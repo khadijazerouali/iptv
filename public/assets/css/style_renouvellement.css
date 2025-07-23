@@ -1,0 +1,229 @@
+/* Conteneur principal */
+
+.zoom-image {
+  width: 100%;
+  transition: transform 0.3s ease-in-out;
+  margin-left: -4px;
+}
+
+.zoom-container:hover .zoom-image {
+  transform: scale(1.1);
+}
+
+/* Titre */
+h4 {
+  font-weight: bold;
+  font-size: 1.8rem;
+}
+
+/* Section notation */
+.rating-section {
+  display: flex;
+  align-items: center;
+  margin: 10px 0;
+}
+
+.stars {
+  color: #f39c12;
+}
+
+.reviews {
+  margin-left: 10px;
+  font-size: 14px;
+  color: #666;
+}
+
+/* Prix */
+.text-primary {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+/* Sélecteur */
+.form-select {
+  padding: 10px;
+  font-size: 1rem;
+  border-radius: 5px;
+}
+
+/* Champ de saisie */
+.form-section {
+  margin-top: 15px;
+}
+
+.form-label {
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.required {
+  color: red;
+  font-weight: normal;
+}
+
+.form-input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.form-help-text {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+/* Séparateur */
+hr {
+  border: 0;
+  height: 1px;
+  background: #ccc;
+  margin: 20px 0;
+}
+
+/* Bouton de commande */
+.btn-primary {
+  background-color: #007bff;
+  color: white;
+  font-size: 1.2rem;
+  padding: 10px 20px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.btn-primary:hover {
+  background-color: #0056b3;
+}
+
+/* Boutons de compteur */
+.counter {
+  display: flex;
+  align-items: center;
+}
+
+/* .counter-btn {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 5px;
+} */
+
+.counter-input {
+  width: 50px;
+  text-align: center;
+  font-size: 1.2rem;
+  border: 1px solid #ccc;
+  margin: 0 5px;
+}
+
+/* SKU et catégorie */
+.text-muted {
+  color: #666;
+}
+
+* Conteneur principal */
+.radio-inputs {
+  display: flex;
+  gap: 10px;
+  background-color: #f8f8f8;
+  padding: 5px;
+  border-radius: 30px;
+
+  width: fit-content;
+  border: 1px solid #ddd;
+  margin-left: 300px; /* Aligné à gauche */
+  margin-bottom: 30px; /* Ajout d'un margin bottom */
+}
+
+/* Cacher les inputs radio */
+.radio input {
+  display: none;
+}
+
+
+/* Style des labels */
+.radio {
+  position: relative;
+  cursor: pointer;
+  border-radius: 30px;
+  padding: 10px 15px;
+  transition: all 0.3s ease-in-out;
+}
+
+/* Apparence par défaut du texte */
+.radio .name {
+  font-size: 14px;
+  font-weight: bold;
+  color: black;
+}
+
+/* Style de l'onglet actif */
+.radio input:checked + .name {
+  background: linear-gradient(45deg, #1a1a1a, #333);
+  color: white;
+  padding: 10px 15px;
+  border-radius: 30px;
+  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.3);
+  font-weight: bold;
+}
+
+
+/* Conteneur des boutons */
+.text-center {
+display: flex;
+align-items: center;
+justify-content: center;
+margin-top: 20px;
+}
+
+/* Style des boutons */
+.btn-nav {
+width: 15px;
+height: 15px;
+border: 2px solid #007bff;
+background: white;
+color: #ffffff;
+font-size: 20px;
+font-weight: bold;
+/* cursor: pointer; */
+margin: 0 10px;
+border-radius: 5px;
+transition: background 0.3s, color 0.3s;
+}
+
+.btn-nav:hover {
+background: #007bff;
+color: white;
+}
+
+/* Conteneur du carré en mouvement */
+.btn-container {
+width: 100px; /* Largeur du conteneur */
+height: 40px;
+position: relative;
+overflow: hidden;
+border: 2px solid #007bff;
+display: flex;
+align-items: center;
+justify-content: flex-start;
+}
+
+/* Élément qui va se déplacer */
+#movingSquare {
+display: flex;
+align-items: center;
+transform: translateX(0);
+transition: transform 0.3s ease-in-out;
+}
+
+/* Petit carré intérieur */
+.inner-square {
+width: 10px;
+height: 10px;
+border: 1px solid #007bff;
+background: transparent;
+}

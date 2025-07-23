@@ -1,0 +1,191 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #fff;
+  margin: 0;
+  padding: 0;
+}
+
+/* Champs de saisie */
+.form-control {
+  border: none;
+  background-color: #f8f9fa;
+  padding: 12px;
+  border-radius: 8px;
+  width: 100%;
+  height: 45px;
+}
+
+
+
+
+
+.form-control:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+/* Labels */
+.form-label {
+  font-weight: bold;
+  color: #333;
+  display: block;
+}
+
+/* Ajout du texte "(Nécessaire)" en rouge */
+.text-danger {
+  font-size: 12px;
+  font-style: italic;
+  font-weight: bold;
+  color: red;
+}
+
+/* Organisation des champs Nom et Prénom */
+.row.mb-3 {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.col-md-6 {
+  flex: 1;
+}
+
+/* Séparation entre les sections */
+hr {
+  border: 0.5px solid #ddd;
+  margin: 20px 0;
+}
+
+
+/* Bouton Commander */
+.btn-primary {
+  background-color: #2576d2;
+  border: none;
+  font-size: 16px;
+  font-weight: bold;
+  padding: 12px 20px;
+  border-radius: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s ease-in-out;
+  color: white;
+}
+
+
+
+.btn-primary:hover {
+  background-color: #1d5fae;
+}
+
+/* Icône à droite du bouton */
+.btn-primary i {
+  font-size: 20px;
+  margin-left: 10px;
+}
+
+/* Sélecteur de quantité */
+.counter {
+  display: flex;
+  align-items: center;
+  background: #f8f9fa;
+  padding: 5px 10px;
+  border-radius: 10px;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+
+.counter-input {
+  text-align: center;
+  width: 40px;
+  border: none;
+  background: transparent;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.counter-btn {
+  border: none;
+  background: transparent;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.counter-btn:hover {
+  color: #2576d2;
+}
+/* Conteneur principal */
+.radio-inputs {
+  display: flex;
+  gap: 10px;
+  background-color: #f8f8f8;
+  padding: 5px;
+  border-radius: 30px;
+
+  width: fit-content;
+  border: 1px solid #ddd;
+  margin-left: 300px; /* Aligné à gauche */
+  margin-bottom: 30px; /* Ajout d'un margin bottom */
+}
+
+/* Cacher les inputs radio */
+.radio input {
+  display: none;
+}
+
+
+/* Style des labels */
+.radio {
+  position: relative;
+  cursor: pointer;
+  border-radius: 30px;
+  padding: 10px 15px;
+  transition: all 0.3s ease-in-out;
+}
+
+/* Apparence par défaut du texte */
+.radio .name {
+  font-size: 14px;
+  font-weight: bold;
+  color: black;
+}
+
+/* Style de l'onglet actif */
+.radio input:checked + .name {
+  background: linear-gradient(45deg, #1a1a1a, #333);
+  color: white;
+  padding: 10px 15px;
+  border-radius: 30px;
+  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.3);
+  font-weight: bold;
+}
+
+.tabs-content {
+  margin-left: -50px; /* Aligné à gauche */
+
+  
+}
+
+.tabs-content h1 {
+  color: #2576d2;
+  font-size: 45px;
+  font-weight: bold;
+  margin-bottom: 10px;
+ 
+}
+
+.intro{
+  color:rgb(0, 0, 0);
+  font-size: 30px;
+  font-weight: bold;
+
+}
+
+
+.note{
+  color:rgb(90, 129, 74);
+  font-size: 15px;
+  margin-left: 300px; /* Aligné à gauche */
+
+}

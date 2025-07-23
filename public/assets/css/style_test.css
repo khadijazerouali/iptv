@@ -1,0 +1,60 @@
+/* Conteneur des boutons */
+.text-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+/* Style des boutons */
+.btn-nav {
+  width: 15px;
+  height: 15px;
+  border: 2px solid #007bff;
+  background: white;
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: bold;
+  /* cursor: pointer; */
+  margin: 0 10px;
+  border-radius: 5px;
+  transition: background 0.3s, color 0.3s;
+}
+
+.btn-nav:hover {
+  background: #007bff;
+  color: white;
+}
+
+/* Conteneur du carré en mouvement */
+.btn-container {
+  width: 100px; /* Largeur du conteneur */
+  height: 40px;
+  position: relative;
+  overflow: hidden;
+  border: 2px solid #007bff;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+/* Élément qui va se déplacer */
+#movingSquare {
+  display: flex;
+  align-items: center;
+  transform: translateX(0);
+  transition: transform 0.3s ease-in-out;
+}
+
+/* Petit carré intérieur */
+.inner-square {
+  width: 10px;
+  height: 10px;
+  border: 1px solid #007bff;
+  background: transparent;
+}
+
+#product-description {
+white-space: pre-line;
+
+}

@@ -1,0 +1,147 @@
+/* Styles globaux */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f5f5f5;
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 20px auto;
+  padding: 20px;
+}
+.category {
+  display: inline-block;
+  /* background-color: #ff5733;  */
+  background-color: rgb(0 107 179);
+  color: white; /* Couleur du texte */
+  font-size: 14px;
+  font-weight: bold;
+  padding: 5px 12px;
+  border-radius: 15px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Style des cartes de blog */
+.custom-blog-card {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  margin-bottom: 20px;
+  transition: transform 0.3s ease;
+}
+
+.custom-blog-card:hover {
+  transform: translateY(-5px);
+}
+
+.custom-post-image {
+  position: relative;
+  overflow: hidden;
+}
+
+.custom-post-image img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.custom-category-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  /* background: #ff4500; */
+  background-color: rgb(0 107 179);
+  color: #fff;
+  padding: 5px 10px;
+  font-size: 14px;
+  border-radius: 5px;
+}
+
+.custom-post-content {
+  padding: 20px;
+}
+
+.custom-post-title {
+  font-size: 22px;
+  margin: 0 0 10px;
+  color: #333;
+}
+
+.custom-post-excerpt {
+  font-size: 16px;
+  color: #666;
+  line-height: 1.5;
+}
+
+.custom-post-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  color: #999;
+  padding-top: 10px;
+}
+
+.custom-read-more {
+  color: #ff4500;
+  font-size: 18px;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.custom-read-more:hover {
+  color: #cc3700;
+}
+.blog-post-card {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  position: relative;
+  font-family: Arial, sans-serif;
+}
+
+.post-title {
+  font-size: 22px;
+  font-weight: bold;
+  margin: 10px 0;
+}
+
+.post-excerpt {
+  font-size: 14px;
+  color: #444;
+}
+
+.post-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid #eee;
+  padding-top: 10px;
+  margin-top: 10px;
+  font-size: 13px;
+  color: #777;
+}
+
+.post-meta {
+  color: #555;
+}
+
+.read-more {
+  background: url('https://www.transparenttextures.com/patterns/black-linen.png'); /* Exemple de texture */
+  width: 35px;
+  height: 35px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  text-decoration: none;
+}
+
+.read-more i {
+  color: white;
+}

@@ -1,0 +1,188 @@
+
+/* En-tête de contact */
+.contact-header {
+  background-color: #222;
+  color: white;
+  text-align: center;
+  padding: 90px 0;
+  margin-top: -25px;
+  width: 100vw; /* Assure que la largeur prend tout l'écran */
+  position: relative;
+  margin-left: -306px;
+
+}
+
+.contact-header h1 {
+  font-size: 36px;
+  font-weight: bold;
+}
+
+/* Section de contact */
+.contact-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 40px auto;
+  width: 100%;
+}
+
+/* Conteneur principal */
+.contact-container {
+  display: flex;
+  justify-content: space-between;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  width: 90%;
+  padding: 20px;
+}
+
+/* Informations de contact */
+.contact-info {
+  width: 45%;
+  padding: 20px;
+}
+
+.contact-info h2 {
+  font-size: 28px;
+  margin-bottom: 15px;
+}
+
+.highlight {
+  color: #007bff;
+}
+
+.contact-info p {
+  font-size: 16px;
+  color: #333;
+}
+
+.contact-details {
+  margin-top: 20px;
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.contact-item i {
+  font-size: 22px;
+  color: #007bff;
+  margin-right: 10px;
+}
+
+.contact-item strong {
+  font-size: 16px;
+  color: #222;
+}
+
+/* Formulaire de contact */
+.contact-form {
+  width: 50%;
+  background-color: #2478CC;
+  border-radius: 10px;
+  padding: 20px;
+  color: white;
+}
+
+.contact-form label {
+  font-size: 16px;
+  font-weight: bold;
+  display: block;
+  margin: 10px 0 5px;
+}
+
+.form-input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 5px;
+  border: none;
+  margin-bottom: 15px;
+  font-size: 14px;
+}
+
+.form-input:focus {
+  outline: none;
+  box-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
+}
+
+textarea {
+  resize: none;
+}
+
+.required {
+  color: red;
+}
+
+/* Bouton envoyer */
+.submit-btn {
+  width: 100%;
+  background-color: white;
+  color: #2478CC;
+  padding: 12px;
+  border: none;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.submit-btn:hover {
+  background-color: #e0e0e0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .contact-container {
+      flex-direction: column;
+      width: 100%;
+  }
+
+  .contact-info, .contact-form {
+      width: 100%;
+  }
+
+  .contact-form {
+      margin-top: 20px;
+  }
+}
+
+/* Style pour la carte de confirmation */
+.card {
+width: 100%;
+max-width: 500px; /* Vous pouvez ajuster la largeur selon vos préférences */
+margin: 20px auto;
+padding: 20px;
+background-color: rgb(0 107 179);
+border-radius: 10px;
+box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+text-align: center;
+display: none; /* Initialement caché */
+}
+
+/* Style pour le titre */
+.card-title {
+font-size: 1.5rem;
+font-weight: bold;
+color: #ffffff; /* Couleur verte pour indiquer un message positif */
+margin-bottom: 15px;
+}
+
+/* Style pour le texte */
+.card-text {
+font-size: 1rem;
+color: #ffffff; /* Couleur verte pour indiquer un message positif */
+
+}
+
+/* Animation de transition pour l'apparition du message */
+#confirmationMessage {
+opacity: 0;
+transition: opacity 0.5s ease-in-out;
+}
+
+#confirmationMessage[style="display: block;"] {
+opacity: 1;
+}

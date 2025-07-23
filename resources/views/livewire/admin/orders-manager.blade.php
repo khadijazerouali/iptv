@@ -49,7 +49,7 @@
                                 <p><strong>VODs :</strong> {{ $formiptv->vods ?? '-' }}</p>
                                 <p><strong>Devices :</strong> {{ $formiptv->device ?? '-' }}</p>
                                 <p><strong>Application :</strong> {{ $formiptv->application ?? '-' }}</p>
-                                <p><strong>Bouquet :</strong> {{ $formiptv->channels ?? '-' }}</p>
+                                <p><strong>Bouquet :</strong> {{ $formiptv->bouquet ?? '-' }}</p>
                                 <p><strong>Date début :</strong> {{ $selectedOrder->start_date }}</p>
                                 <p><strong>Date fin :</strong> {{ $selectedOrder->end_date }}</p>
                                 <p><strong>Statut :</strong> {{ $selectedOrder->status }}</p>

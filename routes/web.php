@@ -15,6 +15,11 @@ Route::get('/', function () {
 Route::middleware(['auth'])->group(function () {
 
     Route::middleware(['auth'])->get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::put('/dashboard/profile', [DashboardController::class, 'updateProfile'])->name('dashboard.updateProfile');
+    Route::get('/dashboard/invoice/{subscription}/download', [DashboardController::class, 'downloadInvoice'])->name('dashboard.downloadInvoice');
+    Route::post('/dashboard/support-ticket', [DashboardController::class, 'createSupportTicket'])->name('dashboard.createSupportTicket');
+
+
     // Route::view('dashboard', 'dashboard')->name('dashboard');
     Route::view('admin/dashboard', 'admin.dashboard')->name('admin.dashboard');
     Route::view('admin/products', 'admin.products')->name('admin.products');

@@ -2,6 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
+use App\Http\Controllers\DashboardController;
+
 
 Route::get('/', function () {
     return view('welcome');
@@ -11,7 +13,9 @@ Route::get('/', function () {
 //     ->middleware(['auth', 'verified'])
 //     ->name('dashboard');
 Route::middleware(['auth'])->group(function () {
-    Route::view('dashboard', 'dashboard')->name('dashboard');
+
+    Route::middleware(['auth'])->get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    // Route::view('dashboard', 'dashboard')->name('dashboard');
     Route::view('admin/dashboard', 'admin.dashboard')->name('admin.dashboard');
     Route::view('admin/products', 'admin.products')->name('admin.products');
     Route::view('admin/contacts', 'admin.contacts')->name('admin.contacts');

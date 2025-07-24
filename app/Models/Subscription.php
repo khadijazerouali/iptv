@@ -95,4 +95,19 @@ class Subscription extends Model
             'uuid'
         );
     }
+    public function vods() {
+        return $this->belongsTo(Vod::class);
+    }
+
+     public function deviceType() {
+        return $this->belongsTo(Vod::class);
+    }
+
+     public function applicationType() {
+        return $this->belongsTo(Vod::class);
+    }
+
+     public function productOption() {
+        return $this->belongsTo(Vod::class);
+    }
 }

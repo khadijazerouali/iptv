@@ -23,61 +23,74 @@
                     <td style="padding: 8px; border: 1px solid #eee;">{{ $user->email ?? ($user['email'] ?? '-') }}</td>
                 </tr>
             </table>
-            <h3 style="margin-top: 30px;">Détails du produit</h3>
-            <table style="width: 100%; border-collapse: collapse;">
-                <tr style="background: #f0f0f0;">
-                    <th style="padding: 10px; border: 1px solid #ddd;">Produit</th>
-                    <th style="padding: 10px; border: 1px solid #ddd;">Prix</th>
-                </tr>
-                <tr>
-                    <td style="padding: 10px; border: 1px solid #ddd;">{{ $product->name ?? $product['name'] ?? '-' }}</td>
-                    <td style="padding: 10px; border: 1px solid #ddd;">{{ $product->price ?? $product['price'] ?? '-' }} €</td>
+    <h3 style="margin-top: 30px;">Détails du produit</h3>
+<table style="width: 100%; border-collapse: collapse;">
+    <tr style="background: #f0f0f0;">
+        <th style="padding: 10px; border: 1px solid #ddd;">Produit</th>
+        <th style="padding: 10px; border: 1px solid #ddd;">Prix</th>
+    </tr>
+    <tr>
+        <td style="padding: 10px; border: 1px solid #ddd;">{{ $product->name ?? $product['name'] ?? '-' }}</td>
+        <td style="padding: 10px; border: 1px solid #ddd;">{{ $product->price ?? $product['price'] ?? '-' }} €</td>
+    </tr>
+</table>
 
-                </tr>
-            </table>
-                <h3>Détails de la commande</h3>
-            <table style="width: 100%; border-collapse: collapse;">
-                <tr>
-                    <td style="padding: 8px; border: 1px solid #eee;">Appareil (Device ID)</td>
-                    <td style="padding: 8px; border: 1px solid #eee;">{{ $cart['device_id'] ?? '-' }}</td>
-                </tr>
-                <tr>
-                    <td style="padding: 8px; border: 1px solid #eee;">Clé d'appareil</td>
-                    <td style="padding: 8px; border: 1px solid #eee;">{{ $cart['device_key'] ?? '-' }}</td>
-                </tr>
-                <tr>
-                    <td style="padding: 8px; border: 1px solid #eee;">Adresse MAC</td>
-                    <td style="padding: 8px; border: 1px solid #eee;">{{ $cart['macaddress'] ?? '-' }}</td>
-                </tr>
-                <tr>
-                    <td style="padding: 8px; border: 1px solid #eee;">Formuler MAC</td>
-                    <td style="padding: 8px; border: 1px solid #eee;">{{ $cart['formulermac'] ?? '-' }}</td>
-                </tr>
-                <tr>
-                    <td style="padding: 8px; border: 1px solid #eee;">Smart STB MAC</td>
-                    <td style="padding: 8px; border: 1px solid #eee;">{{ $cart['smartstbmac'] ?? '-' }}</td>
-                </tr>
-                <tr>
-                    <td style="padding: 8px; border: 1px solid #eee;">VODs</td>
-                    <td style="padding: 8px; border: 1px solid #eee;">
-                        {{ is_array($cart['vods'] ?? null) ? implode(', ', $cart['vods']) : ($cart['vods'] ?? '-') }}
-                    </td>
-                </tr>
-                <tr>
-                    <td style="padding: 8px; border: 1px solid #eee;">Bouquets</td>
-                    <td style="padding: 8px; border: 1px solid #eee;">
-                        {{ is_array($cart['channels'] ?? null) ? implode(', ', $cart['channels']) : ($cart['channels'] ?? '-') }}
-                    </td>
-                </tr>
-                <tr>
-                    <td style="padding: 8px; border: 1px solid #eee;">Durée</td>
-                    <td style="padding: 8px; border: 1px solid #eee;">{{ $cart['selectedOptionName'] ?? '-' }}</td>
-                </tr>
-                <tr>
-                    <td style="padding: 8px; border: 1px solid #eee;">Quantité</td>
-                    <td style="padding: 8px; border: 1px solid #eee;">{{ $cart['quantity'] ?? '-' }}</td>
-                </tr>
-            </table>
+<h3>Détails de la commande</h3>
+<table style="width: 100%; border-collapse: collapse;">
+    <tr>
+        <td style="padding: 8px; border: 1px solid #eee;">Appareil</td>
+        <td style="padding: 8px; border: 1px solid #eee;">{{ $cart['device_name'] ?? $cart['device_id'] ?? '-' }}</td>
+    </tr>
+
+    @if (!empty($cart['device_key']))
+    <tr>
+        <td style="padding: 8px; border: 1px solid #eee;">Clé d'appareil</td>
+        <td style="padding: 8px; border: 1px solid #eee;">{{ $cart['device_key'] }}</td>
+    </tr>
+    @endif
+
+    @if (!empty($cart['macaddress']))
+    <tr>
+        <td style="padding: 8px; border: 1px solid #eee;">Adresse MAC</td>
+        <td style="padding: 8px; border: 1px solid #eee;">{{ $cart['macaddress'] }}</td>
+    </tr>
+    @endif
+
+    @if (!empty($cart['formulermac']))
+    <tr>
+        <td style="padding: 8px; border: 1px solid #eee;">Formuler MAC</td>
+        <td style="padding: 8px; border: 1px solid #eee;">{{ $cart['formulermac'] }}</td>
+    </tr>
+    @endif
+
+    @if (!empty($cart['smartstbmac']))
+    <tr>
+        <td style="padding: 8px; border: 1px solid #eee;">Smart STB MAC</td>
+        <td style="padding: 8px; border: 1px solid #eee;">{{ $cart['smartstbmac'] }}</td>
+    </tr>
+    @endif
+
+    <tr>
+        <td style="padding: 8px; border: 1px solid #eee;">VODs</td>
+        <td style="padding: 8px; border: 1px solid #eee;">
+            {{ is_array($cart['vods'] ?? null) ? implode(', ', $cart['vods']) : ($cart['vods'] ?? '-') }}
+        </td>
+    </tr>
+    <tr>
+        <td style="padding: 8px; border: 1px solid #eee;">Bouquets</td>
+        <td style="padding: 8px; border: 1px solid #eee;">
+            {{ is_array($cart['channels'] ?? null) ? implode(', ', $cart['channels']) : ($cart['channels'] ?? '-') }}
+        </td>
+    </tr>
+    <tr>
+        <td style="padding: 8px; border: 1px solid #eee;">Durée</td>
+        <td style="padding: 8px; border: 1px solid #eee;">{{ $cart['selectedOptionName'] ?? '-' }}</td>
+    </tr>
+    <tr>
+        <td style="padding: 8px; border: 1px solid #eee;">Quantité</td>
+        <td style="padding: 8px; border: 1px solid #eee;">{{ $cart['quantity'] ?? '-' }}</td>
+    </tr>
+</table>
         </div>
         <div style="background: #222; color: #fff; text-align: center; padding: 15px;">
             &copy; {{ date('Y') }} VotreSite.com

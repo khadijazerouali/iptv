@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Subscription;
 use App\Models\SupportTicket;
 use App\Models\Product;
-
+//uuuuu
 class DashboardController extends Controller
 {
     public function index(Request $request)

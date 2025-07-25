@@ -1,14 +1,4 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Sidebar</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-</head>
-<body style="margin: 0; padding: 0; background: linear-gradient(135deg, #ffffff 0%, #ffffff 100%); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; height: 100vh;">
-
-<div class="admin-sidebar">
+<div class="sidebar-container">
     <div class="sidebar-header">
         <div class="header-icon">
             <i class="fas fa-user-shield"></i>
@@ -20,56 +10,56 @@
     </div>
     
     <nav class="sidebar-nav">
-        <a href="/admin/users" class="nav-item {{ request()->is('admin/users*') ? 'active' : '' }}">
+        <a href="{{ route('admin.users') }}" class="nav-item {{ request()->routeIs('admin.users*') ? 'active' : '' }}">
             <div class="nav-icon">
                 <i class="fas fa-users"></i>
             </div>
             <span class="nav-text">Gestion des utilisateurs</span>
             <div class="nav-indicator"></div>
         </a>
-        <a href="/admin/contacts" class="nav-item {{ request()->is('admin/contacts*') ? 'active' : '' }}">
+        <a href="{{ route('admin.contacts') }}" class="nav-item {{ request()->routeIs('admin.contacts*') ? 'active' : '' }}">
             <div class="nav-icon">
                 <i class="fas fa-address-book"></i>
             </div>
             <span class="nav-text">Gestion des contacts</span>
             <div class="nav-indicator"></div>
         </a>
-        <a href="/admin/categories" class="nav-item {{ request()->is('admin/categories*') ? 'active' : '' }}">
+        <a href="{{ route('admin.categories') }}" class="nav-item {{ request()->routeIs('admin.categories*') ? 'active' : '' }}">
             <div class="nav-icon">
                 <i class="fas fa-tags"></i>
             </div>
             <span class="nav-text">Gestion des catégories</span>
             <div class="nav-indicator"></div>
         </a>
-        <a href="/admin/products" class="nav-item {{ request()->is('admin/products*') ? 'active' : '' }}">
+        <a href="{{ route('admin.products') }}" class="nav-item {{ request()->routeIs('admin.products*') ? 'active' : '' }}">
             <div class="nav-icon">
                 <i class="fas fa-box"></i>
             </div>
             <span class="nav-text">Gestion des produits</span>
             <div class="nav-indicator"></div>
         </a>
-        <a href="/admin/device-types" class="nav-item {{ request()->is('admin/device-types*') ? 'active' : '' }}">
+        <a href="{{ route('admin.device-types') }}" class="nav-item {{ request()->routeIs('admin.device-types*') ? 'active' : '' }}">
             <div class="nav-icon">
                 <i class="fas fa-mobile-alt"></i>
             </div>
             <span class="nav-text">Types d'appareils</span>
             <div class="nav-indicator"></div>
         </a>
-        <a href="/admin/application-types" class="nav-item {{ request()->is('admin/application-types*') ? 'active' : '' }}">
+        <a href="{{ route('admin.application-types') }}" class="nav-item {{ request()->routeIs('admin.application-types*') ? 'active' : '' }}">
             <div class="nav-icon">
                 <i class="fas fa-apps"></i>
             </div>
             <span class="nav-text">Types d'applications</span>
             <div class="nav-indicator"></div>
         </a>
-        <a href="/admin/orders" class="nav-item {{ request()->is('admin/orders*') ? 'active' : '' }}">
+        <a href="{{ route('admin.orders') }}" class="nav-item {{ request()->routeIs('admin.orders*') ? 'active' : '' }}">
             <div class="nav-icon">
                 <i class="fas fa-shopping-cart"></i>
             </div>
             <span class="nav-text">Gestion des commandes</span>
             <div class="nav-indicator"></div>
         </a>
-        <a href="/admin/support" class="nav-item {{ request()->is('admin/support*') ? 'active' : '' }}">
+        <a href="{{ route('admin.support') }}" class="nav-item {{ request()->routeIs('admin.support*') ? 'active' : '' }}">
             <div class="nav-icon">
                 <i class="fas fa-headset"></i>
             </div>
@@ -85,7 +75,7 @@
                     <i class="fas fa-user"></i>
                 </div>
                 <div class="user-details">
-                    <span class="user-name">Administrateur</span>
+                    <span class="user-name">{{ auth()->user()->name ?? 'Administrateur' }}</span>
                     <span class="user-role">Super Admin</span>
                 </div>
             </div>
@@ -94,7 +84,7 @@
 </div>
 
 <style>
-.admin-sidebar {
+.sidebar-container {
     width: 100%;
     height: 100vh;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -102,9 +92,11 @@
     backdrop-filter: blur(10px);
     position: relative;
     box-shadow: 4px 0 20px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
 }
 
-.admin-sidebar::before {
+.sidebar-container::before {
     content: '';
     position: absolute;
     top: 0;
@@ -124,6 +116,8 @@
     gap: 16px;
     border-bottom: 1px solid rgba(255,255,255,0.1);
     backdrop-filter: blur(10px);
+    position: relative;
+    z-index: 1;
 }
 
 .header-icon {
@@ -135,6 +129,7 @@
     align-items: center;
     justify-content: center;
     backdrop-filter: blur(10px);
+    flex-shrink: 0;
 }
 
 .header-icon i {
@@ -145,6 +140,8 @@
 .header-content {
     display: flex;
     flex-direction: column;
+    flex: 1;
+    min-width: 0;
 }
 
 .header-title {
@@ -152,17 +149,47 @@
     font-weight: 700;
     color: white;
     line-height: 1.2;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .header-subtitle {
     font-size: 12px;
     color: rgba(255,255,255,0.7);
     font-weight: 400;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .sidebar-nav {
     padding: 16px 0;
     flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    position: relative;
+    z-index: 1;
+}
+
+.sidebar-nav::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar-nav::-webkit-scrollbar-track {
+    background: rgba(255,255,255,0.1);
+    border-radius: 3px;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.3);
+    border-radius: 3px;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb:hover {
+    background: rgba(255,255,255,0.5);
 }
 
 .nav-item {
@@ -179,6 +206,7 @@
     margin: 4px 12px;
     border-radius: 12px;
     overflow: hidden;
+    white-space: nowrap;
 }
 
 .nav-item::before {
@@ -199,6 +227,7 @@
     color: white;
     transform: translateX(4px);
     box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    text-decoration: none;
 }
 
 .nav-item:hover::before {
@@ -224,6 +253,7 @@
     align-items: center;
     justify-content: center;
     transition: all 0.3s ease;
+    flex-shrink: 0;
 }
 
 .nav-item:hover .nav-icon {
@@ -251,6 +281,9 @@
     flex: 1;
     font-weight: 500;
     transition: all 0.3s ease;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .nav-indicator {
@@ -259,6 +292,7 @@
     background: rgba(255,255,255,0.3);
     border-radius: 50%;
     transition: all 0.3s ease;
+    flex-shrink: 0;
 }
 
 .nav-item:hover .nav-indicator,
@@ -271,12 +305,21 @@
     padding: 20px;
     border-top: 1px solid rgba(255,255,255,0.1);
     background: rgba(255,255,255,0.05);
+    position: relative;
+    z-index: 1;
 }
 
 .footer-content {
     display: flex;
     align-items: center;
     gap: 12px;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
 }
 
 .user-avatar {
@@ -287,6 +330,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
 }
 
 .user-avatar i {
@@ -297,17 +341,25 @@
 .user-details {
     display: flex;
     flex-direction: column;
+    flex: 1;
+    min-width: 0;
 }
 
 .user-name {
     font-size: 14px;
     font-weight: 600;
     color: white;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .user-role {
     font-size: 12px;
     color: rgba(255,255,255,0.7);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* Animation d'entrée */
@@ -322,7 +374,7 @@
     }
 }
 
-.admin-sidebar {
+.sidebar-container {
     animation: slideIn 0.6s ease-out;
 }
 
@@ -342,11 +394,16 @@
 
 /* Responsive */
 @media (max-width: 768px) {
-    .admin-sidebar {
-        width: 100%;
+    .sidebar-container {
+        width: 280px;
+    }
+    
+    .nav-text {
+        display: block;
+    }
+    
+    .user-details {
+        display: flex;
     }
 }
 </style>
-
-</body>
-</html>

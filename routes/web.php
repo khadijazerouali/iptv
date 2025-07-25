@@ -31,19 +31,67 @@ Route::middleware(['auth'])->group(function () {
 
     // Routes Admin
     Route::prefix('admin')->name('admin.')->group(function () {
-        Route::view('dashboard', 'admin.dashboard')->name('dashboard');
-        Route::view('products', 'admin.products')->name('products');
-        Route::view('contacts', 'admin.contacts')->name('contacts');
-        Route::get('users', [App\Http\Controllers\Admin\UserController::class, 'index'])->name('users');
-        Route::view('support', 'admin.support')->name('support');
-        Route::view('orders', 'admin.orders')->name('orders');
-        Route::view('categories', 'admin.categories')->name('categories');
-        Route::view('device-types', 'admin.device-types')->name('device-types');
-        Route::view('application-types', 'admin.application-types')->name('application-types');
+        // Dashboard principal avec données dynamiques
+        Route::get('dashboard', [App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
         
-        // API Routes pour les utilisateurs
+        // Gestion des produits avec données dynamiques
+        Route::get('products', [App\Http\Controllers\Admin\ProductController::class, 'index'])->name('products');
+        Route::get('products/create', [App\Http\Controllers\Admin\ProductController::class, 'create'])->name('products.create');
+        Route::get('products/{uuid}/edit', [App\Http\Controllers\Admin\ProductController::class, 'edit'])->name('products.edit');
+        Route::get('products/{uuid}', [App\Http\Controllers\Admin\ProductController::class, 'show'])->name('products.show');
+        Route::post('products', [App\Http\Controllers\Admin\ProductController::class, 'store'])->name('products.store');
+        Route::put('products/{uuid}', [App\Http\Controllers\Admin\ProductController::class, 'update'])->name('products.update');
+        Route::delete('products/{uuid}', [App\Http\Controllers\Admin\ProductController::class, 'destroy'])->name('products.destroy');
+        
+        // Gestion des types d'appareils avec données dynamiques
+        Route::get('device-types', [App\Http\Controllers\Admin\DeviceTypeController::class, 'index'])->name('device-types');
+        Route::get('device-types/{uuid}', [App\Http\Controllers\Admin\DeviceTypeController::class, 'show'])->name('device-types.show');
+        Route::post('device-types', [App\Http\Controllers\Admin\DeviceTypeController::class, 'store'])->name('device-types.store');
+        Route::put('device-types/{uuid}', [App\Http\Controllers\Admin\DeviceTypeController::class, 'update'])->name('device-types.update');
+        Route::delete('device-types/{uuid}', [App\Http\Controllers\Admin\DeviceTypeController::class, 'destroy'])->name('device-types.destroy');
+        
+        // Gestion des types d'applications avec données dynamiques
+        Route::get('application-types', [App\Http\Controllers\Admin\ApplicationTypeController::class, 'index'])->name('application-types');
+        Route::get('application-types/{uuid}', [App\Http\Controllers\Admin\ApplicationTypeController::class, 'show'])->name('application-types.show');
+        Route::post('application-types', [App\Http\Controllers\Admin\ApplicationTypeController::class, 'store'])->name('application-types.store');
+        Route::put('application-types/{uuid}', [App\Http\Controllers\Admin\ApplicationTypeController::class, 'update'])->name('application-types.update');
+        Route::delete('application-types/{uuid}', [App\Http\Controllers\Admin\ApplicationTypeController::class, 'destroy'])->name('application-types.destroy');
+        
+        // Gestion des commandes avec données dynamiques
+        Route::get('orders', [App\Http\Controllers\Admin\OrderController::class, 'index'])->name('orders');
+        Route::get('orders/{uuid}', [App\Http\Controllers\Admin\OrderController::class, 'show'])->name('orders.show');
+        Route::post('orders', [App\Http\Controllers\Admin\OrderController::class, 'store'])->name('orders.store');
+        Route::put('orders/{uuid}', [App\Http\Controllers\Admin\OrderController::class, 'update'])->name('orders.update');
+        Route::delete('orders/{uuid}', [App\Http\Controllers\Admin\OrderController::class, 'destroy'])->name('orders.destroy');
+        Route::post('orders/{uuid}/activate', [App\Http\Controllers\Admin\OrderController::class, 'activate'])->name('orders.activate');
+        
+        // Gestion du support avec données dynamiques
+        Route::get('support', [App\Http\Controllers\Admin\SupportController::class, 'index'])->name('support');
+        Route::get('support/{uuid}', [App\Http\Controllers\Admin\SupportController::class, 'show'])->name('support.show');
+        Route::post('support', [App\Http\Controllers\Admin\SupportController::class, 'store'])->name('support.store');
+        Route::put('support/{uuid}', [App\Http\Controllers\Admin\SupportController::class, 'update'])->name('support.update');
+        Route::delete('support/{uuid}', [App\Http\Controllers\Admin\SupportController::class, 'destroy'])->name('support.destroy');
+        Route::post('support/{uuid}/reply', [App\Http\Controllers\Admin\SupportController::class, 'reply'])->name('support.reply');
+        Route::post('support/{uuid}/resolve', [App\Http\Controllers\Admin\SupportController::class, 'resolve'])->name('support.resolve');
+
+        // Routes pour les catégories
+        Route::get('categories/{uuid}', [App\Http\Controllers\Admin\CategoryController::class, 'show'])->name('categories.show');
+        Route::post('categories', [App\Http\Controllers\Admin\CategoryController::class, 'store'])->name('categories.store');
+        Route::put('categories/{uuid}', [App\Http\Controllers\Admin\CategoryController::class, 'update'])->name('categories.update');
+        Route::delete('categories/{uuid}', [App\Http\Controllers\Admin\CategoryController::class, 'destroy'])->name('categories.destroy');
+        
+        // Gestion des contacts (page existante)
+        Route::view('contacts', 'admin.contacts')->name('contacts');
+        
+        // Gestion des catégories (remplace la route view par le contrôleur)
+        Route::get('categories', [App\Http\Controllers\Admin\CategoryController::class, 'index'])->name('categories');
+        
+        // Gestion des utilisateurs (contrôleur existant)
+        Route::get('users', [App\Http\Controllers\Admin\UserController::class, 'index'])->name('users');
         Route::put('users/{id}/role', [App\Http\Controllers\Admin\UserController::class, 'updateRole'])->name('users.updateRole');
         Route::delete('users/{id}', [App\Http\Controllers\Admin\UserController::class, 'destroy'])->name('users.destroy');
+        
+
     });
     
     // Route pour télécharger les factures (admin)

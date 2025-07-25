@@ -27,7 +27,7 @@ class Devicetype extends Model
 
     public function applicationTypes()
     {
-        return $this->hasOne(ApplicationType::class, 'devicetype_uuid', 'uuid');
+        return $this->hasMany(Applicationtype::class, 'devicetype_uuid', 'uuid');
     }
 
     public function product()

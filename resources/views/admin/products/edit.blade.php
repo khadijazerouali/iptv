@@ -36,7 +36,7 @@
                         </div>
                     </div>
                     <div class="col-md-6">
-                        <div class="mb-3">
+                <div class="mb-3">
                             <label for="category_uuid" class="form-label">Catégorie *</label>
                             <select class="form-select @error('category_uuid') is-invalid @enderror" 
                                     id="category_uuid" name="category_uuid" required>
@@ -60,11 +60,13 @@
                         <div class="mb-3">
                             <label for="type" class="form-label">Type de produit *</label>
                             <select class="form-select @error('type') is-invalid @enderror" 
-                                    id="type" name="type" required>
+                                    id="type" name="type" required onchange="showTypeSpecificFields()">
                                 <option value="">Choisir un type...</option>
-                                <option value="subscription" {{ old('type', $product->type) == 'subscription' ? 'selected' : '' }}>Abonnement</option>
-                                <option value="one_time" {{ old('type', $product->type) == 'one_time' ? 'selected' : '' }}>Achat unique</option>
-                                <option value="trial" {{ old('type', $product->type) == 'trial' ? 'selected' : '' }}>Essai gratuit</option>
+                                <option value="abonnement" {{ old('type', $product->type) == 'abonnement' ? 'selected' : '' }}>Abonnement</option>
+                                <option value="revendeur" {{ old('type', $product->type) == 'revendeur' ? 'selected' : '' }}>Revendeur</option>
+                                <option value="renouvellement" {{ old('type', $product->type) == 'renouvellement' ? 'selected' : '' }}>Renouvellement</option>
+                                <option value="application" {{ old('type', $product->type) == 'application' ? 'selected' : '' }}>Application</option>
+                                <option value="testiptv" {{ old('type', $product->type) == 'testiptv' ? 'selected' : '' }}>Test IPTV</option>
                             </select>
                             @error('type')
                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -72,14 +74,14 @@
                         </div>
                     </div>
                     <div class="col-md-6">
-                        <div class="mb-3">
+                <div class="mb-3">
                             <label for="status" class="form-label">Statut *</label>
                             <select class="form-select @error('status') is-invalid @enderror" 
                                     id="status" name="status" required>
                                 <option value="active" {{ old('status', $product->status) == 'active' ? 'selected' : '' }}>Actif</option>
                                 <option value="paused" {{ old('status', $product->status) == 'paused' ? 'selected' : '' }}>En pause</option>
                                 <option value="inactive" {{ old('status', $product->status) == 'inactive' ? 'selected' : '' }}>Inactif</option>
-                            </select>
+                    </select>
                             @error('status')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -135,76 +137,115 @@
                     @enderror
                 </div>
 
-                <div class="mb-3">
-                    <label class="form-label">Durées & prix *</label>
-                    <div id="durations-list">
-                        @php $options = old('options', $product->productOptions->toArray() ?? []); @endphp
-                        @foreach($options as $i => $option)
+                <!-- Durées et prix du produit -->
+                <div class="mb-4">
+                    <h5 class="mb-3">Durées et prix</h5>
+                    <div id="durationsContainer">
+                        @if($product->productOptions->count() > 0)
+                            @foreach($product->productOptions as $option)
                             <div class="row mb-2 duration-row">
-                                <div class="col-md-5">
-                                    <input type="text" name="options[{{ $i }}][name]" 
-                                           value="{{ $option['name'] ?? '' }}" class="form-control" 
-                                           placeholder="Durée (ex: 1 mois)" required>
+                                <div class="col-md-4">
+                                    <input type="text" class="form-control" name="duration_names[]" placeholder="Nom de la durée (ex: 1 mois)" value="{{ $option->name }}" required>
                                 </div>
-                                <div class="col-md-5">
-                                    <div class="input-group">
-                                        <input type="number" step="0.01" name="options[{{ $i }}][price]" 
-                                               value="{{ $option['price'] ?? '' }}" class="form-control" 
-                                               placeholder="Prix" required>
-                                        <span class="input-group-text">€</span>
-                                    </div>
+                                <div class="col-md-4">
+                                    <input type="number" class="form-control" name="duration_prices[]" placeholder="Prix (€)" step="0.01" value="{{ $option->price }}" required>
                                 </div>
                                 <div class="col-md-2">
-                                    <button type="button" class="btn btn-danger btn-remove-duration">
+                                    <button type="button" class="btn btn-danger btn-sm" onclick="removeDuration(this)">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </div>
                             </div>
-                        @endforeach
-                        @if(empty($options))
+                            @endforeach
+                        @else
                             <div class="row mb-2 duration-row">
-                                <div class="col-md-5">
-                                    <input type="text" name="options[0][name]" class="form-control" 
-                                           placeholder="Durée (ex: 1 mois)" required>
+                                <div class="col-md-4">
+                                    <input type="text" class="form-control" name="duration_names[]" placeholder="Nom de la durée (ex: 1 mois)" required>
                                 </div>
-                                <div class="col-md-5">
-                                    <div class="input-group">
-                                        <input type="number" step="0.01" name="options[0][price]" 
-                                               class="form-control" placeholder="Prix" required>
-                                        <span class="input-group-text">€</span>
-                                    </div>
+                                <div class="col-md-4">
+                                    <input type="number" class="form-control" name="duration_prices[]" placeholder="Prix (€)" step="0.01" required>
                                 </div>
                                 <div class="col-md-2">
-                                    <button type="button" class="btn btn-danger btn-remove-duration">
+                                    <button type="button" class="btn btn-danger btn-sm" onclick="removeDuration(this)">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </div>
                             </div>
                         @endif
                     </div>
-                    <button type="button" class="btn btn-outline-primary" id="add-duration">
+                    <button type="button" class="btn btn-success btn-sm" id="add-duration">
                         <i class="fas fa-plus"></i> Ajouter une durée
                     </button>
                 </div>
 
-                <div class="mb-3">
-                    <label class="form-label">Appareils compatibles</label>
-                    <div class="devices-grid">
-                        @foreach($deviceTypes as $device)
-                            <div class="device-checkbox">
-                                <input type="checkbox" id="device_{{ $device->uuid }}" 
-                                       name="devices[]" value="{{ $device->uuid }}" 
-                                       class="form-check-input @error('devices') is-invalid @enderror"
-                                       {{ in_array($device->uuid, old('devices', $product->devices->pluck('uuid')->toArray())) ? 'checked' : '' }}>
-                                <label for="device_{{ $device->uuid }}" class="form-check-label">
-                                    {{ $device->name }}
-                                </label>
+                <!-- Champs spécifiques selon le type -->
+                <div id="typeSpecificFields" style="display: none;">
+                    
+                    <!-- Champs pour Abonnement et Test IPTV -->
+                    <div id="abonnementFields" class="type-fields" style="display: none;">
+                        <div class="mb-3">
+                            <label class="form-label">Appareils compatibles</label>
+                            <div class="devices-grid">
+                                @foreach($deviceTypes as $device)
+                                    <div class="device-checkbox">
+                                        <input type="checkbox" id="device_{{ $device->uuid }}" 
+                                               name="devices[]" value="{{ $device->uuid }}" 
+                                               class="form-check-input @error('devices') is-invalid @enderror"
+                                               {{ in_array($device->uuid, old('devices', $product->devices->pluck('uuid')->toArray())) ? 'checked' : '' }}>
+                                        <label for="device_{{ $device->uuid }}" class="form-check-label">
+                                            {{ $device->name }}
+                                        </label>
+                                    </div>
+                                @endforeach
                             </div>
-                        @endforeach
+                            @error('devices')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+                        </div>
                     </div>
-                    @error('devices')
-                        <div class="invalid-feedback d-block">{{ $message }}</div>
-                    @enderror
+
+                    <!-- Champs pour Revendeur -->
+                    <div id="revendeurFields" class="type-fields" style="display: none;">
+                        <div class="mb-3">
+                            <label class="form-label">Informations revendeur</label>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <input type="text" class="form-control" name="revendeur_info" 
+                                           placeholder="Informations spécifiques au revendeur" 
+                                           value="{{ old('revendeur_info') }}">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Champs pour Renouvellement -->
+                    <div id="renouvellementFields" class="type-fields" style="display: none;">
+                        <div class="mb-3">
+                            <label class="form-label">Informations renouvellement</label>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <input type="text" class="form-control" name="renouvellement_info" 
+                                           placeholder="Informations spécifiques au renouvellement" 
+                                           value="{{ old('renouvellement_info') }}">
+                                </div>
+                            </div>
+                        </div>
+                                </div>
+
+                    <!-- Champs pour Application -->
+                    <div id="applicationFields" class="type-fields" style="display: none;">
+                        <div class="mb-3">
+                            <label class="form-label">Informations application</label>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <input type="text" class="form-control" name="application_info" 
+                                           placeholder="Informations spécifiques à l'application" 
+                                           value="{{ old('application_info') }}">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
 
                 <div class="form-actions">
@@ -234,46 +275,41 @@ document.addEventListener('DOMContentLoaded', function() {
         content_style: 'body { font-family: -apple-system, BlinkMacSystemFont, San Francisco, Segoe UI, Roboto, Helvetica Neue, sans-serif; font-size: 14px; }'
     });
 
-    let durationIndex = document.querySelectorAll('.duration-row').length;
-    
-    document.getElementById('add-duration').addEventListener('click', function() {
-        const list = document.getElementById('durations-list');
-        const row = document.createElement('div');
-        row.className = 'row mb-2 duration-row';
-        row.innerHTML = `
-            <div class="col-md-5">
-                <input type="text" name="options[${durationIndex}][name]" class="form-control" 
-                       placeholder="Durée (ex: 1 mois)" required>
-            </div>
-            <div class="col-md-5">
-                <div class="input-group">
-                    <input type="number" step="0.01" name="options[${durationIndex}][price]" 
-                           class="form-control" placeholder="Prix" required>
-                    <span class="input-group-text">€</span>
-                </div>
-            </div>
-            <div class="col-md-2">
-                <button type="button" class="btn btn-danger btn-remove-duration">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </div>
-        `;
-        list.appendChild(row);
-        durationIndex++;
-    });
-    
-    document.getElementById('durations-list').addEventListener('click', function(e) {
-        if (e.target.classList.contains('btn-remove-duration') || 
-            e.target.closest('.btn-remove-duration')) {
-            const row = e.target.closest('.duration-row');
-            if (document.querySelectorAll('.duration-row').length > 1) {
-                row.remove();
-            } else {
-                showNotification('Au moins une durée est requise', 'warning');
-            }
-        }
-    });
+    // Afficher les champs spécifiques au type sélectionné
+    showTypeSpecificFields();
 });
+
+// Fonction pour afficher les champs spécifiques selon le type
+function showTypeSpecificFields() {
+    const type = document.getElementById('type').value;
+    const typeSpecificFields = document.getElementById('typeSpecificFields');
+    const allTypeFields = document.querySelectorAll('.type-fields');
+    
+    // Masquer tous les champs spécifiques
+    allTypeFields.forEach(field => field.style.display = 'none');
+    
+    if (type) {
+        typeSpecificFields.style.display = 'block';
+        
+        switch(type) {
+            case 'abonnement':
+            case 'testiptv':
+                document.getElementById('abonnementFields').style.display = 'block';
+                break;
+            case 'revendeur':
+                document.getElementById('revendeurFields').style.display = 'block';
+                break;
+            case 'renouvellement':
+                document.getElementById('renouvellementFields').style.display = 'block';
+                break;
+            case 'application':
+                document.getElementById('applicationFields').style.display = 'block';
+                break;
+        }
+    } else {
+        typeSpecificFields.style.display = 'none';
+    }
+}
 
 // Fonction de prévisualisation d'image
 function previewImage(input) {
@@ -319,8 +355,8 @@ function previewImage(input) {
                 <div class="image-placeholder">
                     <i class="fas fa-image"></i>
                     <p>Aucune image sélectionnée</p>
-                </div>
-            `;
+            </div>
+        `;
         @endif
     }
 }
@@ -335,6 +371,45 @@ function removeImage() {
         </div>
     `;
 }
+
+// Fonction pour ajouter une durée
+function addDuration() {
+    const container = document.getElementById('durationsContainer');
+    const newRow = document.createElement('div');
+    newRow.className = 'row mb-2 duration-row';
+    newRow.innerHTML = `
+        <div class="col-md-4">
+            <input type="text" class="form-control" name="duration_names[]" placeholder="Nom de la durée (ex: 1 mois)" required>
+        </div>
+        <div class="col-md-4">
+            <input type="number" class="form-control" name="duration_prices[]" placeholder="Prix (€)" step="0.01" required>
+        </div>
+        <div class="col-md-2">
+            <button type="button" class="btn btn-danger btn-sm" onclick="removeDuration(this)">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
+    `;
+    container.appendChild(newRow);
+}
+
+// Fonction pour supprimer une durée
+function removeDuration(button) {
+    const row = button.closest('.duration-row');
+    if (document.querySelectorAll('.duration-row').length > 1) {
+        row.remove();
+    } else {
+        alert('Vous devez avoir au moins une durée définie.');
+    }
+}
+
+// Ajouter l'événement pour le bouton d'ajout de durée
+document.addEventListener('DOMContentLoaded', function() {
+    const addDurationBtn = document.getElementById('add-duration');
+    if (addDurationBtn) {
+        addDurationBtn.addEventListener('click', addDuration);
+    }
+});
 </script>
 @endpush
 
@@ -352,26 +427,6 @@ function removeImage() {
     padding-top: 20px;
     border-top: 1px solid #e9ecef;
     margin-top: 20px;
-}
-
-.duration-row {
-    background: #f8f9fa;
-    padding: 15px;
-    border-radius: 8px;
-    border: 1px solid #e9ecef;
-}
-
-.duration-row:hover {
-    background: #e9ecef;
-    transition: background-color 0.3s ease;
-}
-
-#add-duration {
-    margin-top: 10px;
-}
-
-.btn-remove-duration {
-    width: 100%;
 }
 
 .devices-grid {

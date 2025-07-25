@@ -16,8 +16,8 @@ class ApplicationTypeController extends Controller
         // Statistiques des applications
         $stats = [
             'total_applications' => Applicationtype::count(),
-            'active_applications' => Applicationtype::where('status', 'active')->count(),
-            'in_development' => Applicationtype::where('status', 'development')->count(),
+            'active_applications' => Applicationtype::count(), // Toutes les applications sont considérées comme actives
+            'in_development' => 0, // Pas de statut development dans cette table
             'total_downloads' => $this->calculateTotalDownloads(),
         ];
 
@@ -35,6 +35,9 @@ class ApplicationTypeController extends Controller
             $application->download_count = rand(100, 2000); // Simulation pour l'exemple
         }
 
+        // Récupérer tous les types d'appareils pour les formulaires
+        $deviceTypes = Devicetype::orderBy('name')->get();
+
         // Plateformes pour le filtre
         $platforms = [
             'android' => 'Android',
@@ -43,7 +46,7 @@ class ApplicationTypeController extends Controller
             'smarttv' => 'Smart TV'
         ];
 
-        return view('admin.application-types', compact('stats', 'applications', 'platforms'));
+        return view('admin.application-types', compact('stats', 'applications', 'platforms', 'deviceTypes'));
     }
 
     public function show($uuid)
@@ -56,10 +59,10 @@ class ApplicationTypeController extends Controller
         $appStats = [
             'total_users' => Subscription::whereHas('formiptvs', function($query) use ($application) {
                 $query->where('application', $application->name);
-            })->distinct('user_id')->count(),
+            })->distinct()->count('user_id'),
             'monthly_users' => Subscription::whereHas('formiptvs', function($query) use ($application) {
                 $query->where('application', $application->name);
-            })->whereMonth('created_at', Carbon::now()->month)->distinct('user_id')->count(),
+            })->whereMonth('created_at', Carbon::now()->month)->distinct()->count('user_id'),
             'downloads' => rand(500, 3000), // Simulation
             'rating' => round(rand(35, 50) / 10, 1), // Simulation
         ];

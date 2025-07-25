@@ -10,6 +10,13 @@
     </div>
     
     <nav class="sidebar-nav">
+        <a href="{{ url('/') }}" class="nav-item" title="Retour à l'accueil">
+            <div class="nav-icon">
+                <i class="fas fa-home"></i>
+            </div>
+            <span class="nav-text">Accueil</span>
+            <div class="nav-indicator"></div>
+        </a>
         <a href="{{ route('admin.users') }}" class="nav-item {{ request()->routeIs('admin.users*') ? 'active' : '' }}">
             <div class="nav-icon">
                 <i class="fas fa-users"></i>

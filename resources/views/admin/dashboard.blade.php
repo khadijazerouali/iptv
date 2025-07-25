@@ -273,7 +273,7 @@
                             <i class="fas fa-fire me-1"></i>
                             Populaire
                         </span>
-                    </div>
+        </div>
                 </div>
             </div>
         </div>

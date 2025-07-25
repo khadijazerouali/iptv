@@ -45,17 +45,18 @@ Route::middleware(['auth'])->group(function () {
         
         // Gestion des types d'appareils avec données dynamiques
         Route::get('device-types', [App\Http\Controllers\Admin\DeviceTypeController::class, 'index'])->name('device-types');
-        Route::get('device-types/{uuid}', [App\Http\Controllers\Admin\DeviceTypeController::class, 'show'])->name('device-types.show');
+        Route::get('device-types/all', [App\Http\Controllers\Admin\DeviceTypeController::class, 'getAll'])->name('device-types.all');
+        Route::get('device-types/{uuid}', [App\Http\Controllers\Admin\DeviceTypeController::class, 'show'])->name('device-types.show')->where('uuid', '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}');
         Route::post('device-types', [App\Http\Controllers\Admin\DeviceTypeController::class, 'store'])->name('device-types.store');
-        Route::put('device-types/{uuid}', [App\Http\Controllers\Admin\DeviceTypeController::class, 'update'])->name('device-types.update');
-        Route::delete('device-types/{uuid}', [App\Http\Controllers\Admin\DeviceTypeController::class, 'destroy'])->name('device-types.destroy');
+        Route::put('device-types/{uuid}', [App\Http\Controllers\Admin\DeviceTypeController::class, 'update'])->name('device-types.update')->where('uuid', '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}');
+        Route::delete('device-types/{uuid}', [App\Http\Controllers\Admin\DeviceTypeController::class, 'destroy'])->name('device-types.destroy')->where('uuid', '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}');
         
         // Gestion des types d'applications avec données dynamiques
         Route::get('application-types', [App\Http\Controllers\Admin\ApplicationTypeController::class, 'index'])->name('application-types');
-        Route::get('application-types/{uuid}', [App\Http\Controllers\Admin\ApplicationTypeController::class, 'show'])->name('application-types.show');
+        Route::get('application-types/{uuid}', [App\Http\Controllers\Admin\ApplicationTypeController::class, 'show'])->name('application-types.show')->where('uuid', '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}');
         Route::post('application-types', [App\Http\Controllers\Admin\ApplicationTypeController::class, 'store'])->name('application-types.store');
-        Route::put('application-types/{uuid}', [App\Http\Controllers\Admin\ApplicationTypeController::class, 'update'])->name('application-types.update');
-        Route::delete('application-types/{uuid}', [App\Http\Controllers\Admin\ApplicationTypeController::class, 'destroy'])->name('application-types.destroy');
+        Route::put('application-types/{uuid}', [App\Http\Controllers\Admin\ApplicationTypeController::class, 'update'])->name('application-types.update')->where('uuid', '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}');
+        Route::delete('application-types/{uuid}', [App\Http\Controllers\Admin\ApplicationTypeController::class, 'destroy'])->name('application-types.destroy')->where('uuid', '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}');
         
         // Gestion des commandes avec données dynamiques
         Route::get('orders', [App\Http\Controllers\Admin\OrderController::class, 'index'])->name('orders');
@@ -81,7 +82,12 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('categories/{uuid}', [App\Http\Controllers\Admin\CategoryController::class, 'destroy'])->name('categories.destroy');
         
         // Gestion des contacts (page existante)
-        Route::view('contacts', 'admin.contacts')->name('contacts');
+        Route::get('contacts', [App\Http\Controllers\Admin\ContactController::class, 'index'])->name('contacts');
+        Route::get('contacts/{uuid}', [App\Http\Controllers\Admin\ContactController::class, 'show'])->name('contacts.show');
+        Route::put('contacts/{uuid}', [App\Http\Controllers\Admin\ContactController::class, 'update'])->name('contacts.update');
+        Route::delete('contacts/{uuid}', [App\Http\Controllers\Admin\ContactController::class, 'destroy'])->name('contacts.destroy');
+        Route::patch('contacts/{uuid}/replied', [App\Http\Controllers\Admin\ContactController::class, 'markAsReplied'])->name('contacts.replied');
+        Route::patch('contacts/{uuid}/closed', [App\Http\Controllers\Admin\ContactController::class, 'markAsClosed'])->name('contacts.closed');
         
         // Gestion des catégories (remplace la route view par le contrôleur)
         Route::get('categories', [App\Http\Controllers\Admin\CategoryController::class, 'index'])->name('categories');

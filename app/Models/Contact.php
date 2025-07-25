@@ -13,7 +13,7 @@ class Contact extends Model
     use HasFactory;
     use Searchable;
 
-    protected $fillable = ['name', 'email', 'type', 'message', 'ip', 'country'];
+    protected $fillable = ['name', 'email', 'type', 'message', 'ip', 'country', 'status'];
 
     protected $searchableFields = ['*'];
     

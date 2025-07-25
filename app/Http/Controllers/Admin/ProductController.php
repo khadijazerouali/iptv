@@ -7,6 +7,8 @@ use App\Models\Product;
 use App\Models\CategoryProduct;
 use App\Models\Devicetype;
 use App\Models\ProductOption;
+use App\Models\Channel;
+use App\Models\Vod;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
@@ -43,8 +45,10 @@ class ProductController extends Controller
     {
         $categories = CategoryProduct::all();
         $deviceTypes = Devicetype::all();
+        $channels = Channel::all();
+        $vods = Vod::all();
         
-        return view('admin.products.create', compact('categories', 'deviceTypes'));
+        return view('admin.products.create', compact('categories', 'deviceTypes', 'channels', 'vods'));
     }
 
     public function edit($uuid)
@@ -55,8 +59,10 @@ class ProductController extends Controller
             
         $categories = CategoryProduct::all();
         $deviceTypes = Devicetype::all();
+        $channels = Channel::all();
+        $vods = Vod::all();
         
-        return view('admin.products.edit', compact('product', 'categories', 'deviceTypes'));
+        return view('admin.products.edit', compact('product', 'categories', 'deviceTypes', 'channels', 'vods'));
     }
 
     public function show($uuid)
@@ -88,13 +94,17 @@ class ProductController extends Controller
             'category_uuid' => 'required|exists:category_products,uuid',
             'description' => 'nullable|string',
             'status' => 'required|in:active,paused,inactive',
-            'type' => 'required|string',
+            'type' => 'required|in:abonnement,revendeur,renouvellement,application,testiptv',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'options' => 'required|array|min:1',
-            'options.*.name' => 'required|string',
-            'options.*.price' => 'required|numeric|min:0',
             'devices' => 'nullable|array',
             'devices.*' => 'exists:devicetypes,uuid',
+            'duration_names' => 'required|array',
+            'duration_names.*' => 'required|string|max:255',
+            'duration_prices' => 'required|array',
+            'duration_prices.*' => 'required|numeric|min:0',
+            'revendeur_info' => 'nullable|string',
+            'renouvellement_info' => 'nullable|string',
+            'application_info' => 'nullable|string',
         ]);
 
         // Gérer l'upload d'image
@@ -111,21 +121,29 @@ class ProductController extends Controller
             'status' => $validated['status'],
             'type' => $validated['type'],
             'image' => $imagePath,
-            'price' => $validated['options'][0]['price'], // Prix principal = première option
+            'price' => 0, // Prix sera calculé après création des options
         ]);
 
-        // Créer les options de produit
-        foreach ($validated['options'] as $option) {
-            ProductOption::create([
-                'product_uuid' => $product->uuid,
-                'name' => $option['name'],
-                'price' => $option['price'],
-            ]);
+        // Attacher les appareils compatibles (pour abonnement et testiptv)
+        if (in_array($validated['type'], ['abonnement', 'testiptv']) && !empty($validated['devices'])) {
+            $product->devices()->attach($validated['devices']);
         }
 
-        // Attacher les appareils compatibles
-        if (!empty($validated['devices'])) {
-            $product->devices()->attach($validated['devices']);
+        // Créer les options de durée (ProductOptions)
+        if (!empty($validated['duration_names']) && !empty($validated['duration_prices'])) {
+            foreach ($validated['duration_names'] as $index => $name) {
+                if (isset($validated['duration_prices'][$index])) {
+                    ProductOption::create([
+                        'product_uuid' => $product->uuid,
+                        'name' => $name,
+                        'price' => $validated['duration_prices'][$index],
+                    ]);
+                }
+            }
+            
+            // Calculer le prix minimum du produit basé sur les options
+            $minPrice = $product->productOptions()->min('price') ?? 0;
+            $product->update(['price' => $minPrice]);
         }
 
         return redirect()->route('admin.products')
@@ -141,13 +159,17 @@ class ProductController extends Controller
             'category_uuid' => 'required|exists:category_products,uuid',
             'description' => 'nullable|string',
             'status' => 'required|in:active,paused,inactive',
-            'type' => 'required|string',
+            'type' => 'required|in:abonnement,revendeur,renouvellement,application,testiptv',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'options' => 'required|array|min:1',
-            'options.*.name' => 'required|string',
-            'options.*.price' => 'required|numeric|min:0',
             'devices' => 'nullable|array',
             'devices.*' => 'exists:devicetypes,uuid',
+            'duration_names' => 'required|array',
+            'duration_names.*' => 'required|string|max:255',
+            'duration_prices' => 'required|array',
+            'duration_prices.*' => 'required|numeric|min:0',
+            'revendeur_info' => 'nullable|string',
+            'renouvellement_info' => 'nullable|string',
+            'application_info' => 'nullable|string',
         ]);
 
         // Gérer l'upload d'image
@@ -168,23 +190,36 @@ class ProductController extends Controller
             'status' => $validated['status'],
             'type' => $validated['type'],
             'image' => $imagePath,
-            'price' => $validated['options'][0]['price'], // Prix principal = première option
         ]);
 
-        // Supprimer les anciennes options
-        $product->productOptions()->delete();
-
-        // Créer les nouvelles options
-        foreach ($validated['options'] as $option) {
-            ProductOption::create([
-                'product_uuid' => $product->uuid,
-                'name' => $option['name'],
-                'price' => $option['price'],
-            ]);
+        // Mettre à jour les appareils compatibles (pour abonnement et testiptv)
+        if (in_array($validated['type'], ['abonnement', 'testiptv'])) {
+            $product->devices()->sync($validated['devices'] ?? []);
+        } else {
+            // Détacher tous les appareils pour les autres types
+            $product->devices()->detach();
         }
 
-        // Mettre à jour les appareils compatibles
-        $product->devices()->sync($validated['devices'] ?? []);
+        // Mettre à jour les options de durée (ProductOptions)
+        // Supprimer toutes les options existantes
+        $product->productOptions()->delete();
+        
+        // Créer les nouvelles options
+        if (!empty($validated['duration_names']) && !empty($validated['duration_prices'])) {
+            foreach ($validated['duration_names'] as $index => $name) {
+                if (isset($validated['duration_prices'][$index])) {
+                    ProductOption::create([
+                        'product_uuid' => $product->uuid,
+                        'name' => $name,
+                        'price' => $validated['duration_prices'][$index],
+                    ]);
+                }
+            }
+            
+            // Calculer le prix minimum du produit basé sur les options
+            $minPrice = $product->productOptions()->min('price') ?? 0;
+            $product->update(['price' => $minPrice]);
+        }
 
         return redirect()->route('admin.products')
             ->with('success', 'Produit mis à jour avec succès');

@@ -16,8 +16,8 @@ class DeviceTypeController extends Controller
         // Statistiques des types d'appareils
         $stats = [
             'total_types' => Devicetype::count(),
-            'active_types' => Devicetype::where('status', 'active')->count(),
-            'paused_types' => Devicetype::where('status', 'paused')->count(),
+            'active_types' => Devicetype::count(), // Tous les types sont considérés comme actifs
+            'paused_types' => 0, // Pas de statut pause dans cette table
             'active_users' => Subscription::distinct('user_id')->count(),
         ];
 
@@ -54,10 +54,10 @@ class DeviceTypeController extends Controller
         $deviceStats = [
             'total_users' => Subscription::whereHas('formiptvs', function($query) use ($deviceType) {
                 $query->where('device', $deviceType->name);
-            })->distinct('user_id')->count(),
+            })->distinct()->count('user_id'),
             'monthly_users' => Subscription::whereHas('formiptvs', function($query) use ($deviceType) {
                 $query->where('device', $deviceType->name);
-            })->whereMonth('created_at', Carbon::now()->month)->distinct('user_id')->count(),
+            })->whereMonth('created_at', Carbon::now()->month)->distinct()->count('user_id'),
             'applications_count' => $deviceType->applicationTypes->count(),
             'compatibility_score' => $this->calculateCompatibilityScore($deviceType),
         ];
@@ -72,10 +72,6 @@ class DeviceTypeController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'macaddress' => 'boolean',
-            'magaddress' => 'boolean',
-            'formulermac' => 'boolean',
-            'formulermag' => 'boolean',
         ]);
 
         $deviceType = Devicetype::create($validated);
@@ -93,10 +89,6 @@ class DeviceTypeController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'macaddress' => 'boolean',
-            'magaddress' => 'boolean',
-            'formulermac' => 'boolean',
-            'formulermag' => 'boolean',
         ]);
 
         $deviceType->update($validated);
@@ -119,16 +111,16 @@ class DeviceTypeController extends Controller
         ]);
     }
 
+    public function getAll()
+    {
+        $deviceTypes = Devicetype::orderBy('name')->get(['uuid', 'name']);
+        
+        return response()->json($deviceTypes);
+    }
+
     private function calculateCompatibilityScore($deviceType)
     {
-        $features = [
-            $deviceType->macaddress,
-            $deviceType->magaddress,
-            $deviceType->formulermac,
-            $deviceType->formulermag,
-        ];
-
-        $enabledFeatures = array_filter($features);
-        return round((count($enabledFeatures) / count($features)) * 100);
+        // Tous les types d'appareils sont considérés comme 100% compatibles
+        return 100;
     }
 } 

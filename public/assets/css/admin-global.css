@@ -617,4 +617,28 @@ body {
 .product-thumbnail:hover {
     transform: scale(1.1);
     border-color: #667eea;
+}
+
+/* Logo d'accueil pour admin */
+.navbar-brand-home {
+    color: #ffffff !important;
+    font-size: 1.5rem;
+    margin-left: 15px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.navbar-brand-home:hover {
+    color: #667eea !important;
+    background: rgba(255,255,255,0.1);
+    transform: scale(1.1);
+}
+
+.navbar-brand-home i {
+    font-size: 1.2rem;
 } 

@@ -13,7 +13,7 @@
             <p class="page-subtitle">Gérez tous les types d'appareils supportés</p>
         </div>
         <div class="d-flex gap-2">
-            <button class="btn btn-primary" onclick="showNotification('Fonctionnalité en cours de développement', 'info')">
+            <button class="btn btn-primary" onclick="createDeviceType()">
                 <i class="fas fa-plus me-2"></i>
                 Nouveau type
             </button>
@@ -33,7 +33,7 @@
                 <i class="fas fa-mobile-alt"></i>
             </div>
             <div class="stat-details">
-                <h3>12</h3>
+                <h3>{{ number_format($stats['total_types']) }}</h3>
                 <p>Total types</p>
             </div>
         </div>
@@ -45,7 +45,7 @@
                 <i class="fas fa-check-circle"></i>
             </div>
             <div class="stat-details">
-                <h3>10</h3>
+                <h3>{{ number_format($stats['active_types']) }}</h3>
                 <p>Actifs</p>
             </div>
         </div>
@@ -57,7 +57,7 @@
                 <i class="fas fa-pause"></i>
             </div>
             <div class="stat-details">
-                <h3>2</h3>
+                <h3>{{ number_format($stats['paused_types']) }}</h3>
                 <p>En pause</p>
             </div>
         </div>
@@ -69,7 +69,7 @@
                 <i class="fas fa-users"></i>
             </div>
             <div class="stat-details">
-                <h3>1,234</h3>
+                <h3>{{ number_format($stats['active_users']) }}</h3>
                 <p>Utilisateurs actifs</p>
             </div>
         </div>
@@ -107,16 +107,16 @@
                     <th>ID</th>
                     <th>Type d'appareil</th>
                     <th>Catégorie</th>
-                    <th>Compatibilité</th>
                     <th>Statut</th>
                     <th>Utilisateurs</th>
                     <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
+                @forelse($deviceTypes as $deviceType)
                 <tr>
                     <td>
-                        <span class="fw-bold text-primary">#1</span>
+                        <span class="fw-bold text-primary">#{{ $loop->iteration }}</span>
                     </td>
                     <td>
                         <div class="d-flex align-items-center">
@@ -126,21 +126,18 @@
                                 </div>
                             </div>
                             <div class="flex-grow-1 ms-3">
-                                <div class="fw-semibold text-dark">Android Smartphone</div>
-                                <small class="text-muted">Version 8.0 et supérieure</small>
+                                <div class="fw-semibold text-dark">{{ $deviceType->name }}</div>
+                                <small class="text-muted">Type d'appareil</small>
                             </div>
                         </div>
                     </td>
                     <td>
                         <span class="badge badge-primary">
                             <i class="fas fa-mobile me-1"></i>
-                            Mobile
+                            Appareil
                         </span>
                     </td>
-                    <td>
-                        <div class="fw-semibold text-success">100%</div>
-                        <small class="text-muted">Toutes les fonctionnalités</small>
-                    </td>
+
                     <td>
                         <span class="badge badge-success">
                             <i class="fas fa-check-circle me-1"></i>
@@ -149,132 +146,32 @@
                     </td>
                     <td>
                         <div class="text-muted">
-                            <div class="fw-semibold text-dark">456</div>
+                            <div class="fw-semibold text-dark">{{ $deviceType->usage_count ?? 0 }}</div>
                             <small>utilisateurs</small>
                         </div>
                     </td>
                     <td>
                         <div class="d-flex gap-1">
-                            <button class="btn btn-outline-primary btn-sm" onclick="viewDeviceType(1)">
+                            <button class="btn btn-outline-primary btn-sm" onclick="viewDeviceType('{{ $deviceType->uuid }}')">
                                 <i class="fas fa-eye"></i>
                             </button>
-                            <button class="btn btn-outline-warning btn-sm" onclick="editDeviceType(1)">
+                            <button class="btn btn-outline-warning btn-sm" onclick="editDeviceType('{{ $deviceType->uuid }}')">
                                 <i class="fas fa-edit"></i>
                             </button>
-                            <button class="btn btn-outline-danger btn-sm" data-confirm="Êtes-vous sûr de vouloir supprimer ce type d'appareil ?">
+                            <button class="btn btn-outline-danger btn-sm" onclick="deleteDeviceType('{{ $deviceType->uuid }}')" data-confirm="Êtes-vous sûr de vouloir supprimer ce type d'appareil ?">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </div>
                     </td>
                 </tr>
-                
+                @empty
                 <tr>
-                    <td>
-                        <span class="fw-bold text-primary">#2</span>
-                    </td>
-                    <td>
-                        <div class="d-flex align-items-center">
-                            <div class="flex-shrink-0">
-                                <div class="bg-success bg-opacity-10 rounded-circle p-2">
-                                    <i class="fas fa-tv text-success"></i>
-                                </div>
-                            </div>
-                            <div class="flex-grow-1 ms-3">
-                                <div class="fw-semibold text-dark">Samsung Smart TV</div>
-                                <small class="text-muted">Tizen OS 6.0+</small>
-                            </div>
-                        </div>
-                    </td>
-                    <td>
-                        <span class="badge badge-success">
-                            <i class="fas fa-tv me-1"></i>
-                            Smart TV
-                        </span>
-                    </td>
-                    <td>
-                        <div class="fw-semibold text-success">95%</div>
-                        <small class="text-muted">Fonctionnalités principales</small>
-                    </td>
-                    <td>
-                        <span class="badge badge-success">
-                            <i class="fas fa-check-circle me-1"></i>
-                            Actif
-                        </span>
-                    </td>
-                    <td>
-                        <div class="text-muted">
-                            <div class="fw-semibold text-dark">234</div>
-                            <small>utilisateurs</small>
-                        </div>
-                    </td>
-                    <td>
-                        <div class="d-flex gap-1">
-                            <button class="btn btn-outline-primary btn-sm" onclick="viewDeviceType(2)">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                            <button class="btn btn-outline-warning btn-sm" onclick="editDeviceType(2)">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="btn btn-outline-danger btn-sm" data-confirm="Êtes-vous sûr de vouloir supprimer ce type d'appareil ?">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
+                    <td colspan="6" class="text-center text-muted py-4">
+                        <i class="fas fa-mobile-alt fa-3x mb-3"></i>
+                        <p>Aucun type d'appareil trouvé</p>
                     </td>
                 </tr>
-                
-                <tr>
-                    <td>
-                        <span class="fw-bold text-primary">#3</span>
-                    </td>
-                    <td>
-                        <div class="d-flex align-items-center">
-                            <div class="flex-shrink-0">
-                                <div class="bg-warning bg-opacity-10 rounded-circle p-2">
-                                    <i class="fas fa-box text-warning"></i>
-                                </div>
-                            </div>
-                            <div class="flex-grow-1 ms-3">
-                                <div class="fw-semibold text-dark">Formuler Z8</div>
-                                <small class="text-muted">Android TV Box</small>
-                            </div>
-                        </div>
-                    </td>
-                    <td>
-                        <span class="badge badge-warning">
-                            <i class="fas fa-box me-1"></i>
-                            Box IPTV
-                        </span>
-                    </td>
-                    <td>
-                        <div class="fw-semibold text-warning">85%</div>
-                        <small class="text-muted">Compatibilité partielle</small>
-                    </td>
-                    <td>
-                        <span class="badge badge-warning">
-                            <i class="fas fa-pause me-1"></i>
-                            En pause
-                        </span>
-                    </td>
-                    <td>
-                        <div class="text-muted">
-                            <div class="fw-semibold text-dark">89</div>
-                            <small>utilisateurs</small>
-                        </div>
-                    </td>
-                    <td>
-                        <div class="d-flex gap-1">
-                            <button class="btn btn-outline-primary btn-sm" onclick="viewDeviceType(3)">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                            <button class="btn btn-outline-warning btn-sm" onclick="editDeviceType(3)">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="btn btn-outline-danger btn-sm" data-confirm="Êtes-vous sûr de vouloir supprimer ce type d'appareil ?">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </td>
-                </tr>
+                @endforelse
             </tbody>
         </table>
     </div>
@@ -306,50 +203,255 @@
 
 <script>
 // Fonctions pour la gestion des types d'appareils
+function createDeviceType() {
+    document.getElementById('deviceTypeModalContent').innerHTML = `
+        <form id="createDeviceTypeForm">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Nom du type d'appareil</label>
+                        <input type="text" class="form-control" id="name" name="name" required>
+                    </div>
+                </div>
+            </div>
+        </form>
+    `;
+    
+    // Changer le titre et les boutons du modal
+    document.querySelector('#deviceTypeModal .modal-title').innerHTML = '<i class="fas fa-plus"></i> Nouveau type d\'appareil';
+    document.querySelector('#deviceTypeModal .modal-footer').innerHTML = `
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+        <button type="button" class="btn btn-primary" onclick="saveNewDeviceType()">Créer</button>
+    `;
+    
+    new bootstrap.Modal(document.getElementById('deviceTypeModal')).show();
+}
+
+function saveNewDeviceType() {
+    const form = document.getElementById('createDeviceTypeForm');
+    const formData = new FormData(form);
+    
+    const data = {
+        name: formData.get('name')
+    };
+    
+    showLoading();
+    
+    fetch('/admin/device-types', {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        hideLoading();
+        if (data.success) {
+            showNotification(data.message, 'success');
+            bootstrap.Modal.getInstance(document.getElementById('deviceTypeModal')).hide();
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        } else {
+            showNotification('Erreur lors de la création', 'error');
+        }
+    })
+    .catch(error => {
+        hideLoading();
+        showNotification('Erreur lors de la création', 'error');
+        console.error('Error:', error);
+    });
+}
+
 function viewDeviceType(deviceTypeId) {
     showLoading();
     
-    // Simulation d'une requête AJAX
-    setTimeout(() => {
-        hideLoading();
-        document.getElementById('deviceTypeModalContent').innerHTML = `
-            <div class="row">
-                <div class="col-md-6">
-                    <h6>Informations du type d'appareil</h6>
-                    <p><strong>Nom:</strong> Type d'appareil #${deviceTypeId}</p>
-                    <p><strong>Catégorie:</strong> Mobile</p>
-                    <p><strong>Compatibilité:</strong> 100%</p>
-                    <p><strong>Statut:</strong> Actif</p>
+    fetch(`/admin/device-types/${deviceTypeId}`)
+        .then(response => response.json())
+        .then(data => {
+            hideLoading();
+            
+            // Pas de fonctionnalités spécifiques à afficher
+            
+            document.getElementById('deviceTypeModalContent').innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Informations du type d'appareil</h6>
+                        <p><strong>Nom:</strong> ${data.deviceType.name}</p>
+                        <p><strong>Compatibilité:</strong> ${data.stats.compatibility_score}%</p>
+                        <p><strong>Statut:</strong> Actif</p>
+                        <p><strong>Date de création:</strong> ${new Date(data.deviceType.created_at).toLocaleDateString()}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Statistiques</h6>
+                        <p><strong>Utilisateurs actifs:</strong> ${data.stats.total_users}</p>
+                        <p><strong>Nouveaux ce mois:</strong> ${data.stats.monthly_users}</p>
+                        <p><strong>Applications compatibles:</strong> ${data.stats.applications_count}</p>
+                    </div>
                 </div>
-                <div class="col-md-6">
-                    <h6>Statistiques</h6>
-                    <p><strong>Utilisateurs actifs:</strong> 456</p>
-                    <p><strong>Nouveaux ce mois:</strong> 23</p>
-                    <p><strong>Note moyenne:</strong> 4.7/5</p>
+
+                ${data.deviceType.applicationTypes && data.deviceType.applicationTypes.length > 0 ? `
+                <hr>
+                <div class="mt-3">
+                    <h6>Applications compatibles</h6>
+                    <div class="row">
+                        ${data.deviceType.applicationTypes.map(app => `
+                            <div class="col-md-6 mb-2">
+                                <span class="badge bg-primary">${app.name}</span>
+                            </div>
+                        `).join('')}
+                    </div>
                 </div>
-            </div>
-            <hr>
-            <div class="mt-3">
-                <h6>Spécifications techniques</h6>
-                <div class="bg-light p-3 rounded">
-                    <ul>
-                        <li><strong>Système d'exploitation:</strong> Android 8.0+</li>
-                        <li><strong>Résolution minimale:</strong> 720p</li>
-                        <li><strong>Résolution recommandée:</strong> 1080p/4K</li>
-                        <li><strong>RAM minimale:</strong> 2GB</li>
-                        <li><strong>Stockage:</strong> 8GB minimum</li>
-                        <li><strong>Connexion:</strong> WiFi/4G/5G</li>
-                    </ul>
-                </div>
-            </div>
-        `;
-        
-        new bootstrap.Modal(document.getElementById('deviceTypeModal')).show();
-    }, 500);
+                ` : ''}
+            `;
+            
+            // Changer le titre et les boutons du modal
+            document.querySelector('#deviceTypeModal .modal-title').innerHTML = '<i class="fas fa-eye"></i> Détails du type d\'appareil';
+            document.querySelector('#deviceTypeModal .modal-footer').innerHTML = `
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                <button type="button" class="btn btn-warning" onclick="editDeviceType('${deviceTypeId}')">Modifier</button>
+            `;
+            
+            new bootstrap.Modal(document.getElementById('deviceTypeModal')).show();
+        })
+        .catch(error => {
+            hideLoading();
+            showNotification('Erreur lors du chargement des données', 'error');
+            console.error('Error:', error);
+        });
 }
 
 function editDeviceType(deviceTypeId) {
-    showNotification('Fonctionnalité de modification en cours de développement', 'info');
+    showLoading();
+    
+    fetch(`/admin/device-types/${deviceTypeId}`)
+        .then(response => response.json())
+        .then(data => {
+            hideLoading();
+            
+            document.getElementById('deviceTypeModalContent').innerHTML = `
+                <form id="editDeviceTypeForm">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Nom du type d'appareil</label>
+                                <input type="text" class="form-control" id="name" name="name" value="${data.deviceType.name}" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="alert alert-info">
+                                <h6>Statistiques</h6>
+                                                                <div class="row">
+                                    <div class="col-md-4">
+                                        <small class="text-muted">Utilisateurs actifs</small>
+                                        <div class="fw-bold">${data.stats.total_users}</div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <small class="text-muted">Nouveaux ce mois</small>
+                                        <div class="fw-bold">${data.stats.monthly_users}</div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <small class="text-muted">Applications</small>
+                                        <div class="fw-bold">${data.stats.applications_count}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            `;
+            
+            // Changer le titre et les boutons du modal
+            document.querySelector('#deviceTypeModal .modal-title').innerHTML = '<i class="fas fa-edit"></i> Modifier le type d\'appareil';
+            document.querySelector('#deviceTypeModal .modal-footer').innerHTML = `
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-primary" onclick="saveDeviceType('${deviceTypeId}')">Enregistrer</button>
+            `;
+            
+            new bootstrap.Modal(document.getElementById('deviceTypeModal')).show();
+        })
+        .catch(error => {
+            hideLoading();
+            showNotification('Erreur lors du chargement des données', 'error');
+            console.error('Error:', error);
+        });
+}
+
+function saveDeviceType(deviceTypeId) {
+    const form = document.getElementById('editDeviceTypeForm');
+    const formData = new FormData(form);
+    
+    const data = {
+        name: formData.get('name')
+    };
+    
+    showLoading();
+    
+    fetch(`/admin/device-types/${deviceTypeId}`, {
+        method: 'PUT',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        hideLoading();
+        if (data.success) {
+            showNotification(data.message, 'success');
+            bootstrap.Modal.getInstance(document.getElementById('deviceTypeModal')).hide();
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        } else {
+            showNotification('Erreur lors de la mise à jour', 'error');
+        }
+    })
+    .catch(error => {
+        hideLoading();
+        showNotification('Erreur lors de la mise à jour', 'error');
+        console.error('Error:', error);
+    });
+}
+
+function deleteDeviceType(deviceTypeId) {
+    if (confirm('Êtes-vous sûr de vouloir supprimer ce type d\'appareil ?')) {
+        showLoading();
+        
+        fetch(`/admin/device-types/${deviceTypeId}`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            hideLoading();
+            if (data.success) {
+                showNotification(data.message, 'success');
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            } else {
+                showNotification('Erreur lors de la suppression', 'error');
+            }
+        })
+        .catch(error => {
+            hideLoading();
+            showNotification('Erreur lors de la suppression', 'error');
+            console.error('Error:', error);
+        });
+    }
 }
 
 // Recherche en temps réel

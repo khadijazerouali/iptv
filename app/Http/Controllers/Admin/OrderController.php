@@ -15,16 +15,13 @@ class OrderController extends Controller
 {
     public function index()
     {
-        // Statistiques des commandes
+        // Statistiques des commandes basées sur le statut réel de la commande
         $stats = [
             'total_orders' => Subscription::count(),
-            'paid_orders' => Subscription::whereHas('payments', function($query) {
-                $query->where('status', 'completed');
-            })->count(),
-            'pending_orders' => Subscription::whereDoesntHave('payments', function($query) {
-                $query->where('status', 'completed');
-            })->count(),
-            'total_revenue' => Payment::where('status', 'completed')->sum('amount'),
+            'paid_orders' => Subscription::where('status', 'active')->count(),
+            'pending_orders' => Subscription::where('status', 'pending')->count(),
+            'total_revenue' => Subscription::join('products', 'subscriptions.product_uuid', '=', 'products.uuid')
+                ->sum('products.price'),
         ];
 
         // Commandes avec relations
@@ -34,15 +31,16 @@ class OrderController extends Controller
 
         // Ajouter des statistiques par commande
         foreach ($orders as $order) {
-            $order->total_paid = $order->payments->where('status', 'completed')->sum('amount');
+            $order->total_paid = $order->product->price ?? 0; // Utiliser le prix du produit
             $order->payment_status = $order->payments->where('status', 'completed')->count() > 0 ? 'paid' : 'pending';
         }
 
         // Statuts pour le filtre
         $statuses = [
-            'paid' => 'Payées',
             'pending' => 'En attente',
-            'cancelled' => 'Annulées'
+            'active' => 'En cours',
+            'cancelled' => 'Annulées',
+            'completed' => 'Terminées'
         ];
 
         return view('admin.orders', compact('stats', 'orders', 'statuses'));
@@ -71,9 +69,9 @@ class OrderController extends Controller
 
         // Statistiques de la commande
         $orderStats = [
-            'total_paid' => $order->payments->where('status', 'completed')->sum('amount'),
+            'total_paid' => $order->product->price ?? 0, // Utiliser le prix du produit
             'payment_count' => $order->payments->count(),
-            'days_active' => $order->start_date ? Carbon::now()->diffInDays($order->start_date) : 0,
+            'days_active' => $order->start_date ? max(0, Carbon::now()->diffInDays($order->start_date)) : 0, // Éviter les valeurs négatives
             'status' => $order->payments->where('status', 'completed')->count() > 0 ? 'paid' : 'pending',
         ];
 
@@ -110,20 +108,14 @@ class OrderController extends Controller
         $order = Subscription::where('uuid', $uuid)->firstOrFail();
 
         $validated = $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'product_uuid' => 'required|exists:products,uuid',
-            'start_date' => 'required|date',
-            'end_date' => 'nullable|date|after:start_date',
-            'quantity' => 'required|integer|min:1',
-            'status' => 'required|string',
-            'note' => 'nullable|string',
+            'status' => 'required|string|in:pending,active,cancelled,completed',
         ]);
 
         $order->update($validated);
 
         return response()->json([
             'success' => true,
-            'message' => 'Commande mise à jour avec succès',
+            'message' => 'Statut de la commande mis à jour avec succès',
             'order' => $order
         ]);
     }

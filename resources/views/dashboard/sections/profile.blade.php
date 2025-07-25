@@ -25,9 +25,9 @@
         </div>
 
         <div class="form-group">
-            <label for="phone">Téléphone :</label>
-            <input type="text" id="phone" name="phone" class="form-control @error('phone') is-invalid @enderror" value="{{ old('phone', $user->phone) }}">
-            @error('phone')
+            <label for="telephone">Téléphone :</label>
+            <input type="text" id="telephone" name="telephone" class="form-control @error('telephone') is-invalid @enderror" value="{{ old('telephone', $user->telephone ?? '') }}" placeholder="Entrez votre numéro de téléphone">
+            @error('telephone')
                 <span class="invalid-feedback" role="alert">
                     <strong>{{ $message }}</strong>
                 </span>
@@ -36,7 +36,7 @@
 
         <div class="form-group">
             <label for="ville">Ville :</label>
-            <input type="text" id="ville" name="ville" class="form-control @error('ville') is-invalid @enderror" value="{{ old('ville', $user->ville) }}">
+            <input type="text" id="ville" name="ville" class="form-control @error('ville') is-invalid @enderror" value="{{ old('ville', $user->ville ?? '') }}" placeholder="Entrez votre ville">
             @error('ville')
                 <span class="invalid-feedback" role="alert">
                     <strong>{{ $message }}</strong>

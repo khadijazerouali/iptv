@@ -83,10 +83,9 @@
                 
                 <div style="margin-top: 1rem;">
                     @if($subscription->product)
-                        <a href="{{ route('product.details', $subscription->product->uuid) }}" class="btn">Voir Formation</a>
+                        <a href="{{ route('dashboard.product.details', $subscription->product->uuid) }}" class="btn">Voir Formation</a>
                     @endif
                     <a href="{{ route('order.details', $subscription->uuid) }}" class="btn btn-secondary" style="margin-left: 0.5rem;">Détails Commande</a>
-                    <button onclick="downloadInvoice('{{ $subscription->uuid }}')" class="btn btn-secondary" style="margin-left: 0.5rem;">Télécharger facture</button>
                 </div>
             </div>
         @endforeach

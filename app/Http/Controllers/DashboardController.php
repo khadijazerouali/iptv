@@ -73,22 +73,19 @@ class DashboardController extends Controller
     }
 
     public function updateProfile(Request $request)
-{
-    // dd('Méthode appelée !', $request->all(), $request->method());
-    
-    $user = Auth::user();
-    
-    $request->validate([
-        'name' => 'required|string|max:255',
-        'telephone' => 'nullable|string|max:20',
-        'ville' => 'nullable|string|max:255',
-    ]);
-    
+    {
+        $user = Auth::user();
+        
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'telephone' => 'nullable|string|max:20',
+            'ville' => 'nullable|string|max:255',
+        ]);
 
-
-        $user->name = $request->input('name'); 
-        $user->telephone = $request->input('telephone'); 
-        $user->ville = $request->input('ville'); 
+        // Mise à jour des champs avec gestion des valeurs vides
+        $user->name = trim($request->input('name')); 
+        $user->telephone = trim($request->input('telephone')) ?: null; 
+        $user->ville = trim($request->input('ville')) ?: null; 
 
         $user->save();
 

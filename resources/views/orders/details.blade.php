@@ -52,9 +52,121 @@
                     </div>
                 </div>
                 <div class="product-actions">
-                    <a href="{{ route('product.details', $subscription->product->uuid) }}" class="btn btn-primary">
+                    <a href="{{ route('dashboard.product.details', $subscription->product->uuid) }}" class="btn btn-primary">
                         Voir la formation
                     </a>
+                </div>
+            </div>
+        </div>
+        @endif
+
+        <!-- Configuration détaillée du produit -->
+        @if($subscription->product)
+        <div class="order-section">
+            <h2 class="section-title">Configuration de votre abonnement</h2>
+            
+            <!-- Durée d'abonnement -->
+            @if($subscription->formiptvs && $subscription->formiptvs->count() > 0)
+            @foreach($subscription->formiptvs as $formiptv)
+                @if($formiptv->duration)
+                <div class="config-detail-section">
+                    <h3 class="config-subtitle">Durée Abonnement</h3>
+                    <div class="config-value-display">
+                        <span class="config-label">{{ $formiptv->duration }}</span>
+                        <span class="config-price">{{ number_format($formiptv->price ?? $subscription->product->price, 2) }}€</span>
+                    </div>
+                </div>
+                @endif
+            @endforeach
+            @endif
+
+            <!-- Type d'appareil -->
+            @if($subscription->formiptvs && $subscription->formiptvs->count() > 0)
+            @foreach($subscription->formiptvs as $formiptv)
+                @if($formiptv->device)
+                <div class="config-detail-section">
+                    <h3 class="config-subtitle">Dispositif d'abonnement IPTV</h3>
+                    <div class="config-value-display">
+                        <span class="config-label">{{ $formiptv->device }}</span>
+                    </div>
+                </div>
+                @endif
+
+                <!-- Type d'application -->
+                @if($formiptv->application)
+                <div class="config-detail-section">
+                    <h3 class="config-subtitle">Type d'application</h3>
+                    <div class="config-value-display">
+                        <span class="config-label">{{ $formiptv->application }}</span>
+                    </div>
+                </div>
+                @endif
+            @endforeach
+            @endif
+
+            <!-- Informations device et application -->
+            @if($subscription->formiptvs && $subscription->formiptvs->count() > 0)
+            @foreach($subscription->formiptvs as $formiptv)
+                @if($formiptv->device || $formiptv->application)
+                <div class="config-detail-section">
+                    <h3 class="config-subtitle">Informations techniques</h3>
+                    <div class="tech-info-grid">
+                        @if($formiptv->device)
+                        <div class="tech-info-item">
+                            <div class="tech-info-label">Device Name</div>
+                            <div class="tech-info-value">{{ $formiptv->device }}</div>
+                        </div>
+                        @endif
+                        
+                        @if($formiptv->application)
+                        <div class="tech-info-item">
+                            <div class="tech-info-label">Application Name</div>
+                            <div class="tech-info-value">{{ $formiptv->application }}</div>
+                        </div>
+                        @endif
+                    </div>
+                </div>
+                @endif
+            @endforeach
+            @endif
+
+            <!-- Bouquets de chaînes sélectionnés -->
+            @if($subscription->formiptvs && $subscription->formiptvs->count() > 0)
+            <div class="config-detail-section">
+                <h3 class="config-subtitle">Bouquets de chaînes sélectionnés</h3>
+                <div class="bouquets-grid">
+                    @foreach($subscription->formiptvs as $formiptv)
+                        @if($formiptv->channels)
+                            <div class="bouquet-item">
+                                <span class="bouquet-name">{{ $formiptv->channels }}</span>
+                            </div>
+                        @endif
+                    @endforeach
+                </div>
+            </div>
+            @endif
+
+            <!-- VODs sélectionnées -->
+            @if($subscription->formiptvs && $subscription->formiptvs->count() > 0)
+            <div class="config-detail-section">
+                <h3 class="config-subtitle">Vidéos à la demande (VOD)</h3>
+                <div class="vods-grid">
+                    @foreach($subscription->formiptvs as $formiptv)
+                        @if($formiptv->vods)
+                            <div class="vod-item">
+                                <span class="vod-name">{{ $formiptv->vods }}</span>
+                            </div>
+                        @endif
+                    @endforeach
+                </div>
+            </div>
+            @endif
+
+            <!-- Quantité -->
+            <div class="config-detail-section">
+                <h3 class="config-subtitle">Quantité</h3>
+                <div class="config-value-display">
+                    <span class="config-label">{{ $subscription->quantity }}</span>
                 </div>
             </div>
         </div>
@@ -85,25 +197,29 @@
         <div class="order-section">
             <h2 class="section-title">Configuration</h2>
             <div class="config-grid">
-                @if($subscription->productOption)
-                <div class="config-item">
-                    <div class="config-label">Option produit</div>
-                    <div class="config-value">{{ $subscription->productOption->name }}</div>
-                </div>
-                @endif
+                @if($subscription->formiptvs && $subscription->formiptvs->count() > 0)
+                @foreach($subscription->formiptvs as $formiptv)
+                    @if($formiptv->duration)
+                    <div class="config-item">
+                        <div class="config-label">Option produit</div>
+                        <div class="config-value">{{ $formiptv->duration }}</div>
+                    </div>
+                    @endif
 
-                @if($subscription->applicationType)
-                <div class="config-item">
-                    <div class="config-label">Type d'application</div>
-                    <div class="config-value">{{ $subscription->applicationType->name }}</div>
-                </div>
-                @endif
+                    @if($formiptv->application)
+                    <div class="config-item">
+                        <div class="config-label">Type d'application</div>
+                        <div class="config-value">{{ $formiptv->application }}</div>
+                    </div>
+                    @endif
 
-                @if($subscription->deviceType)
-                <div class="config-item">
-                    <div class="config-label">Type d'appareil</div>
-                    <div class="config-value">{{ $subscription->deviceType->name }}</div>
-                </div>
+                    @if($formiptv->device)
+                    <div class="config-item">
+                        <div class="config-label">Type d'appareil</div>
+                        <div class="config-value">{{ $formiptv->device }}</div>
+                    </div>
+                    @endif
+                @endforeach
                 @endif
             </div>
         </div>
@@ -124,62 +240,113 @@
         </div>
         @endif
 
-        <!-- Informations techniques -->
-        @if($subscription->formiptvs && $subscription->formiptvs->count() > 0)
-        <div class="order-section">
-            <h2 class="section-title">Informations techniques</h2>
-            <div class="tech-grid">
-                @foreach($subscription->formiptvs as $formiptv)
-                    @if($formiptv->mac_address)
-                    <div class="tech-item">
-                        <div class="tech-label">Adresse MAC</div>
-                        <div class="tech-value">{{ $formiptv->mac_address }}</div>
-                    </div>
-                    @endif
+                                        <!-- Informations techniques -->
+                                @if($subscription->formiptvs && $subscription->formiptvs->count() > 0)
+                                <div class="order-section">
+                                    <h2 class="section-title">Informations techniques</h2>
+                                    <div class="tech-grid">
+                                        @foreach($subscription->formiptvs as $formiptv)
+                                            @if($formiptv->mac_address)
+                                            <div class="tech-item">
+                                                <div class="tech-label">Adresse MAC</div>
+                                                <div class="tech-value">{{ $formiptv->mac_address }}</div>
+                                            </div>
+                                            @endif
 
-                    @if($formiptv->device_id)
-                    <div class="tech-item">
-                        <div class="tech-label">ID Appareil</div>
-                        <div class="tech-value">{{ $formiptv->device_id }}</div>
-                    </div>
-                    @endif
+                                            @if($formiptv->device_id)
+                                            <div class="tech-item">
+                                                <div class="tech-label">ID Appareil</div>
+                                                <div class="tech-value">{{ $formiptv->device_id }}</div>
+                                            </div>
+                                            @endif
 
-                    @if($formiptv->device_key)
-                    <div class="tech-item">
-                        <div class="tech-label">Clé Appareil</div>
-                        <div class="tech-value">{{ $formiptv->device_key }}</div>
-                    </div>
-                    @endif
+                                            @if($formiptv->device_key)
+                                            <div class="tech-item">
+                                                <div class="tech-label">Clé Appareil</div>
+                                                <div class="tech-value">{{ $formiptv->device_key }}</div>
+                                            </div>
+                                            @endif
 
-                    @if($formiptv->otp_code)
-                    <div class="tech-item">
-                        <div class="tech-label">Code OTP</div>
-                        <div class="tech-value">{{ $formiptv->otp_code }}</div>
-                    </div>
-                    @endif
+                                            @if($formiptv->otp_code)
+                                            <div class="tech-item">
+                                                <div class="tech-label">Code OTP</div>
+                                                <div class="tech-value">{{ $formiptv->otp_code }}</div>
+                                            </div>
+                                            @endif
 
-                    @if($formiptv->formuler_mac)
-                    <div class="tech-item">
-                        <div class="tech-label">Formuler MAC</div>
-                        <div class="tech-value">{{ $formiptv->formuler_mac }}</div>
-                    </div>
-                    @endif
+                                            @if($formiptv->formuler_mac)
+                                            <div class="tech-item">
+                                                <div class="tech-label">Formuler MAC</div>
+                                                <div class="tech-value">{{ $formiptv->formuler_mac }}</div>
+                                            </div>
+                                            @endif
 
-                    @if($formiptv->mag_adresse)
-                    <div class="tech-item">
-                        <div class="tech-label">Adresse MAG</div>
-                        <div class="tech-value">{{ $formiptv->mag_adresse }}</div>
-                    </div>
-                    @endif
-                @endforeach
-            </div>
-        </div>
-        @endif
+                                            @if($formiptv->mag_adresse)
+                                            <div class="tech-item">
+                                                <div class="tech-label">Adresse MAG</div>
+                                                <div class="tech-value">{{ $formiptv->mag_adresse }}</div>
+                                            </div>
+                                            @endif
+                                        @endforeach
+                                    </div>
+                                </div>
+                                @endif
 
-        <!-- Notes -->
+                                <!-- Champs spécifiques à l'application -->
+                                @if($subscription->formiptvs && $subscription->formiptvs->count() > 0)
+                                @foreach($subscription->formiptvs as $formiptv)
+                                    @php
+                                        $applicationType = \App\Models\Applicationtype::where('name', $formiptv->application)->first();
+                                        $hasFields = false;
+                                        if ($applicationType) {
+                                            $hasFields = ($applicationType->deviceid && $formiptv->device_id) ||
+                                                        ($applicationType->devicekey && $formiptv->device_key) ||
+                                                        ($applicationType->otpcode && $formiptv->otp_code) ||
+                                                        ($applicationType->smartstbmac && $formiptv->note);
+                                        }
+                                    @endphp
+                                    
+                                    @if($hasFields)
+                                    <div class="order-section">
+                                        <h2 class="section-title">Configuration spécifique à l'application</h2>
+                                        <div class="app-config-grid">
+                                            @if($applicationType && $applicationType->deviceid && $formiptv->device_id)
+                                            <div class="app-config-item">
+                                                <div class="app-config-label">Device ID</div>
+                                                <div class="app-config-value">{{ $formiptv->device_id }}</div>
+                                            </div>
+                                            @endif
+
+                                            @if($applicationType && $applicationType->devicekey && $formiptv->device_key)
+                                            <div class="app-config-item">
+                                                <div class="app-config-label">Device Key</div>
+                                                <div class="app-config-value">{{ $formiptv->device_key }}</div>
+                                            </div>
+                                            @endif
+
+                                            @if($applicationType && $applicationType->otpcode && $formiptv->otp_code)
+                                            <div class="app-config-item">
+                                                <div class="app-config-label">OTP Code</div>
+                                                <div class="app-config-value">{{ $formiptv->otp_code }}</div>
+                                            </div>
+                                            @endif
+
+                                            @if($applicationType && $applicationType->smartstbmac && $formiptv->note)
+                                            <div class="app-config-item">
+                                                <div class="app-config-label">Smart STB MAC</div>
+                                                <div class="app-config-value">{{ $formiptv->note }}</div>
+                                            </div>
+                                            @endif
+                                        </div>
+                                    </div>
+                                    @endif
+                                @endforeach
+                                @endif
+
+        <!-- Informations Complémentaires -->
         @if($subscription->note)
         <div class="order-section">
-            <h2 class="section-title">Notes</h2>
+            <h2 class="section-title">Informations Complémentaires</h2>
             <div class="notes-content">
                 {{ $subscription->note }}
             </div>
@@ -216,9 +383,6 @@
             <a href="{{ route('dashboard') }}#commandes" class="btn btn-secondary">
                 ← Retour aux commandes
             </a>
-            <button onclick="downloadInvoice('{{ $subscription->uuid }}')" class="btn btn-primary">
-                📄 Télécharger la facture
-            </button>
             <button onclick="contactSupport('{{ $subscription->uuid }}')" class="btn btn-secondary">
                 💬 Contacter le support
             </button>
@@ -227,17 +391,6 @@
 </div>
 
 <script>
-function downloadInvoice(subscriptionUuid) {
-    // Afficher un message de chargement
-    const loadingToast = showToast('Génération de la facture en cours...', 'info');
-    
-    // Simuler le téléchargement (remplacez par votre logique réelle)
-    setTimeout(() => {
-        loadingToast.remove();
-        showToast('Facture téléchargée avec succès !', 'success');
-    }, 2000);
-}
-
 function contactSupport(subscriptionUuid) {
     // Rediriger vers la page de support avec l'ID de la commande
     window.location.href = '{{ route("dashboard") }}#support';
@@ -463,6 +616,154 @@ function showToast(message, type = 'info') {
     font-weight: bold;
     color: #2d3748;
     word-break: break-all;
+}
+
+/* Styles pour la configuration détaillée */
+.config-detail-section {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: #f8fafc;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+}
+
+.config-subtitle {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: #2d3748;
+    margin: 0 0 1rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.config-subtitle::before {
+    content: "⚙️";
+    font-size: 1.1rem;
+}
+
+.config-value-display {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+.config-label {
+    font-weight: bold;
+    color: #2d3748;
+    font-size: 1.1rem;
+}
+
+.config-price {
+    font-weight: bold;
+    color: #059669;
+    font-size: 1.25rem;
+}
+
+.config-description {
+    color: #718096;
+    font-size: 0.9rem;
+    margin-top: 0.25rem;
+}
+
+.bouquets-grid, .vods-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.bouquet-item, .vod-item {
+    background: white;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.bouquet-item::before {
+    content: "📺";
+}
+
+.vod-item::before {
+    content: "🎬";
+}
+
+.bouquet-name, .vod-name {
+    font-weight: 500;
+    color: #2d3748;
+}
+
+/* Styles pour la configuration spécifique à l'application */
+.app-config-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.app-config-item {
+    background: #f0f9ff;
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid #0ea5e9;
+    border-left: 4px solid #0ea5e9;
+}
+
+.app-config-label {
+    font-size: 0.875rem;
+    color: #0369a1;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.app-config-value {
+    font-weight: bold;
+    color: #0c4a6e;
+    word-break: break-all;
+    font-family: 'Courier New', monospace;
+    background: #e0f2fe;
+    padding: 0.5rem;
+    border-radius: 4px;
+}
+
+/* Styles pour les informations techniques */
+.tech-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.tech-info-item {
+    background: #fef3c7;
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid #f59e0b;
+    border-left: 4px solid #f59e0b;
+}
+
+.tech-info-label {
+    font-size: 0.875rem;
+    color: #92400e;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.tech-info-value {
+    font-weight: bold;
+    color: #78350f;
+    word-break: break-all;
+    font-family: 'Courier New', monospace;
+    background: #fef3c7;
+    padding: 0.5rem;
+    border-radius: 4px;
 }
 
 .vods-list {

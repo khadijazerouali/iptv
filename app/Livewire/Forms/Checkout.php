@@ -196,13 +196,13 @@ class Checkout extends Component
                 'vods' => $vodsString ?? '-',
                 'adulte' => $this->cart['adulte'] ?? false,
                 // 'product_uuid' => $this->product_uuid,
-                'mac_address' => $this->cart['mac_address'] ?? null,
-                'device_id' => $this->cart['device_id'] ?? null,
-                'device_key' => $this->cart['device_key'] ?? null,
-                'otp_code' => $this->cart['otp_code'] ?? null,
-                'formuler_mac' => $this->cart['formuler_mac'] ?? null,
-                'mag_adresse' => $this->cart['mag_adresse'] ?? null,
-                'note' => $formData['commentaire'] ?? null,
+                'mac_address' => $this->cart['macaddress'] ?? null,
+                'device_id' => $this->cart['deviceid'] ?? null,
+                'device_key' => $this->cart['devicekey'] ?? null,
+                'otp_code' => $this->cart['otpcode'] ?? null,
+                'formuler_mac' => $this->cart['formulermac'] ?? null,
+                'mag_adresse' => $this->cart['magaddress'] ?? null,
+                'note' => $this->cart['smartstbmac'] ?? $formData['commentaire'] ?? null,
             ]);
            
         }elseif ($this->productType == 'renouvellement') {

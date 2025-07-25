@@ -10,54 +10,98 @@
 
 <div class="admin-sidebar">
     <div class="sidebar-header">
-        <i class="fas fa-user-shield"></i>
-        <span>Admin Panel</span>
+        <div class="header-icon">
+            <i class="fas fa-user-shield"></i>
+        </div>
+        <div class="header-content">
+            <span class="header-title">Admin Panel</span>
+            <span class="header-subtitle">Gestion complète</span>
+        </div>
     </div>
     
     <nav class="sidebar-nav">
-        <a href="/admin/users" class="nav-item">
-            <i class="fas fa-users"></i>
-            <span>Gestion des utilisateurs</span>
+        <a href="/admin/users" class="nav-item {{ request()->is('admin/users*') ? 'active' : '' }}">
+            <div class="nav-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <span class="nav-text">Gestion des utilisateurs</span>
+            <div class="nav-indicator"></div>
         </a>
-        <a href="/admin/contacts" class="nav-item">
-            <i class="fas fa-address-book"></i>
-            <span>Gestion des contacts</span>
+        <a href="/admin/contacts" class="nav-item {{ request()->is('admin/contacts*') ? 'active' : '' }}">
+            <div class="nav-icon">
+                <i class="fas fa-address-book"></i>
+            </div>
+            <span class="nav-text">Gestion des contacts</span>
+            <div class="nav-indicator"></div>
         </a>
-        <a href="/admin/categories" class="nav-item">
-            <i class="fas fa-tags"></i>
-            <span>Gestion des catégories</span>
+        <a href="/admin/categories" class="nav-item {{ request()->is('admin/categories*') ? 'active' : '' }}">
+            <div class="nav-icon">
+                <i class="fas fa-tags"></i>
+            </div>
+            <span class="nav-text">Gestion des catégories</span>
+            <div class="nav-indicator"></div>
         </a>
-        <a href="/admin/products" class="nav-item">
-            <i class="fas fa-box"></i>
-            <span>Gestion des produits</span>
+        <a href="/admin/products" class="nav-item {{ request()->is('admin/products*') ? 'active' : '' }}">
+            <div class="nav-icon">
+                <i class="fas fa-box"></i>
+            </div>
+            <span class="nav-text">Gestion des produits</span>
+            <div class="nav-indicator"></div>
         </a>
-        <a href="/admin/device-types" class="nav-item">
-            <i class="fas fa-mobile-alt"></i>
-            <span>Types d'appareils</span>
+        <a href="/admin/device-types" class="nav-item {{ request()->is('admin/device-types*') ? 'active' : '' }}">
+            <div class="nav-icon">
+                <i class="fas fa-mobile-alt"></i>
+            </div>
+            <span class="nav-text">Types d'appareils</span>
+            <div class="nav-indicator"></div>
         </a>
-        <a href="/admin/application-types" class="nav-item">
-            <i class="fas fa-apps"></i>
-            <span>Types d'applications</span>
+        <a href="/admin/application-types" class="nav-item {{ request()->is('admin/application-types*') ? 'active' : '' }}">
+            <div class="nav-icon">
+                <i class="fas fa-apps"></i>
+            </div>
+            <span class="nav-text">Types d'applications</span>
+            <div class="nav-indicator"></div>
         </a>
-        <a href="/admin/orders" class="nav-item">
-            <i class="fas fa-shopping-cart"></i>
-            <span>Gestion des commandes</span>
+        <a href="/admin/orders" class="nav-item {{ request()->is('admin/orders*') ? 'active' : '' }}">
+            <div class="nav-icon">
+                <i class="fas fa-shopping-cart"></i>
+            </div>
+            <span class="nav-text">Gestion des commandes</span>
+            <div class="nav-indicator"></div>
         </a>
-        <a href="/admin/support" class="nav-item">
-            <i class="fas fa-headset"></i>
-            <span>Support</span>
+        <a href="/admin/support" class="nav-item {{ request()->is('admin/support*') ? 'active' : '' }}">
+            <div class="nav-icon">
+                <i class="fas fa-headset"></i>
+            </div>
+            <span class="nav-text">Support</span>
+            <div class="nav-indicator"></div>
         </a>
     </nav>
+    
+    <div class="sidebar-footer">
+        <div class="footer-content">
+            <div class="user-info">
+                <div class="user-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="user-details">
+                    <span class="user-name">Administrateur</span>
+                    <span class="user-role">Super Admin</span>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <style>
 .admin-sidebar {
     width: 100%;
     height: 100vh;
-    background: linear-gradient(135deg, #1d42e6 0%, #234fe0 100%);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     overflow: hidden;
     backdrop-filter: blur(10px);
     position: relative;
+    box-shadow: 4px 0 20px rgba(0,0,0,0.1);
 }
 
 .admin-sidebar::before {
@@ -67,7 +111,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(255,255,255,0.1);
+    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
     pointer-events: none;
 }
 
@@ -75,27 +119,56 @@
     background: rgba(255,255,255,0.15);
     padding: 24px 20px;
     color: white;
-    font-size: 18px;
-    font-weight: 600;
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 16px;
     border-bottom: 1px solid rgba(255,255,255,0.1);
+    backdrop-filter: blur(10px);
 }
 
-.sidebar-header i {
+.header-icon {
+    width: 48px;
+    height: 48px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(10px);
+}
+
+.header-icon i {
     font-size: 20px;
     color: #ffd700;
 }
 
+.header-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.header-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: white;
+    line-height: 1.2;
+}
+
+.header-subtitle {
+    font-size: 12px;
+    color: rgba(255,255,255,0.7);
+    font-weight: 400;
+}
+
 .sidebar-nav {
-    padding: 8px 0;
+    padding: 16px 0;
+    flex: 1;
 }
 
 .nav-item {
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 16px;
     padding: 16px 20px;
     color: rgba(255,255,255,0.9);
     text-decoration: none;
@@ -103,46 +176,138 @@
     position: relative;
     font-size: 14px;
     font-weight: 500;
+    margin: 4px 12px;
+    border-radius: 12px;
+    overflow: hidden;
 }
 
 .nav-item::before {
     content: '';
     position: absolute;
     left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 3px;
-    height: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
     background: #ffd700;
     border-radius: 0 2px 2px 0;
-    transition: height 0.3s ease;
+    transform: scaleY(0);
+    transition: transform 0.3s ease;
 }
 
 .nav-item:hover {
     background: rgba(255,255,255,0.15);
     color: white;
     transform: translateX(4px);
-    padding-left: 24px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
 }
 
 .nav-item:hover::before {
-    height: 20px;
+    transform: scaleY(1);
 }
 
-.nav-item i {
+.nav-item.active {
+    background: rgba(255,255,255,0.2);
+    color: white;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+}
+
+.nav-item.active::before {
+    transform: scaleY(1);
+}
+
+.nav-icon {
+    width: 40px;
+    height: 40px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.nav-item:hover .nav-icon {
+    background: rgba(255,255,255,0.2);
+    transform: scale(1.1);
+}
+
+.nav-item.active .nav-icon {
+    background: rgba(255,215,0,0.2);
+}
+
+.nav-icon i {
     font-size: 16px;
-    width: 18px;
-    text-align: center;
-    opacity: 0.8;
-    transition: opacity 0.3s ease;
+    color: rgba(255,255,255,0.9);
+    transition: all 0.3s ease;
 }
 
-.nav-item:hover i {
-    opacity: 1;
+.nav-item:hover .nav-icon i,
+.nav-item.active .nav-icon i {
+    color: white;
+    transform: scale(1.1);
 }
 
-.nav-item:active {
-    transform: translateX(2px) scale(0.98);
+.nav-text {
+    flex: 1;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.nav-indicator {
+    width: 8px;
+    height: 8px;
+    background: rgba(255,255,255,0.3);
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.nav-item:hover .nav-indicator,
+.nav-item.active .nav-indicator {
+    background: #ffd700;
+    transform: scale(1.2);
+}
+
+.sidebar-footer {
+    padding: 20px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.05);
+}
+
+.footer-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.user-avatar i {
+    color: white;
+    font-size: 16px;
+}
+
+.user-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.user-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: white;
+}
+
+.user-role {
+    font-size: 12px;
+    color: rgba(255,255,255,0.7);
 }
 
 /* Animation d'entrée */

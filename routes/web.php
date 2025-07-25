@@ -10,7 +10,12 @@ Route::get('/', function () {
 })->name('home');
 
 // Route publique pour les détails des produits
-// Route::get('/product/{productUuid}', [DashboardController::class, 'showProduct'])->name('product.details');
+Route::get('/product/{slug}', [App\Http\Controllers\Public\ProductController::class, 'show'])->name('product.details');
+
+// Route spécifique pour le dashboard (utilise UUID)
+Route::middleware(['auth'])->group(function () {
+    Route::get('/dashboard/product/{productUuid}', [DashboardController::class, 'showProduct'])->name('dashboard.product.details');
+});
 
 // Route::view('dashboard', 'dashboard')
 //     ->middleware(['auth', 'verified'])
@@ -24,16 +29,25 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/order/{subscriptionUuid}', [DashboardController::class, 'showOrderDetails'])->name('order.details');
 
 
-    // Route::view('dashboard', 'dashboard')->name('dashboard');
-    Route::view('admin/dashboard', 'admin.dashboard')->name('admin.dashboard');
-    Route::view('admin/products', 'admin.products')->name('admin.products');
-    Route::view('admin/contacts', 'admin.contacts')->name('admin.contacts');
-    Route::view('admin/users', 'admin.users')->name('admin.users');
-    Route::view('admin/support', 'admin.support')->name('admin.support');
-    Route::view('admin/orders', 'admin.orders')->name('admin.orders');
-    Route::view('admin/categories', 'admin.categories')->name('admin.categories');
-    Route::view('admin/device-types', 'admin.device-types')->name('admin.device-types');
-    Route::view('admin/application-types', 'admin.application-types')->name('admin.application-types');
+    // Routes Admin
+    Route::prefix('admin')->name('admin.')->group(function () {
+        Route::view('dashboard', 'admin.dashboard')->name('dashboard');
+        Route::view('products', 'admin.products')->name('products');
+        Route::view('contacts', 'admin.contacts')->name('contacts');
+        Route::get('users', [App\Http\Controllers\Admin\UserController::class, 'index'])->name('users');
+        Route::view('support', 'admin.support')->name('support');
+        Route::view('orders', 'admin.orders')->name('orders');
+        Route::view('categories', 'admin.categories')->name('categories');
+        Route::view('device-types', 'admin.device-types')->name('device-types');
+        Route::view('application-types', 'admin.application-types')->name('application-types');
+        
+        // API Routes pour les utilisateurs
+        Route::put('users/{id}/role', [App\Http\Controllers\Admin\UserController::class, 'updateRole'])->name('users.updateRole');
+        Route::delete('users/{id}', [App\Http\Controllers\Admin\UserController::class, 'destroy'])->name('users.destroy');
+    });
+    
+    // Route pour télécharger les factures (admin)
+    Route::get('/admin/orders/{subscriptionUuid}/download', [DashboardController::class, 'downloadInvoice'])->name('admin.orders.download');
 
 });
 
@@ -48,6 +62,8 @@ Route::middleware(['auth'])->group(function () {
 Route::get('/success', function () {
     return view('pages.success');
 })->name('success');
+
+
 
 
 

@@ -10,9 +10,13 @@ class OrdersManager extends Component
     public $orders;
     public $selectedOrder = null;
 
-    public function mount()
+        public function mount()
     {
-        $this->orders = Subscription::with(['user', 'product'])->get();
+        $this->orders = Subscription::with([
+            'user',
+            'product',
+            'formiptvs'
+        ])->get();
     }
 
     public function show($id)
@@ -22,7 +26,8 @@ class OrdersManager extends Component
             'product',
             'product.devices',
             'product.category',
-            'formiptvs'
+            'formiptvs',
+            'payments'
         ])->findOrFail($id);
     }
 

@@ -153,7 +153,10 @@
                     <td style="padding: 8px; border: 1px solid #eee;">{{ $user->email ?? ($user['email'] ?? '-') }}</td>
                 </tr>
             </table>
+<<<<<<< HEAD
             
+=======
+>>>>>>> e0b1228c2e6aaa4ccf2205a14c6af684ce49080b
             <p style="margin-top: 30px;">Nous restons à votre disposition pour toute question.<br>Merci de votre confiance !</p>
         </div>
         <div style="background: #222; color: #fff; text-align: center; padding: 15px;">

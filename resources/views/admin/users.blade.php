@@ -108,6 +108,12 @@
             </thead>
             <tbody>
                 @foreach($users as $user)
+                @php
+                    // Déterminer le rôle affiché
+                    $displayRole = $user->email === 'admin@admin.com' ? 'admin' : ($user->role ?? 'user');
+                    $isMainAdmin = $user->email === 'admin@admin.com';
+                    $currentUserIsAdmin = auth()->user()->email === 'admin@admin.com';
+                @endphp
                 <tr>
                     <td>
                         <span class="fw-bold text-primary">#{{ $user->id }}</span>
@@ -115,12 +121,23 @@
                     <td>
                         <div class="d-flex align-items-center">
                             <div class="flex-shrink-0">
-                                <div class="bg-primary bg-opacity-10 rounded-circle p-2">
-                                    <i class="fas fa-user text-primary"></i>
-                                </div>
+                                @if($isMainAdmin)
+                                    <div class="bg-danger bg-opacity-10 rounded-circle p-2">
+                                        <i class="fas fa-crown text-danger"></i>
+                                    </div>
+                                @else
+                                    <div class="bg-primary bg-opacity-10 rounded-circle p-2">
+                                        <i class="fas fa-user text-primary"></i>
+                                    </div>
+                                @endif
                             </div>
                             <div class="flex-grow-1 ms-3">
-                                <div class="fw-semibold text-dark">{{ $user->name }}</div>
+                                <div class="fw-semibold text-dark">
+                                    {{ $user->name }}
+                                    @if($isMainAdmin)
+                                        <span class="badge badge-danger ms-2">Super Admin</span>
+                                    @endif
+                                </div>
                                 <small class="text-muted">{{ $user->email }}</small>
                             </div>
                         </div>
@@ -129,11 +146,37 @@
                         <span class="text-muted">{{ $user->email }}</span>
                     </td>
                     <td>
-                        <select class="form-select form-select-sm" style="width: auto;" onchange="updateUserRole({{ $user->id }}, this.value)">
-                            <option value="user" {{ $user->role == 'user' ? 'selected' : '' }}>Utilisateur</option>
-                            <option value="admin" {{ $user->role == 'admin' ? 'selected' : '' }}>Administrateur</option>
-                            <option value="super-admin" {{ $user->role == 'super-admin' ? 'selected' : '' }}>Super Admin</option>
-                        </select>
+                        @if($isMainAdmin)
+                            <!-- L'admin principal ne peut pas être modifié -->
+                            <div class="d-flex align-items-center">
+                                <select class="form-select form-select-sm me-2" style="width: auto;" disabled>
+                                    <option value="admin" selected>Administrateur</option>
+                                </select>
+                                <span class="badge badge-danger">Immutable</span>
+                            </div>
+                        @elseif($currentUserIsAdmin)
+                            <!-- Seul l'admin principal peut modifier les rôles -->
+                            <div class="d-flex align-items-center">
+                                <select class="form-select form-select-sm me-2" style="width: auto;" 
+                                        onchange="updateUserRole({{ $user->id }}, this.value, '{{ $user->role }}')"
+                                        data-original-role="{{ $user->role }}">
+                                    <option value="user" {{ $displayRole == 'user' ? 'selected' : '' }}>Utilisateur</option>
+                                    <option value="admin" {{ $displayRole == 'admin' ? 'selected' : '' }}>Administrateur</option>
+                                    <option value="super-admin" {{ $displayRole == 'super-admin' ? 'selected' : '' }}>Super Admin</option>
+                                </select>
+                                <button class="btn btn-outline-secondary btn-sm" 
+                                        onclick="cancelRoleChange({{ $user->id }})" 
+                                        style="display: none;" 
+                                        id="cancelBtn{{ $user->id }}">
+                                    <i class="fas fa-undo"></i>
+                                </button>
+                            </div>
+                        @else
+                            <!-- Les autres utilisateurs voient seulement le rôle -->
+                            <span class="badge badge-{{ $displayRole == 'admin' ? 'danger' : 'primary' }}">
+                                {{ $displayRole == 'admin' ? 'Administrateur' : 'Utilisateur' }}
+                            </span>
+                        @endif
                     </td>
                     <td>
                         @if($user->email_verified_at)
@@ -159,12 +202,17 @@
                             <button class="btn btn-outline-primary btn-sm" onclick="viewUser({{ $user->id }})">
                                 <i class="fas fa-eye"></i>
                             </button>
-                            <button class="btn btn-outline-warning btn-sm" onclick="editUser({{ $user->id }})">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="btn btn-outline-danger btn-sm" data-confirm="Êtes-vous sûr de vouloir supprimer cet utilisateur ?" onclick="deleteUser({{ $user->id }})">
-                                <i class="fas fa-trash"></i>
-                            </button>
+                            @if($currentUserIsAdmin && !$isMainAdmin)
+                                <button class="btn btn-outline-danger btn-sm" onclick="deleteUser({{ $user->id }})">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            @elseif($isMainAdmin)
+                                <span class="badge badge-danger">Protégé</span>
+                            @else
+                                <button class="btn btn-outline-secondary btn-sm" disabled>
+                                    <i class="fas fa-lock"></i>
+                                </button>
+                            @endif
                         </div>
                     </td>
                 </tr>
@@ -192,22 +240,136 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-                <button type="button" class="btn btn-primary">Sauvegarder</button>
             </div>
         </div>
     </div>
 </div>
 
 <script>
+// Variables pour suivre les changements de rôle
+let roleChanges = {};
+
 // Fonctions pour la gestion des utilisateurs
-function updateUserRole(userId, role) {
+function updateUserRole(userId, newRole, originalRole) {
+    const selectElement = event.target;
+    const cancelBtn = document.getElementById(`cancelBtn${userId}`);
+    
+    // Sauvegarder le changement
+    roleChanges[userId] = {
+        newRole: newRole,
+        originalRole: originalRole,
+        selectElement: selectElement
+    };
+    
+    // Afficher le bouton d'annulation
+    if (cancelBtn) {
+        cancelBtn.style.display = 'inline-block';
+    }
+    
+    // Changer la couleur du select pour indiquer un changement
+    selectElement.classList.add('border-warning');
+    
+    // Afficher le bouton de sauvegarde
+    const saveBtn = document.getElementById('saveRoleChangesBtn');
+    if (saveBtn) {
+        saveBtn.style.display = 'inline-block';
+    }
+    
+    showNotification(`Rôle modifié vers ${newRole}. Cliquez sur l'icône d'annulation pour annuler.`, 'warning');
+}
+
+function cancelRoleChange(userId) {
+    const change = roleChanges[userId];
+    if (change) {
+        // Restaurer la valeur originale
+        change.selectElement.value = change.originalRole;
+        change.selectElement.classList.remove('border-warning');
+        
+        // Masquer le bouton d'annulation
+        const cancelBtn = document.getElementById(`cancelBtn${userId}`);
+        if (cancelBtn) {
+            cancelBtn.style.display = 'none';
+        }
+        
+        // Supprimer le changement de la liste
+        delete roleChanges[userId];
+        
+        // Masquer le bouton de sauvegarde si plus de changements
+        const saveBtn = document.getElementById('saveRoleChangesBtn');
+        if (saveBtn && Object.keys(roleChanges).length === 0) {
+            saveBtn.style.display = 'none';
+        }
+        
+        showNotification('Modification annulée', 'info');
+    }
+}
+
+function saveRoleChanges() {
+    const changes = Object.keys(roleChanges);
+    if (changes.length === 0) {
+        showNotification('Aucune modification à sauvegarder', 'info');
+        return;
+    }
+    
     showLoading();
     
-    // Simulation d'une requête AJAX
-    setTimeout(() => {
+    // Préparer les données pour l'envoi
+    const changesData = {};
+    changes.forEach(userId => {
+        changesData[userId] = {
+            newRole: roleChanges[userId].newRole,
+            originalRole: roleChanges[userId].originalRole
+        };
+    });
+    
+    // Envoyer les modifications au serveur
+    fetch('/admin/users/update-roles', {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ changes: changesData })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
         hideLoading();
-        showNotification(`Rôle de l'utilisateur #${userId} mis à jour vers ${role}`, 'success');
-    }, 1000);
+        if (data.success) {
+            showNotification('Rôles mis à jour avec succès', 'success');
+            // Vider la liste des changements
+            roleChanges = {};
+            // Masquer tous les boutons d'annulation
+            document.querySelectorAll('[id^="cancelBtn"]').forEach(btn => {
+                btn.style.display = 'none';
+            });
+            // Retirer les bordures de warning
+            document.querySelectorAll('.border-warning').forEach(select => {
+                select.classList.remove('border-warning');
+            });
+            // Masquer le bouton de sauvegarde
+            const saveBtn = document.getElementById('saveRoleChangesBtn');
+            if (saveBtn) {
+                saveBtn.style.display = 'none';
+            }
+            // Recharger la page pour afficher les nouveaux rôles
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
+        } else {
+            showNotification('Erreur lors de la mise à jour des rôles: ' + (data.message || 'Erreur inconnue'), 'error');
+        }
+    })
+    .catch(error => {
+        hideLoading();
+        showNotification('Erreur lors de la mise à jour des rôles: ' + error.message, 'error');
+        console.error('Error:', error);
+    });
 }
 
 function viewUser(userId) {
@@ -237,18 +399,41 @@ function viewUser(userId) {
     }, 500);
 }
 
-function editUser(userId) {
-    showNotification('Fonctionnalité d\'édition en cours de développement', 'info');
-}
-
 function deleteUser(userId) {
-    showLoading();
-    
-    // Simulation d'une requête AJAX
-    setTimeout(() => {
-        hideLoading();
-        showNotification(`Utilisateur #${userId} supprimé avec succès`, 'success');
-    }, 1000);
+    if (confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ? Cette action est irréversible.')) {
+        showLoading();
+        
+        fetch(`/admin/users/${userId}`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            hideLoading();
+            if (data.success) {
+                showNotification(`Utilisateur #${userId} supprimé avec succès`, 'success');
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            } else {
+                showNotification('Erreur lors de la suppression: ' + (data.message || 'Erreur inconnue'), 'error');
+            }
+        })
+        .catch(error => {
+            hideLoading();
+            showNotification('Erreur lors de la suppression: ' + error.message, 'error');
+            console.error('Error:', error);
+        });
+    }
 }
 
 // Recherche en temps réel
@@ -264,6 +449,24 @@ document.getElementById('searchInput').addEventListener('input', function(e) {
             row.style.display = 'none';
         }
     });
+});
+
+// Ajouter un bouton pour sauvegarder tous les changements de rôle
+document.addEventListener('DOMContentLoaded', function() {
+    const tableHeader = document.querySelector('.table-header');
+    if (tableHeader) {
+        const saveButton = document.createElement('button');
+        saveButton.className = 'btn btn-success btn-sm';
+        saveButton.innerHTML = '<i class="fas fa-save me-2"></i>Sauvegarder les modifications';
+        saveButton.onclick = saveRoleChanges;
+        saveButton.style.display = 'none';
+        saveButton.id = 'saveRoleChangesBtn';
+        
+        const headerActions = tableHeader.querySelector('.d-flex');
+        if (headerActions) {
+            headerActions.appendChild(saveButton);
+        }
+    }
 });
 </script>
 @endsection 

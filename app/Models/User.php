@@ -39,6 +39,7 @@ class User extends Authenticatable
         'password',
         'status',
         'uuid',
+        'role',
         'nom',
         'prenom',
         'nom_entreprise',

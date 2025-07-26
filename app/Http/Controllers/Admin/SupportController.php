@@ -21,10 +21,10 @@ class SupportController extends Controller
             'satisfaction_score' => $this->calculateSatisfactionScore(),
         ];
 
-        // Tickets avec relations
+        // Tickets avec pagination
         $tickets = SupportTicket::with(['user', 'ticketReplies'])
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->paginate(15);
 
         // Ajouter des statistiques par ticket
         foreach ($tickets as $ticket) {
@@ -155,6 +155,50 @@ class SupportController extends Controller
             'success' => true,
             'message' => 'Ticket résolu avec succès'
         ]);
+    }
+
+    public function export()
+    {
+        $tickets = SupportTicket::with(['user', 'ticketReplies'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        // Créer un fichier CSV simple pour l'export
+        $filename = 'tickets_export_' . date('Y-m-d') . '.csv';
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ];
+
+        $callback = function() use ($tickets) {
+            $file = fopen('php://output', 'w');
+            
+            // En-têtes CSV
+            fputcsv($file, [
+                'ID', 'Client', 'Email', 'Sujet', 'Message', 'Priorité', 'Statut', 
+                'Date de création', 'Nombre de réponses', 'Jours ouverts'
+            ]);
+
+            // Données des tickets
+            foreach ($tickets as $ticket) {
+                fputcsv($file, [
+                    $ticket->id,
+                    $ticket->user ? $ticket->user->name : 'Utilisateur inconnu',
+                    $ticket->user ? $ticket->user->email : 'N/A',
+                    $ticket->subject,
+                    strip_tags($ticket->message),
+                    $ticket->priority,
+                    $ticket->status,
+                    $ticket->created_at->format('d/m/Y H:i'),
+                    $ticket->ticketReplies->count(),
+                    Carbon::now()->diffInDays($ticket->created_at)
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 
     private function calculateSatisfactionScore()

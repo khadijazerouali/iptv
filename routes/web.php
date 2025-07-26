@@ -22,7 +22,10 @@ Route::middleware(['auth'])->group(function () {
 //     ->name('dashboard');
 Route::middleware(['auth'])->group(function () {
 
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard', [App\Http\Controllers\ClientDashboardController::class, 'index'])->name('dashboard');
+    Route::post('/dashboard/profile/update', [App\Http\Controllers\ClientDashboardController::class, 'updateProfile'])->name('dashboard.profile.update');
+    Route::post('/dashboard/settings/update', [App\Http\Controllers\ClientDashboardController::class, 'updateSettings'])->name('dashboard.settings.update');
+    Route::get('/dashboard/orders/{id}/invoice', [App\Http\Controllers\ClientDashboardController::class, 'downloadInvoice'])->name('dashboard.orders.invoice');
     Route::put('/dashboard/update-profile', [DashboardController::class, 'updateProfile'])->name('dashboard.updateProfile');
     Route::get('/dashboard/invoice/{subscription}/download', [DashboardController::class, 'downloadInvoice'])->name('dashboard.downloadInvoice');
     Route::post('/dashboard/support-ticket', [DashboardController::class, 'createSupportTicket'])->name('dashboard.createSupportTicket');
@@ -74,7 +77,12 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('support/{uuid}', [App\Http\Controllers\Admin\SupportController::class, 'destroy'])->name('support.destroy');
         Route::post('support/{uuid}/reply', [App\Http\Controllers\Admin\SupportController::class, 'reply'])->name('support.reply');
         Route::post('support/{uuid}/resolve', [App\Http\Controllers\Admin\SupportController::class, 'resolve'])->name('support.resolve');
-
+        Route::get('support/export', [App\Http\Controllers\Admin\SupportController::class, 'export'])->name('support.export');
+        
+        // Base de connaissances
+        Route::get('knowledge-base/articles/{category}', [App\Http\Controllers\Admin\KnowledgeBaseController::class, 'articles'])->name('knowledge-base.articles');
+        Route::get('knowledge-base/create-article', [App\Http\Controllers\Admin\KnowledgeBaseController::class, 'create'])->name('knowledge-base.create');
+        
         // Routes pour les catégories
         Route::get('categories/{uuid}', [App\Http\Controllers\Admin\CategoryController::class, 'show'])->name('categories.show');
         Route::post('categories', [App\Http\Controllers\Admin\CategoryController::class, 'store'])->name('categories.store');
@@ -94,7 +102,8 @@ Route::middleware(['auth'])->group(function () {
         
         // Gestion des utilisateurs (contrôleur existant)
         Route::get('users', [App\Http\Controllers\Admin\UserController::class, 'index'])->name('users');
-        Route::put('users/{id}/role', [App\Http\Controllers\Admin\UserController::class, 'updateRole'])->name('users.updateRole');
+        Route::post('users/update-roles', [App\Http\Controllers\Admin\UserController::class, 'updateRoles'])->name('users.updateRoles');
+        Route::get('users/list', [App\Http\Controllers\Admin\UserController::class, 'list'])->name('users.list');
         Route::delete('users/{id}', [App\Http\Controllers\Admin\UserController::class, 'destroy'])->name('users.destroy');
         
 
@@ -111,6 +120,18 @@ Route::middleware(['auth'])->group(function () {
     Volt::route('settings/profile', 'settings.profile')->name('settings.profile');
     Volt::route('settings/password', 'settings.password')->name('settings.password');
     Volt::route('settings/appearance', 'settings.appearance')->name('settings.appearance');
+    
+    // Support routes for authenticated users
+    Route::prefix('support')->name('support.')->group(function () {
+        Route::get('/', [App\Http\Controllers\SupportController::class, 'index'])->name('index');
+        Route::get('/create', [App\Http\Controllers\SupportController::class, 'create'])->name('create');
+        Route::post('/', [App\Http\Controllers\SupportController::class, 'store'])->name('store');
+        Route::get('/{uuid}', [App\Http\Controllers\SupportController::class, 'show'])->name('show');
+        Route::post('/{uuid}/reply', [App\Http\Controllers\SupportController::class, 'reply'])->name('reply');
+        Route::post('/{uuid}/close', [App\Http\Controllers\SupportController::class, 'close'])->name('close');
+        Route::get('/knowledge-base', [App\Http\Controllers\SupportController::class, 'knowledgeBase'])->name('knowledge-base');
+        Route::get('/knowledge-base/{category}/{articleId}', [App\Http\Controllers\SupportController::class, 'article'])->name('article');
+    });
 });
 
 Route::get('/success', function () {

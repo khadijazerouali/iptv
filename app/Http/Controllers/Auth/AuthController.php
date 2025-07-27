@@ -6,6 +6,8 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use App\Services\EmailService;
+use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
@@ -31,6 +33,14 @@ class AuthController extends Controller
         }
 
         Auth::login($user);
+
+        // Envoyer l'email de bienvenue
+        try {
+            EmailService::sendWelcomeEmail($user);
+        } catch (\Exception $e) {
+            // Log l'erreur mais ne pas bloquer l'inscription
+            Log::error('Erreur envoi email bienvenue: ' . $e->getMessage());
+        }
 
         // Redirection après inscription
         return redirect()->route('dashboard');

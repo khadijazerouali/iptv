@@ -34,11 +34,11 @@
         <div class="stat-card warning">
             <div class="stat-content">
                 <div class="stat-details">
-                    <h3>{{ $stats['total_support_tickets'] }}</h3>
-                    <p>Tickets de support</p>
+                    <h3>{{ $stats['total_orders'] ?? 0 }}</h3>
+                    <p>Commandes totales</p>
                 </div>
                 <div class="stat-icon">
-                    <i class="fas fa-headset"></i>
+                    <i class="fas fa-shopping-cart"></i>
                 </div>
             </div>
         </div>
@@ -46,11 +46,11 @@
         <div class="stat-card info">
             <div class="stat-content">
                 <div class="stat-details">
-                    <h3>{{ $stats['open_support_tickets'] }}</h3>
-                    <p>Tickets en attente</p>
+                    <h3>{{ $stats['total_products'] ?? 0 }}</h3>
+                    <p>Produits disponibles</p>
                 </div>
                 <div class="stat-icon">
-                    <i class="fas fa-clock"></i>
+                    <i class="fas fa-box"></i>
                 </div>
             </div>
         </div>
@@ -233,8 +233,8 @@
                         <span class="text-muted">{{ $sectionData['subscriptionCount'] }}</span>
                     </div>
                     <div class="mb-3">
-                        <strong>Tickets de support :</strong><br>
-                        <span class="text-muted">{{ $sectionData['supportTicketCount'] }}</span>
+                                        <strong>Commandes :</strong><br>
+                <span class="text-muted">{{ $sectionData['orderCount'] ?? 0 }}</span>
                     </div>
                 </div>
             </div>
@@ -306,10 +306,10 @@
                     @forelse($sectionData['subscriptions'] as $subscription)
                         <tr>
                             <td>
-                                <span class="fw-bold text-primary">#{{ $subscription->id }}</span>
+                                <span class="fw-bold text-primary">#{{ $subscription->number_order }}</span>
                             </td>
                             <td>
-                                <div class="fw-semibold">{{ $subscription->product->title ?? 'Produit #' . $subscription->id }}</div>
+                                <div class="fw-semibold">{{ $subscription->product->title ?? 'Produit #' . $subscription->number_order }}</div>
                                 <small class="text-muted">{{ $subscription->product->category->name ?? 'Catégorie' }}</small>
                             </td>
                             <td>
@@ -338,10 +338,10 @@
                             </td>
                             <td>
                                 <div class="d-flex gap-1">
-                                    <button class="btn btn-outline-primary btn-sm" onclick="viewOrder({{ $subscription->id }})" title="Voir">
+                                    <button class="btn btn-outline-primary btn-sm" onclick="viewOrder('{{ $subscription->uuid }}')" title="Voir">
                                         <i class="fas fa-eye"></i>
                                     </button>
-                                    <button class="btn btn-outline-success btn-sm" onclick="downloadInvoice({{ $subscription->id }})" title="Facture">
+                                    <button class="btn btn-outline-success btn-sm" onclick="downloadInvoice('{{ $subscription->uuid }}')" title="Facture">
                                         <i class="fas fa-download"></i>
                                     </button>
                                 </div>
@@ -371,162 +371,139 @@
 @if($section == 'support')
     <div class="row mb-4">
         <div class="col-md-3">
-            <div class="stat-card primary">
-                <div class="stat-content">
-                    <div class="stat-details">
-                        <h3>{{ $sectionData['ticketStats']['total'] }}</h3>
-                        <p>Total tickets</p>
+            <div class="dashboard-card">
+                <div class="card-body text-center">
+                    <div class="stat-icon mb-3">
+                        <i class="fas fa-ticket-alt fa-2x text-primary"></i>
                     </div>
-                    <div class="stat-icon">
-                        <i class="fas fa-ticket-alt"></i>
-                    </div>
+                    <h3 class="text-primary">{{ $sectionData['ticketStats']['total'] ?? 0 }}</h3>
+                    <p class="text-muted mb-0">Total tickets</p>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="stat-card warning">
-                <div class="stat-content">
-                    <div class="stat-details">
-                        <h3>{{ $sectionData['ticketStats']['open'] }}</h3>
-                        <p>En attente</p>
+            <div class="dashboard-card">
+                <div class="card-body text-center">
+                    <div class="stat-icon mb-3">
+                        <i class="fas fa-clock fa-2x text-warning"></i>
                     </div>
-                    <div class="stat-icon">
-                        <i class="fas fa-clock"></i>
-                    </div>
+                    <h3 class="text-warning">{{ $sectionData['ticketStats']['open'] ?? 0 }}</h3>
+                    <p class="text-muted mb-0">En attente</p>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="stat-card info">
-                <div class="stat-content">
-                    <div class="stat-details">
-                        <h3>{{ $sectionData['ticketStats']['in_progress'] }}</h3>
-                        <p>En cours</p>
+            <div class="dashboard-card">
+                <div class="card-body text-center">
+                    <div class="stat-icon mb-3">
+                        <i class="fas fa-comments fa-2x text-info"></i>
                     </div>
-                    <div class="stat-icon">
-                        <i class="fas fa-comments"></i>
-                    </div>
+                    <h3 class="text-info">{{ $sectionData['ticketStats']['in_progress'] ?? 0 }}</h3>
+                    <p class="text-muted mb-0">En cours</p>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="stat-card success">
-                <div class="stat-content">
-                    <div class="stat-details">
-                        <h3>{{ $sectionData['ticketStats']['resolved'] }}</h3>
-                        <p>Résolus</p>
+            <div class="dashboard-card">
+                <div class="card-body text-center">
+                    <div class="stat-icon mb-3">
+                        <i class="fas fa-check-circle fa-2x text-success"></i>
                     </div>
-                    <div class="stat-icon">
-                        <i class="fas fa-check-circle"></i>
-                    </div>
+                    <h3 class="text-success">{{ $sectionData['ticketStats']['resolved'] ?? 0 }}</h3>
+                    <p class="text-muted mb-0">Résolus</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h5><i class="fas fa-headset me-2"></i> Mes Tickets de Support</h5>
-        <a href="{{ route('support.create') }}" class="btn btn-primary">
-            <i class="fas fa-plus me-2"></i>
-            Nouveau ticket
-        </a>
-    </div>
-
-    <div class="table-container">
-        <div class="table-responsive">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Sujet</th>
-                        <th>Priorité</th>
-                        <th>Statut</th>
-                        <th>Réponses</th>
-                        <th>Date</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($sectionData['supportTickets'] as $ticket)
-                        <tr>
-                            <td>
-                                <span class="fw-bold text-primary">#{{ $ticket->id }}</span>
-                            </td>
-                            <td>
-                                <div class="fw-semibold">{{ $ticket->subject }}</div>
-                                <small class="text-muted">{{ Str::limit($ticket->message, 50) }}</small>
-                            </td>
-                            <td>
-                                @switch($ticket->priority)
-                                    @case('urgent')
-                                        <span class="badge bg-danger">Urgente</span>
-                                        @break
-                                    @case('high')
-                                        <span class="badge bg-warning">Élevée</span>
-                                        @break
-                                    @case('medium')
-                                        <span class="badge bg-info">Moyenne</span>
-                                        @break
-                                    @case('low')
-                                        <span class="badge bg-secondary">Faible</span>
-                                        @break
-                                @endswitch
-                            </td>
-                            <td>
-                                @switch($ticket->status)
-                                    @case('open')
-                                        <span class="badge bg-primary">En attente</span>
-                                        @break
-                                    @case('in_progress')
-                                        <span class="badge bg-warning">En cours</span>
-                                        @break
-                                    @case('resolved')
-                                        <span class="badge bg-success">Résolu</span>
-                                        @break
-                                    @case('closed')
-                                        <span class="badge bg-secondary">Fermé</span>
-                                        @break
-                                @endswitch
-                            </td>
-                            <td>
-                                <span class="badge bg-info">{{ $ticket->ticketReplies->count() }}</span>
-                            </td>
-                            <td>
-                                <div class="text-muted">
-                                    <div>{{ $ticket->created_at->format('d/m/Y') }}</div>
-                                    <small>{{ $ticket->created_at->format('H:i') }}</small>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="d-flex gap-1">
-                                    <a href="{{ route('support.show', $ticket->uuid) }}" class="btn btn-outline-primary btn-sm" title="Voir">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                    @if($ticket->status !== 'closed' && $ticket->status !== 'resolved')
-                                        <a href="{{ route('support.show', $ticket->uuid) }}#reply" class="btn btn-outline-info btn-sm" title="Répondre">
-                                            <i class="fas fa-reply"></i>
-                                        </a>
-                                    @endif
-                                </div>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="7" class="text-center py-4">
-                                <i class="fas fa-headset fa-2x text-muted mb-3"></i>
-                                <p class="text-muted mb-0">Aucun ticket de support</p>
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-        
-        @if($sectionData['supportTickets']->hasPages())
-            <div class="d-flex justify-content-center p-3">
-                {{ $sectionData['supportTickets']->links() }}
+    <div class="dashboard-card">
+        <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5><i class="fas fa-headset me-2"></i> Mes Tickets de Support</h5>
+                <a href="{{ route('support.create') }}" class="btn btn-primary btn-sm">
+                    <i class="fas fa-plus me-2"></i>
+                    Nouveau ticket
+                </a>
             </div>
-        @endif
+        </div>
+        <div class="card-body">
+            @if(isset($sectionData['supportTickets']) && $sectionData['supportTickets']->count() > 0)
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Sujet</th>
+                                <th>Catégorie</th>
+                                <th>Priorité</th>
+                                <th>Statut</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($sectionData['supportTickets'] as $ticket)
+                                <tr>
+                                    <td>
+                                        <span class="fw-bold text-primary">#{{ $ticket->id }}</span>
+                                    </td>
+                                    <td>
+                                        <div class="fw-semibold">{{ $ticket->subject }}</div>
+                                        <small class="text-muted">{{ Str::limit($ticket->message, 50) }}</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-light text-dark">{{ ucfirst($ticket->category) }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{{ $ticket->priority_badge }}">{{ $ticket->priority_label }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{{ $ticket->status_badge }}">{{ $ticket->status_label }}</span>
+                                    </td>
+                                    <td>
+                                        <div class="text-muted">
+                                            <div>{{ $ticket->created_at->format('d/m/Y') }}</div>
+                                            <small>{{ $ticket->created_at->format('H:i') }}</small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="{{ route('support.show', $ticket->uuid) }}" 
+                                               class="btn btn-outline-primary btn-sm" 
+                                               title="Voir les détails">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            @if($ticket->status !== 'closed' && $ticket->status !== 'resolved')
+                                                <a href="{{ route('support.show', $ticket->uuid) }}#reply" 
+                                                   class="btn btn-outline-info btn-sm" 
+                                                   title="Répondre">
+                                                    <i class="fas fa-reply"></i>
+                                                </a>
+                                            @endif
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+
+                @if($sectionData['supportTickets']->hasPages())
+                    <div class="d-flex justify-content-center p-3">
+                        {{ $sectionData['supportTickets']->links() }}
+                    </div>
+                @endif
+            @else
+                <div class="text-center py-4">
+                    <i class="fas fa-headset fa-2x text-muted mb-3"></i>
+                    <p class="text-muted mb-0">Aucun ticket de support</p>
+                    <a href="{{ route('support.create') }}" class="btn btn-primary mt-3">
+                        <i class="fas fa-plus me-2"></i>
+                        Créer votre premier ticket
+                    </a>
+                </div>
+            @endif
+        </div>
     </div>
 @endif
 
@@ -567,10 +544,10 @@
                         </div>
                         <div class="mb-3">
                             <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" id="support_updates" name="support_updates" checked>
-                                <label class="form-check-label" for="support_updates">
-                                    Mises à jour du support
-                                </label>
+                                                            <input class="form-check-input" type="checkbox" id="newsletter" name="newsletter" checked>
+                            <label class="form-check-label" for="newsletter">
+                                Newsletter et offres spéciales
+                            </label>
                             </div>
                         </div>
                         <button type="submit" class="btn btn-primary">
@@ -708,34 +685,26 @@ document.getElementById('settingsForm')?.addEventListener('submit', function(e) 
 });
 
 // View order function
-function viewOrder(orderId) {
-    window.location.href = `/dashboard/orders/${orderId}`;
+function viewOrder(orderUuid) {
+    window.location.href = `/order/${orderUuid}`;
 }
 
 // Download invoice function
-function downloadInvoice(orderId) {
+function downloadInvoice(orderUuid) {
     showLoading();
     
-    fetch(`/dashboard/orders/${orderId}/invoice`, {
-        method: 'GET',
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-            'Accept': 'application/json',
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        hideLoading();
-        if (data.success) {
-            showNotification('Facture téléchargée avec succès', 'success');
-        } else {
-            showNotification('Erreur lors du téléchargement', 'error');
-        }
-    })
-    .catch(error => {
-        hideLoading();
-        showNotification('Erreur de connexion', 'error');
-    });
+    // Créer un lien temporaire pour télécharger le PDF
+    const link = document.createElement('a');
+    link.href = `/dashboard/orders/${orderUuid}/invoice`;
+    link.download = `facture-${orderUuid}.pdf`;
+    link.style.display = 'none';
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    hideLoading();
+    showNotification('Facture téléchargée avec succès', 'success');
 }
 </script>
 @endsection 

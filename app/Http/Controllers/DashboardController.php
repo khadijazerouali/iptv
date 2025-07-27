@@ -93,30 +93,7 @@ class DashboardController extends Controller
     }
 
 
-    public function createSupportTicket(Request $request)
-{
-    $user = auth()->user();
-    
-    $request->validate([
-        'subject' => 'required|string|max:255',
-        'message' => 'required|string',
-        'subscription_id' => 'nullable|exists:subscriptions,id'
-    ]);
 
-    $ticket = SupportTicket::create([
-        'user_id' => $user->id,
-        'subject' => $request->subject,
-        'message' => $request->message,
-        'status' => 'open',
-        'subscription_id' => $request->subscription_id
-    ]);
-
-    return response()->json([
-        'success' => true,
-        'message' => 'Ticket créé avec succès!',
-        'ticket_id' => $ticket->id
-    ]);
-}
 
 public function downloadInvoice($subscriptionId)
 {

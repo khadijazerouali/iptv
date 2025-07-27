@@ -1,277 +1,207 @@
-@extends('layouts.main')
+@extends('layouts.dashboard')
 
-@section('title', 'Ticket #' . $ticket->id)
+@section('title', 'Support - Détails du Ticket')
 
 @section('content')
-<div class="container mt-5">
+<div class="dashboard-content">
+<div class="support-container">
     <!-- Header -->
-    <div class="row mb-4">
-        <div class="col-md-8">
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item">
-                        <a href="{{ route('support.index') }}" class="text-decoration-none">
-                            <i class="fas fa-headset me-1"></i>
-                            Support
-                        </a>
-                    </li>
-                    <li class="breadcrumb-item active" aria-current="page">
-                        Ticket #{{ $ticket->id }}
-                    </li>
-                </ol>
-            </nav>
-            <h1 class="display-6 fw-bold text-primary">
-                <i class="fas fa-ticket-alt me-3"></i>
-                {{ $ticket->subject }}
+    <div class="support-header">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="support-title">
+                    <i class="fas fa-ticket-alt me-3"></i>
+                    Ticket #{{ $ticket->id }}
             </h1>
-        </div>
-        <div class="col-md-4 text-end">
-            <a href="{{ route('support.index') }}" class="btn btn-outline-secondary">
-                <i class="fas fa-arrow-left me-2"></i>
-                Retour aux tickets
-            </a>
+                <p class="support-subtitle">{{ $ticket->subject }}</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="{{ route('support.index') }}" class="btn btn-outline-light">
+                    <i class="fas fa-arrow-left me-2"></i>
+                    Retour aux tickets
+                </a>
+                @if($ticket->status !== 'closed')
+                    <form action="{{ route('support.close', $ticket->uuid) }}" method="POST" class="d-inline">
+                        @csrf
+                        <button type="submit" class="btn btn-outline-warning" 
+                                onclick="return confirm('Êtes-vous sûr de vouloir fermer ce ticket ?')">
+                    <i class="fas fa-times me-2"></i>
+                    Fermer le ticket
+                </button>
+                    </form>
+                @endif
+            </div>
         </div>
     </div>
 
-    <div class="row">
+        <div class="row">
         <!-- Main Content -->
-        <div class="col-md-8">
+        <div class="col-lg-8">
             <!-- Ticket Details -->
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-header bg-white">
+                <div class="support-card mb-4">
+                    <div class="support-card-header">
                     <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">
-                            <i class="fas fa-info-circle me-2"></i>
-                            Détails du ticket
-                        </h5>
-                        <div class="d-flex gap-2">
-                            @switch($ticket->priority)
-                                @case('urgent')
-                                    <span class="badge bg-danger">
-                                        <i class="fas fa-exclamation-triangle me-1"></i>
-                                        Urgente
-                                    </span>
-                                    @break
-                                @case('high')
-                                    <span class="badge bg-warning">
-                                        <i class="fas fa-clock me-1"></i>
-                                        Élevée
-                                    </span>
-                                    @break
-                                @case('medium')
-                                    <span class="badge bg-info">
-                                        <i class="fas fa-info-circle me-1"></i>
-                                        Moyenne
-                                    </span>
-                                    @break
-                                @case('low')
-                                    <span class="badge bg-secondary">
-                                        <i class="fas fa-arrow-down me-1"></i>
-                                        Faible
-                                    </span>
-                                    @break
-                            @endswitch
-                            
-                            @switch($ticket->status)
-                                @case('open')
-                                    <span class="badge bg-primary">
-                                        <i class="fas fa-folder-open me-1"></i>
-                                        En attente
-                                    </span>
-                                    @break
-                                @case('in_progress')
-                                    <span class="badge bg-warning">
-                                        <i class="fas fa-clock me-1"></i>
-                                        En cours
-                                    </span>
-                                    @break
-                                @case('resolved')
-                                    <span class="badge bg-success">
-                                        <i class="fas fa-check-circle me-1"></i>
-                                        Résolu
-                                    </span>
-                                    @break
-                                @case('closed')
-                                    <span class="badge bg-secondary">
-                                        <i class="fas fa-times-circle me-1"></i>
-                                        Fermé
-                                    </span>
-                                    @break
-                            @endswitch
+                        <h5><i class="fas fa-info-circle me-2"></i> Détails du Ticket</h5>
+                        <div class="ticket-meta">
+                            <span class="badge bg-{{ $ticket->status_badge }} me-2">{{ $ticket->status_label }}</span>
+                            <span class="badge bg-{{ $ticket->priority_badge }}">{{ $ticket->priority_label }}</span>
+                        </div>
+                        </div>
+                    </div>
+                    <div class="support-card-body">
+                    <div class="ticket-content">
+                        <div class="ticket-message">
+                            <h6 class="text-muted mb-3">
+                                <i class="fas fa-user me-2"></i>
+                                Message initial de {{ $ticket->user->name }}
+                            </h6>
+                            <div class="message-content">
+                                {{ $ticket->message }}
+                            </div>
+                        </div>
+                        <div class="ticket-footer">
+                            <small class="text-muted">
+                                <i class="fas fa-calendar me-1"></i>
+                            Créé le {{ $ticket->created_at->format('d/m/Y à H:i') }}
+                            </small>
+                        </div>
                         </div>
                     </div>
                 </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <p><strong>Numéro :</strong> #{{ $ticket->id }}</p>
-                            <p><strong>Créé le :</strong> {{ $ticket->created_at->format('d/m/Y à H:i') }}</p>
-                            <p><strong>Jours ouverts :</strong> {{ $ticketStats['days_open'] }} jours</p>
-                        </div>
-                        <div class="col-md-6">
-                            <p><strong>Réponses :</strong> {{ $ticketStats['reply_count'] }}</p>
-                            <p><strong>Dernière activité :</strong> 
-                                @if($ticketStats['last_reply'])
-                                    {{ $ticketStats['last_reply']->created_at->format('d/m/Y à H:i') }}
-                                @else
-                                    {{ $ticket->created_at->format('d/m/Y à H:i') }}
-                                @endif
-                            </p>
-                        </div>
-                    </div>
-                    
-                    <hr>
-                    
-                    <h6>Message initial :</h6>
-                    <div class="bg-light p-3 rounded">
-                        <p class="mb-0">{{ nl2br(e($ticket->message)) }}</p>
-                    </div>
-                </div>
-            </div>
 
-            <!-- Replies -->
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0">
-                        <i class="fas fa-comments me-2"></i>
-                        Historique des réponses ({{ $ticketStats['reply_count'] }})
-                    </h5>
-                </div>
-                <div class="card-body">
-                    @if($ticket->ticketReplies->count() > 0)
-                        @foreach($ticket->ticketReplies->sortBy('created_at') as $reply)
-                            <div class="d-flex mb-4">
-                                <div class="flex-shrink-0">
-                                    <div class="bg-primary bg-opacity-10 rounded-circle p-2">
-                                        <i class="fas fa-user text-primary"></i>
-                                    </div>
-                                </div>
-                                <div class="flex-grow-1 ms-3">
-                                    <div class="d-flex justify-content-between align-items-start mb-2">
-                                        <div>
-                                            <strong class="text-dark">
-                                                @if($reply->user->id === $ticket->user_id)
-                                                    Vous
-                                                @else
-                                                    Support technique
-                                                @endif
-                                            </strong>
-                                            <small class="text-muted ms-2">
-                                                {{ $reply->created_at->format('d/m/Y à H:i') }}
-                                            </small>
+                <!-- Replies -->
+                <div class="support-card">
+                    <div class="support-card-header">
+                        <h5>
+                            <i class="fas fa-comments me-2"></i>
+                        Réponses ({{ $ticket->replies->count() }})
+                        </h5>
+                    </div>
+                    <div class="support-card-body">
+                    @if($ticket->replies->count() > 0)
+                        <div class="replies-container">
+                            @foreach($ticket->replies as $reply)
+                                <div class="reply-item {{ $reply->is_admin_reply ? 'admin-reply' : 'user-reply' }}">
+                                <div class="reply-header">
+                                        <div class="reply-author">
+                                            <div class="author-avatar">
+                                                <i class="fas {{ $reply->is_admin_reply ? 'fa-user-shield' : 'fa-user' }}"></i>
+                                            </div>
+                                            <div class="author-info">
+                                                <div class="author-name">
+                                                    {{ $reply->user->name }}
+                                                    @if($reply->is_admin_reply)
+                                                        <span class="badge bg-primary ms-2">Support</span>
+                                                    @endif
+                                                </div>
+                                                <small class="text-muted">
+                                        {{ $reply->created_at->format('d/m/Y à H:i') }}
+                                                </small>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div class="bg-light p-3 rounded">
-                                        <p class="mb-0">{{ nl2br(e($reply->message)) }}</p>
-                                    </div>
+                                    <div class="reply-content">
+                                        {{ $reply->message }}
                                 </div>
                             </div>
-                        @endforeach
-                    @else
+                            @endforeach
+                        </div>
+                        @else
                         <div class="text-center py-4">
                             <i class="fas fa-comments fa-2x text-muted mb-3"></i>
-                            <p class="text-muted mb-0">Aucune réponse pour le moment</p>
-                        </div>
-                    @endif
-                </div>
-            </div>
-
-            <!-- Reply Form -->
-            @if($ticket->status !== 'closed' && $ticket->status !== 'resolved')
-                <div class="card border-0 shadow-sm" id="reply">
-                    <div class="card-header bg-white">
-                        <h5 class="mb-0">
-                            <i class="fas fa-reply me-2"></i>
-                            Ajouter une réponse
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <form action="{{ route('support.reply', $ticket->uuid) }}" method="POST">
-                            @csrf
-                            <div class="mb-3">
-                                <label for="message" class="form-label">Votre message</label>
-                                <textarea class="form-control @error('message') is-invalid @enderror" 
-                                          id="message" name="message" rows="5" 
-                                          placeholder="Tapez votre réponse..." required>{{ old('message') }}</textarea>
-                                @error('message')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                            <p class="text-muted">Aucune réponse pour le moment</p>
                             </div>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <small class="text-muted">
-                                    <i class="fas fa-info-circle me-1"></i>
-                                    Votre réponse sera visible par notre équipe de support
-                                </small>
+                        @endif
+
+                        <!-- Reply Form -->
+                    @if($ticket->status !== 'closed')
+                        <div class="reply-form-container" id="reply">
+                            <hr class="my-4">
+                            <h6 class="mb-3">
+                                <i class="fas fa-reply me-2"></i>
+                                Ajouter une réponse
+                            </h6>
+                            <form action="{{ route('support.reply', $ticket->uuid) }}" method="POST" class="reply-form">
+                                @csrf
+                                <div class="form-group">
+                                    <textarea class="form-control @error('message') is-invalid @enderror" 
+                                              name="message" 
+                                              rows="4"
+                                              placeholder="Tapez votre réponse ici..."
+                                              required>{{ old('message') }}</textarea>
+                                    @error('message')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                <div class="form-actions mt-3">
                                 <button type="submit" class="btn btn-primary">
                                     <i class="fas fa-paper-plane me-2"></i>
                                     Envoyer la réponse
                                 </button>
+                                </div>
+                            </form>
+                        </div>
+                    @else
+                        <div class="text-center py-4">
+                            <div class="alert alert-warning">
+                                <i class="fas fa-lock me-2"></i>
+                                Ce ticket est fermé. Vous ne pouvez plus y répondre.
                             </div>
-                        </form>
-                    </div>
+                        </div>
+                        @endif
                 </div>
-            @else
-                <div class="alert alert-info">
-                    <i class="fas fa-info-circle me-2"></i>
-                    Ce ticket est {{ $ticket->status === 'resolved' ? 'résolu' : 'fermé' }}. 
-                    Si vous avez besoin d'aide supplémentaire, veuillez créer un nouveau ticket.
-                </div>
-            @endif
-        </div>
-
-        <!-- Sidebar -->
-        <div class="col-md-4">
-            <!-- Actions -->
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-header bg-white">
-                    <h6 class="mb-0">
-                        <i class="fas fa-cogs me-2"></i>
-                        Actions
-                    </h6>
-                </div>
-                <div class="card-body">
-                    @if($ticket->status !== 'closed' && $ticket->status !== 'resolved')
-                        <form action="{{ route('support.close', $ticket->uuid) }}" method="POST" class="d-inline">
-                            @csrf
-                            <button type="submit" class="btn btn-outline-secondary btn-sm w-100 mb-2" 
-                                    onclick="return confirm('Êtes-vous sûr de vouloir fermer ce ticket ?')">
-                                <i class="fas fa-times me-2"></i>
-                                Fermer le ticket
-                            </button>
-                        </form>
-                    @endif
-                    
-                    <a href="{{ route('support.create') }}" class="btn btn-primary btn-sm w-100">
-                        <i class="fas fa-plus me-2"></i>
-                        Nouveau ticket
-                    </a>
                 </div>
             </div>
 
-            <!-- Help -->
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white">
-                    <h6 class="mb-0">
-                        <i class="fas fa-question-circle me-2"></i>
-                        Besoin d'aide ?
-                    </h6>
+            <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Ticket Info -->
+            <div class="support-card mb-4">
+                <div class="support-card-header">
+                    <h5><i class="fas fa-info me-2"></i> Informations</h5>
                 </div>
-                <div class="card-body">
-                    <p class="small text-muted mb-3">
-                        Consultez notre base de connaissances pour des solutions rapides.
-                    </p>
+                <div class="support-card-body">
+                    <div class="info-item">
+                        <label class="info-label">Statut</label>
+                        <span class="badge bg-{{ $ticket->status_badge }}">{{ $ticket->status_label }}</span>
+                    </div>
+                        <div class="info-item">
+                        <label class="info-label">Priorité</label>
+                        <span class="badge bg-{{ $ticket->priority_badge }}">{{ $ticket->priority_label }}</span>
+                            </div>
+                    <div class="info-item">
+                        <label class="info-label">Catégorie</label>
+                        <span class="info-value">{{ ucfirst($ticket->category) }}</span>
+                        </div>
+                        <div class="info-item">
+                        <label class="info-label">Créé par</label>
+                        <span class="info-value">{{ $ticket->user->name }}</span>
+                        </div>
+                        <div class="info-item">
+                        <label class="info-label">Date de création</label>
+                        <span class="info-value">{{ $ticket->created_at->format('d/m/Y H:i') }}</span>
+                        </div>
+                        <div class="info-item">
+                        <label class="info-label">Dernière mise à jour</label>
+                        <span class="info-value">{{ $ticket->updated_at->format('d/m/Y H:i') }}</span>
+                    </div>
+                            </div>
+                        </div>
+
+            <!-- Quick Actions -->
+            <div class="support-card">
+                <div class="support-card-header">
+                    <h5><i class="fas fa-bolt me-2"></i> Actions Rapides</h5>
+                </div>
+                <div class="support-card-body">
                     <div class="d-grid gap-2">
-                        <a href="{{ route('support.knowledge-base') }}?category=depannage" class="btn btn-outline-primary btn-sm">
-                            <i class="fas fa-tools me-2"></i>
-                            Guide de dépannage
+                        <a href="{{ route('support.index') }}" class="btn btn-outline-primary">
+                            <i class="fas fa-list me-2"></i>
+                            Voir tous les tickets
                         </a>
-                        <a href="{{ route('support.knowledge-base') }}?category=installation" class="btn btn-outline-success btn-sm">
-                            <i class="fas fa-download me-2"></i>
-                            Guides d'installation
-                        </a>
-                        <a href="{{ route('support.knowledge-base') }}?category=configuration" class="btn btn-outline-info btn-sm">
-                            <i class="fas fa-cog me-2"></i>
-                            Configuration
+                        <a href="{{ route('support.create') }}" class="btn btn-outline-success">
+                            <i class="fas fa-plus me-2"></i>
+                            Nouveau ticket
                         </a>
                     </div>
                 </div>
@@ -279,35 +209,197 @@
         </div>
     </div>
 </div>
+</div>
 
 <style>
-.card {
-    transition: transform 0.2s ease-in-out;
+.support-container {
+    padding: 2rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
 }
 
-.card:hover {
-    transform: translateY(-2px);
+.support-header {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.badge {
-    font-size: 0.75rem;
+.support-title {
+    color: white;
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
 
-.breadcrumb-item + .breadcrumb-item::before {
-    content: ">";
+.support-subtitle {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1.1rem;
+    margin: 0.5rem 0 0 0;
+}
+
+.support-card {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.support-card-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 1.5rem 2rem;
+    border-bottom: none;
+}
+
+.support-card-header h5 {
+    margin: 0;
+    font-weight: 600;
+    font-size: 1.2rem;
+}
+
+.support-card-body {
+    padding: 2rem;
+}
+
+.ticket-message {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.message-content {
+    line-height: 1.6;
+    color: #495057;
+}
+
+.ticket-footer {
+    border-top: 1px solid #e9ecef;
+    padding-top: 1rem;
+    margin-top: 1rem;
+}
+
+.reply-item {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    border-left: 4px solid #667eea;
+}
+
+.admin-reply {
+    border-left-color: #28a745;
+    background: #f8fff9;
+}
+
+.user-reply {
+    border-left-color: #667eea;
+    background: #f8f9fa;
+}
+
+.reply-header {
+    margin-bottom: 1rem;
+}
+
+.reply-author {
+    display: flex;
+    align-items: center;
+}
+
+.author-avatar {
+    width: 40px;
+    height: 40px;
+    background: #667eea;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    margin-right: 1rem;
+}
+
+.admin-reply .author-avatar {
+    background: #28a745;
+}
+
+.author-name {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.25rem;
+}
+
+.reply-content {
+    line-height: 1.6;
+    color: #495057;
+}
+
+.reply-form-container {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 1.5rem;
+}
+
+.reply-form .form-control {
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.reply-form .form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.info-item:last-child {
+    border-bottom: none;
+}
+
+.info-label {
+    font-weight: 600;
+    color: #495057;
+}
+
+.info-value {
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+    .support-container {
+        padding: 1rem;
+    }
+    
+    .support-title {
+        font-size: 2rem;
+    }
+    
+    .support-card-body {
+        padding: 1rem;
+    }
+    
+    .reply-author {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .author-avatar {
+        margin-bottom: 0.5rem;
+        margin-right: 0;
+    }
 }
 </style>
-
-<script>
-// Auto-resize textarea
-document.getElementById('message').addEventListener('input', function() {
-    this.style.height = 'auto';
-    this.style.height = (this.scrollHeight) + 'px';
-});
-
-// Scroll to reply form if anchor is present
-if (window.location.hash === '#reply') {
-    document.getElementById('reply').scrollIntoView({ behavior: 'smooth' });
-}
-</script>
 @endsection 

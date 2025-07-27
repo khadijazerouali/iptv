@@ -4,10 +4,11 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\SupportTicket;
+use App\Models\SupportReply;
 use App\Models\User;
-use App\Models\TicketReplie;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
-use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class SupportController extends Controller
 {
@@ -16,212 +17,92 @@ class SupportController extends Controller
         // Statistiques du support
         $stats = [
             'total_tickets' => SupportTicket::count(),
+            'open_tickets' => SupportTicket::where('status', 'open')->count(),
+            'in_progress_tickets' => SupportTicket::where('status', 'in_progress')->count(),
             'resolved_tickets' => SupportTicket::where('status', 'resolved')->count(),
-            'in_progress' => SupportTicket::where('status', 'in_progress')->count(),
-            'satisfaction_score' => $this->calculateSatisfactionScore(),
+            'urgent_tickets' => SupportTicket::where('priority', 'urgent')->count(),
         ];
 
         // Tickets avec pagination
-        $tickets = SupportTicket::with(['user', 'ticketReplies'])
+        $tickets = SupportTicket::with(['user', 'replies.user'])
+            ->orderByRaw("CASE 
+                WHEN priority = 'urgent' THEN 1 
+                WHEN priority = 'high' THEN 2 
+                WHEN priority = 'medium' THEN 3 
+                WHEN priority = 'low' THEN 4 
+                ELSE 5 END")
             ->orderBy('created_at', 'desc')
             ->paginate(15);
 
-        // Ajouter des statistiques par ticket
-        foreach ($tickets as $ticket) {
-            $ticket->reply_count = $ticket->ticketReplies->count();
-            $ticket->last_reply = $ticket->ticketReplies->sortByDesc('created_at')->first();
-            $ticket->days_open = Carbon::now()->diffInDays($ticket->created_at);
-        }
-
-        // Statuts et priorités pour les filtres
-        $statuses = [
-            'open' => 'Ouverts',
-            'in_progress' => 'En cours',
-            'resolved' => 'Résolus',
-            'closed' => 'Fermés'
-        ];
-
-        $priorities = [
-            'low' => 'Faible',
-            'medium' => 'Moyenne',
-            'high' => 'Élevée',
-            'urgent' => 'Urgente'
-        ];
-
-        return view('admin.support', compact('stats', 'tickets', 'statuses', 'priorities'));
+        return view('admin.support.index', compact('stats', 'tickets'));
     }
 
-    public function show($uuid)
+    public function show(SupportTicket $ticket)
     {
-        $ticket = SupportTicket::with(['user', 'ticketReplies.user'])
-            ->where('uuid', $uuid)
-            ->firstOrFail();
-
-        // Statistiques du ticket
-        $ticketStats = [
-            'reply_count' => $ticket->ticketReplies->count(),
-            'days_open' => Carbon::now()->diffInDays($ticket->created_at),
-            'last_reply' => $ticket->ticketReplies->sortByDesc('created_at')->first(),
-            'response_time' => $this->calculateResponseTime($ticket),
-        ];
-
-        return response()->json([
-            'ticket' => $ticket,
-            'stats' => $ticketStats
-        ]);
+        $ticket->load(['user', 'replies.user']);
+        
+        return view('admin.support.show', compact('ticket'));
     }
 
-    public function store(Request $request)
+    public function reply(Request $request, SupportTicket $ticket)
     {
         $validated = $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'subject' => 'required|string|max:255',
-            'message' => 'required|string',
-            'priority' => 'required|in:low,medium,high,urgent',
-            'status' => 'required|in:open,in_progress,resolved,closed',
+            'message' => 'required|string|min:5',
+            'status' => 'nullable|in:open,in_progress,resolved,closed',
         ]);
 
-        $ticket = SupportTicket::create($validated);
+        // Sauvegarder l'ancien statut
+        $oldStatus = $ticket->status;
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Ticket créé avec succès',
-            'ticket' => $ticket
-        ]);
-    }
-
-    public function update(Request $request, $uuid)
-    {
-        $ticket = SupportTicket::where('uuid', $uuid)->firstOrFail();
-
-        $validated = $request->validate([
-            'subject' => 'required|string|max:255',
-            'message' => 'required|string',
-            'priority' => 'required|in:low,medium,high,urgent',
-            'status' => 'required|in:open,in_progress,resolved,closed',
-        ]);
-
-        $ticket->update($validated);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Ticket mis à jour avec succès',
-            'ticket' => $ticket
-        ]);
-    }
-
-    public function destroy($uuid)
-    {
-        $ticket = SupportTicket::where('uuid', $uuid)->firstOrFail();
-        $ticket->delete();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Ticket supprimé avec succès'
-        ]);
-    }
-
-    public function reply(Request $request, $uuid)
-    {
-        $ticket = SupportTicket::where('uuid', $uuid)->firstOrFail();
-
-        $validated = $request->validate([
-            'message' => 'required|string',
-            'user_id' => 'required|exists:users,id',
-        ]);
-
-        $reply = TicketReplie::create([
-            'support_ticket_uuid' => $ticket->uuid,
-            'user_id' => $validated['user_id'],
+        // Créer la réponse
+        $reply = SupportReply::create([
+            'ticket_uuid' => $ticket->uuid,
+            'user_id' => Auth::id(),
             'message' => $validated['message'],
+            'is_admin_reply' => true,
         ]);
 
-        // Mettre à jour le statut du ticket
-        $ticket->update(['status' => 'in_progress']);
+        // Envoyer notification au client
+        NotificationService::sendTicketReplyNotification($ticket, $reply);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Réponse ajoutée avec succès',
-            'reply' => $reply
-        ]);
-    }
-
-    public function resolve($uuid)
-    {
-        $ticket = SupportTicket::where('uuid', $uuid)->firstOrFail();
-        $ticket->update(['status' => 'resolved']);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Ticket résolu avec succès'
-        ]);
-    }
-
-    public function export()
-    {
-        $tickets = SupportTicket::with(['user', 'ticketReplies'])
-            ->orderBy('created_at', 'desc')
-            ->get();
-
-        // Créer un fichier CSV simple pour l'export
-        $filename = 'tickets_export_' . date('Y-m-d') . '.csv';
-        $headers = [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
-        ];
-
-        $callback = function() use ($tickets) {
-            $file = fopen('php://output', 'w');
+        // Mettre à jour le statut si fourni
+        if (isset($validated['status'])) {
+            $ticket->update(['status' => $validated['status']]);
             
-            // En-têtes CSV
-            fputcsv($file, [
-                'ID', 'Client', 'Email', 'Sujet', 'Message', 'Priorité', 'Statut', 
-                'Date de création', 'Nombre de réponses', 'Jours ouverts'
-            ]);
-
-            // Données des tickets
-            foreach ($tickets as $ticket) {
-                fputcsv($file, [
-                    $ticket->id,
-                    $ticket->user ? $ticket->user->name : 'Utilisateur inconnu',
-                    $ticket->user ? $ticket->user->email : 'N/A',
-                    $ticket->subject,
-                    strip_tags($ticket->message),
-                    $ticket->priority,
-                    $ticket->status,
-                    $ticket->created_at->format('d/m/Y H:i'),
-                    $ticket->ticketReplies->count(),
-                    Carbon::now()->diffInDays($ticket->created_at)
-                ]);
+            // Envoyer notification de changement de statut
+            if ($oldStatus !== $validated['status']) {
+                NotificationService::sendTicketStatusNotification($ticket, $oldStatus, $validated['status']);
             }
-
-            fclose($file);
-        };
-
-        return response()->stream($callback, 200, $headers);
-    }
-
-    private function calculateSatisfactionScore()
-    {
-        // Simulation du calcul du score de satisfaction
-        $resolvedTickets = SupportTicket::where('status', 'resolved')->count();
-        $totalTickets = SupportTicket::count();
-        
-        if ($totalTickets === 0) return 0;
-        
-        // Simulation basée sur le ratio de tickets résolus
-        $baseScore = ($resolvedTickets / $totalTickets) * 5;
-        return round($baseScore, 1);
-    }
-
-    private function calculateResponseTime($ticket)
-    {
-        $firstReply = $ticket->ticketReplies->sortBy('created_at')->first();
-        
-        if (!$firstReply) {
-            return Carbon::now()->diffInHours($ticket->created_at);
         }
-        
-        return $ticket->created_at->diffInHours($firstReply->created_at);
+
+        return back()->with('success', 'Réponse envoyée avec succès !');
+    }
+
+    public function updateStatus(Request $request, SupportTicket $ticket)
+    {
+        $validated = $request->validate([
+            'status' => 'required|in:open,in_progress,resolved,closed',
+        ]);
+
+        $oldStatus = $ticket->status;
+        $ticket->update(['status' => $validated['status']]);
+
+        // Envoyer notification de changement de statut
+        if ($oldStatus !== $validated['status']) {
+            NotificationService::sendTicketStatusNotification($ticket, $oldStatus, $validated['status']);
+        }
+
+        return back()->with('success', 'Statut mis à jour avec succès !');
+    }
+
+    public function assign(Request $request, SupportTicket $ticket)
+    {
+        $validated = $request->validate([
+            'assigned_to' => 'required|exists:users,id',
+        ]);
+
+        $ticket->update(['assigned_to' => $validated['assigned_to']]);
+
+        return back()->with('success', 'Ticket assigné avec succès !');
     }
 } 

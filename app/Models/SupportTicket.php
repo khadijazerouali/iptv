@@ -2,16 +2,15 @@
 
 namespace App\Models;
 
-use App\Models\Scopes\Searchable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class SupportTicket extends Model
 {
-    use HasUuids;
-    use HasFactory;
-    use Searchable;
+    use HasUuids, HasFactory;
 
     protected $fillable = [
         'user_id',
@@ -19,27 +18,75 @@ class SupportTicket extends Model
         'message',
         'status',
         'priority',
+        'category',
+        'assigned_to',
     ];
 
-    protected $searchableFields = ['*'];
-    
+    protected $casts = [
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
+
     protected $primaryKey = 'uuid';
     public $incrementing = false;
     protected $keyType = 'string';
 
-    protected $table = 'support_tickets';
-
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    public function ticketReplies()
+    public function assignedTo(): BelongsTo
     {
-        return $this->hasMany(
-            TicketReplie::class,
-            'support_ticket_uuid',
-            'uuid'
-        );
+        return $this->belongsTo(User::class, 'assigned_to');
     }
-}
+
+    public function replies(): HasMany
+    {
+        return $this->hasMany(SupportReply::class, 'ticket_uuid', 'uuid');
+    }
+
+    public function getStatusBadgeAttribute(): string
+    {
+        return match($this->status) {
+            'open' => 'primary',
+            'in_progress' => 'warning',
+            'resolved' => 'success',
+            'closed' => 'secondary',
+            default => 'secondary'
+        };
+    }
+
+    public function getStatusLabelAttribute(): string
+    {
+        return match($this->status) {
+            'open' => 'En attente',
+            'in_progress' => 'En cours',
+            'resolved' => 'Résolu',
+            'closed' => 'Fermé',
+            default => 'Inconnu'
+        };
+    }
+
+    public function getPriorityBadgeAttribute(): string
+    {
+        return match($this->priority) {
+            'low' => 'secondary',
+            'medium' => 'info',
+            'high' => 'warning',
+            'urgent' => 'danger',
+            default => 'secondary'
+        };
+    }
+
+    public function getPriorityLabelAttribute(): string
+    {
+        return match($this->priority) {
+            'low' => 'Faible',
+            'medium' => 'Moyenne',
+            'high' => 'Élevée',
+            'urgent' => 'Urgente',
+            default => 'Non définie'
+        };
+    }
+} 

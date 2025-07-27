@@ -107,9 +107,37 @@ class User extends Authenticatable
         return $this->hasMany(SupportTicket::class);
     }
 
-    public function ticketReplies()
+    public function supportReplies()
     {
-        return $this->hasMany(TicketReplie::class);
+        return $this->hasMany(SupportReply::class);
+    }
+
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class);
+    }
+
+    public function unreadNotifications()
+    {
+        return $this->notifications()->whereNull('read_at');
+    }
+
+    public function unreadNotificationsCount()
+    {
+        return $this->unreadNotifications()->count();
+    }
+
+    public function settings()
+    {
+        return $this->hasOne(UserSettings::class);
+    }
+
+    public function getSettings()
+    {
+        return $this->settings ?? UserSettings::create([
+            'user_id' => $this->id,
+            ...UserSettings::getDefaults()
+        ]);
     }
 
     /**

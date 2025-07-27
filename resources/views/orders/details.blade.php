@@ -47,9 +47,9 @@
                     <div class="product-price">
                         <span class="price">{{ number_format($subscription->product->price, 2) }}€</span>
                     </div>
-                    <div class="product-description">
-                        {{ $subscription->product->description }}
-                    </div>
+                    {{-- <div class="product-description">
+                        {!! $subscription->product->description !!}
+                    </div> --}}
                 </div>
                 <div class="product-actions">
                     <a href="{{ route('dashboard.product.details', $subscription->product->uuid) }}" class="btn btn-primary">
@@ -353,6 +353,59 @@
         </div>
         @endif
 
+        <!-- Calculs et prix -->
+        <div class="order-section">
+            <h2 class="section-title">Calculs et prix</h2>
+            <div class="price-breakdown">
+                <!-- Prix de base du produit -->
+                <div class="price-item">
+                    <div class="price-label">Prix de base</div>
+                    <div class="price-value">{{ number_format($subscription->product->price ?? 0, 2) }}€</div>
+                </div>
+                
+                <!-- Prix des options -->
+                @if($subscription->formiptvs && $subscription->formiptvs->count() > 0)
+                    @foreach($subscription->formiptvs as $formiptv)
+                        @if($formiptv->price && $formiptv->price != $subscription->product->price)
+                        <div class="price-item">
+                            <div class="price-label">Option: {{ $formiptv->duration ?? 'Durée personnalisée' }}</div>
+                            <div class="price-value">{{ number_format($formiptv->price, 2) }}€</div>
+                        </div>
+                        @endif
+                    @endforeach
+                @endif
+                
+                <!-- Quantité -->
+                @if($subscription->quantity > 1)
+                <div class="price-item">
+                    <div class="price-label">Quantité</div>
+                    <div class="price-value">× {{ $subscription->quantity }}</div>
+                </div>
+                @endif
+                
+                <!-- Total calculé -->
+                @php
+                    $basePrice = $subscription->product->price ?? 0;
+                    $optionPrice = 0;
+                    if($subscription->formiptvs && $subscription->formiptvs->count() > 0) {
+                        foreach($subscription->formiptvs as $formiptv) {
+                            if($formiptv->price && $formiptv->price != $basePrice) {
+                                $optionPrice = $formiptv->price;
+                                break;
+                            }
+                        }
+                    }
+                    $finalPrice = $optionPrice > 0 ? $optionPrice : $basePrice;
+                    $totalPrice = $finalPrice * $subscription->quantity;
+                @endphp
+                
+                <div class="price-item total">
+                    <div class="price-label">Total</div>
+                    <div class="price-value">{{ number_format($totalPrice, 2) }}€</div>
+                </div>
+            </div>
+        </div>
+
         <!-- Paiements -->
         @if($subscription->payments && $subscription->payments->count() > 0)
         <div class="order-section">
@@ -380,11 +433,12 @@
 
         <!-- Actions -->
         <div class="order-actions">
-            <a href="{{ route('dashboard') }}#commandes" class="btn btn-secondary">
+            <a href="{{ route('dashboard') }}?section=orders" class="btn btn-secondary">
                 ← Retour aux commandes
             </a>
-            <button onclick="contactSupport('{{ $subscription->uuid }}')" class="btn btn-secondary">
-                💬 Contacter le support
+            <button onclick="contactSupport('{{ $subscription->uuid }}')" class="btn-support" type="button">
+                <i class="fas fa-headset"></i>
+                <span>Contacter le support</span>
             </button>
         </div>
     </div>
@@ -392,38 +446,64 @@
 
 <script>
 function contactSupport(subscriptionUuid) {
-    // Rediriger vers la page de support avec l'ID de la commande
-    window.location.href = '{{ route("dashboard") }}#support';
+    // Redirection directe vers la page de support publique
+    window.location.href = '{{ route("support.index") }}';
 }
 
-// Utilitaires pour les toasts
-function showToast(message, type = 'info') {
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
-    toast.innerHTML = `
-        <span>${message}</span>
-        <button onclick="this.parentElement.remove()">&times;</button>
+// Fonction de notification simple
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : type === 'warning' ? '#f59e0b' : '#3b82f6'};
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        min-width: 300px;
+        max-width: 400px;
+        animation: slideInRight 0.3s ease;
+        font-weight: 500;
     `;
     
-    // Ajouter au DOM
-    let toastContainer = document.querySelector('.toast-container');
-    if (!toastContainer) {
-        toastContainer = document.createElement('div');
-        toastContainer.className = 'toast-container';
-        document.body.appendChild(toastContainer);
-    }
+    notification.innerHTML = `
+        <span>${message}</span>
+        <button onclick="this.parentElement.remove()" style="background: none; border: none; color: white; font-size: 1.2rem; cursor: pointer; margin-left: 1rem; opacity: 0.7;">&times;</button>
+    `;
     
-    toastContainer.appendChild(toast);
+    document.body.appendChild(notification);
     
-    // Auto-suppression après 5 secondes
+    // Auto-suppression après 3 secondes
     setTimeout(() => {
-        if (toast.parentElement) {
-            toast.remove();
+        if (notification.parentElement) {
+            notification.remove();
         }
-    }, 5000);
+    }, 3000);
     
-    return toast;
+    return notification;
 }
+
+// Ajouter les styles CSS pour les animations
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideInRight {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+`;
+document.head.appendChild(style);
 </script>
 
 <style>
@@ -825,12 +905,119 @@ function showToast(message, type = 'info') {
     color: #718096;
 }
 
+.price-breakdown {
+    background: #f7fafc;
+    border-radius: 8px;
+    padding: 1.5rem;
+    border: 1px solid #e2e8f0;
+}
+
+.price-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.price-item:last-child {
+    border-bottom: none;
+}
+
+.price-item.total {
+    border-top: 2px solid #667eea;
+    border-bottom: none;
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #2d3748;
+}
+
+.price-label {
+    color: #4a5568;
+    font-weight: 500;
+}
+
+.price-value {
+    color: #2d3748;
+    font-weight: 600;
+}
+
+.price-item.total .price-value {
+    color: #667eea;
+    font-size: 1.2rem;
+}
+
 .order-actions {
     padding: 2rem;
     border-top: 1px solid #e2e8f0;
     display: flex;
     gap: 1rem;
     justify-content: flex-end;
+}
+
+/* Bouton de support moderne et attrayant */
+.btn-support {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem 1.5rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white !important;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    position: relative;
+    overflow: hidden;
+    z-index: 10;
+}
+
+.btn-support::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.btn-support:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    color: white;
+    text-decoration: none;
+}
+
+.btn-support:hover::before {
+    left: 100%;
+}
+
+.btn-support:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.btn-support i {
+    font-size: 1.1rem;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
 }
 
 .btn {

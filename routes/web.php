@@ -9,6 +9,12 @@ Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
+// Routes de récupération de mot de passe (publiques)
+Route::get('forgot-password', [App\Http\Controllers\Auth\ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
+Route::post('forgot-password', [App\Http\Controllers\Auth\ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+Route::get('reset-password/{token}', [App\Http\Controllers\Auth\ResetPasswordController::class, 'showResetForm'])->name('password.reset');
+Route::post('reset-password', [App\Http\Controllers\Auth\ResetPasswordController::class, 'reset'])->name('password.update');
+
 // Route publique pour les détails des produits
 Route::get('/product/{slug}', [App\Http\Controllers\Public\ProductController::class, 'show'])->name('product.details');
 
@@ -25,11 +31,26 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [App\Http\Controllers\ClientDashboardController::class, 'index'])->name('dashboard');
     Route::post('/dashboard/profile/update', [App\Http\Controllers\ClientDashboardController::class, 'updateProfile'])->name('dashboard.profile.update');
     Route::post('/dashboard/settings/update', [App\Http\Controllers\ClientDashboardController::class, 'updateSettings'])->name('dashboard.settings.update');
-    Route::get('/dashboard/orders/{id}/invoice', [App\Http\Controllers\ClientDashboardController::class, 'downloadInvoice'])->name('dashboard.orders.invoice');
+    Route::get('/dashboard/orders/{uuid}/invoice', [App\Http\Controllers\ClientDashboardController::class, 'downloadInvoice'])->name('dashboard.orders.invoice');
     Route::put('/dashboard/update-profile', [DashboardController::class, 'updateProfile'])->name('dashboard.updateProfile');
     Route::get('/dashboard/invoice/{subscription}/download', [DashboardController::class, 'downloadInvoice'])->name('dashboard.downloadInvoice');
-    Route::post('/dashboard/support-ticket', [DashboardController::class, 'createSupportTicket'])->name('dashboard.createSupportTicket');
+
     Route::get('/order/{subscriptionUuid}', [DashboardController::class, 'showOrderDetails'])->name('order.details');
+    
+    // Routes pour les notifications
+    Route::get('/notifications', [App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/mark-read', [App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.mark-read');
+    Route::post('/notifications/mark-all-read', [App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-read');
+    Route::get('/notifications/unread-count', [App\Http\Controllers\NotificationController::class, 'getUnreadCount'])->name('notifications.unread-count');
+    Route::get('/notifications/recent', [App\Http\Controllers\NotificationController::class, 'getRecentNotifications'])->name('notifications.recent');
+
+    // Routes pour les paramètres
+    Route::get('/settings', [App\Http\Controllers\SettingsController::class, 'index'])->name('settings.index');
+    Route::get('/settings/profile', [App\Http\Controllers\SettingsController::class, 'profile'])->name('settings.profile');
+    Route::post('/settings/update', [App\Http\Controllers\SettingsController::class, 'update'])->name('settings.update');
+    Route::post('/settings/notifications', [App\Http\Controllers\SettingsController::class, 'updateNotifications'])->name('settings.notifications');
+    Route::post('/settings/preferences', [App\Http\Controllers\SettingsController::class, 'updatePreferences'])->name('settings.preferences');
+    Route::post('/dashboard/delete-account', [App\Http\Controllers\ClientDashboardController::class, 'deleteAccount'])->name('dashboard.delete-account');
 
 
     // Routes Admin
@@ -67,17 +88,18 @@ Route::middleware(['auth'])->group(function () {
         Route::post('orders', [App\Http\Controllers\Admin\OrderController::class, 'store'])->name('orders.store');
         Route::put('orders/{uuid}', [App\Http\Controllers\Admin\OrderController::class, 'update'])->name('orders.update');
         Route::delete('orders/{uuid}', [App\Http\Controllers\Admin\OrderController::class, 'destroy'])->name('orders.destroy');
-        Route::post('orders/{uuid}/activate', [App\Http\Controllers\Admin\OrderController::class, 'activate'])->name('orders.activate');
+                Route::post('orders/{uuid}/activate', [App\Http\Controllers\Admin\OrderController::class, 'activate'])->name('orders.activate');
         
-        // Gestion du support avec données dynamiques
-        Route::get('support', [App\Http\Controllers\Admin\SupportController::class, 'index'])->name('support');
-        Route::get('support/{uuid}', [App\Http\Controllers\Admin\SupportController::class, 'show'])->name('support.show');
-        Route::post('support', [App\Http\Controllers\Admin\SupportController::class, 'store'])->name('support.store');
-        Route::put('support/{uuid}', [App\Http\Controllers\Admin\SupportController::class, 'update'])->name('support.update');
-        Route::delete('support/{uuid}', [App\Http\Controllers\Admin\SupportController::class, 'destroy'])->name('support.destroy');
-        Route::post('support/{uuid}/reply', [App\Http\Controllers\Admin\SupportController::class, 'reply'])->name('support.reply');
-        Route::post('support/{uuid}/resolve', [App\Http\Controllers\Admin\SupportController::class, 'resolve'])->name('support.resolve');
-        Route::get('support/export', [App\Http\Controllers\Admin\SupportController::class, 'export'])->name('support.export');
+        // Gestion du support admin
+        Route::get('support', [App\Http\Controllers\Admin\SupportController::class, 'index'])->name('support.index');
+        Route::get('support/{ticket}', [App\Http\Controllers\Admin\SupportController::class, 'show'])->name('support.show');
+        Route::post('support/{ticket}/reply', [App\Http\Controllers\Admin\SupportController::class, 'reply'])->name('support.reply');
+        Route::post('support/{ticket}/status', [App\Http\Controllers\Admin\SupportController::class, 'updateStatus'])->name('support.update-status');
+        Route::post('support/{ticket}/assign', [App\Http\Controllers\Admin\SupportController::class, 'assign'])->name('support.assign');
+        
+ 
+
+
         
         // Base de connaissances
         Route::get('knowledge-base/articles/{category}', [App\Http\Controllers\Admin\KnowledgeBaseController::class, 'articles'])->name('knowledge-base.articles');
@@ -106,6 +128,19 @@ Route::middleware(['auth'])->group(function () {
         Route::get('users/list', [App\Http\Controllers\Admin\UserController::class, 'list'])->name('users.list');
         Route::delete('users/{id}', [App\Http\Controllers\Admin\UserController::class, 'destroy'])->name('users.destroy');
         
+        // Gestion des codes promo
+        Route::get('promo-codes', [App\Http\Controllers\Admin\PromoCodeController::class, 'index'])->name('promo-codes.index');
+        Route::get('promo-codes/create', [App\Http\Controllers\Admin\PromoCodeController::class, 'create'])->name('promo-codes.create');
+        Route::post('promo-codes', [App\Http\Controllers\Admin\PromoCodeController::class, 'store'])->name('promo-codes.store');
+        Route::get('promo-codes/{promoCode}', [App\Http\Controllers\Admin\PromoCodeController::class, 'show'])->name('promo-codes.show');
+        Route::get('promo-codes/{promoCode}/edit', [App\Http\Controllers\Admin\PromoCodeController::class, 'edit'])->name('promo-codes.edit');
+        Route::put('promo-codes/{promoCode}', [App\Http\Controllers\Admin\PromoCodeController::class, 'update'])->name('promo-codes.update');
+        Route::delete('promo-codes/{promoCode}', [App\Http\Controllers\Admin\PromoCodeController::class, 'destroy'])->name('promo-codes.destroy');
+        Route::post('promo-codes/{promoCode}/send', [App\Http\Controllers\Admin\PromoCodeController::class, 'sendToUsers'])->name('promo-codes.send');
+        Route::get('promo-codes/users', [App\Http\Controllers\Admin\PromoCodeController::class, 'getUsersForPromo'])->name('promo-codes.users');
+        Route::post('promo-codes/{promoCode}/toggle-status', [App\Http\Controllers\Admin\PromoCodeController::class, 'toggleStatus'])->name('promo-codes.toggle-status');
+        Route::get('promo-codes/{promoCode}/duplicate', [App\Http\Controllers\Admin\PromoCodeController::class, 'duplicate'])->name('promo-codes.duplicate');
+        
 
     });
     
@@ -115,31 +150,23 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Route::middleware(['auth'])->group(function () {
-    Route::redirect('settings', 'settings/profile');
-
-    Volt::route('settings/profile', 'settings.profile')->name('settings.profile');
-    Volt::route('settings/password', 'settings.password')->name('settings.password');
-    Volt::route('settings/appearance', 'settings.appearance')->name('settings.appearance');
     
     // Support routes for authenticated users
     Route::prefix('support')->name('support.')->group(function () {
+        Route::get('/test', function() { return view('support.test'); })->name('test');
         Route::get('/', [App\Http\Controllers\SupportController::class, 'index'])->name('index');
         Route::get('/create', [App\Http\Controllers\SupportController::class, 'create'])->name('create');
         Route::post('/', [App\Http\Controllers\SupportController::class, 'store'])->name('store');
-        Route::get('/{uuid}', [App\Http\Controllers\SupportController::class, 'show'])->name('show');
-        Route::post('/{uuid}/reply', [App\Http\Controllers\SupportController::class, 'reply'])->name('reply');
-        Route::post('/{uuid}/close', [App\Http\Controllers\SupportController::class, 'close'])->name('close');
-        Route::get('/knowledge-base', [App\Http\Controllers\SupportController::class, 'knowledgeBase'])->name('knowledge-base');
-        Route::get('/knowledge-base/{category}/{articleId}', [App\Http\Controllers\SupportController::class, 'article'])->name('article');
+        Route::get('/{ticket}', [App\Http\Controllers\SupportController::class, 'show'])->name('show');
+        Route::post('/{ticket}/reply', [App\Http\Controllers\SupportController::class, 'reply'])->name('reply');
+        Route::post('/{ticket}/close', [App\Http\Controllers\SupportController::class, 'close'])->name('close');
     });
+    
+ 
 });
 
 Route::get('/success', function () {
     return view('pages.success');
 })->name('success');
-
-
-
-
 
 require __DIR__.'/auth.php';

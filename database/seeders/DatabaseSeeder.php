@@ -62,6 +62,7 @@ class DatabaseSeeder extends Seeder
         $this->call(ChannelsTableSeeder::class);
         $this->call(DevicetypesTableSeeder::class);
         $this->call(ApplicationtypesTableSeeder::class);
+        $this->call(SupportCategorySeeder::class);
       
         
         $this->call(ProductOptionsTableSeeder::class);

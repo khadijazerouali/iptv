@@ -43,7 +43,7 @@
                 </div>
 
                 <div class="product-description">
-                    {!! nl2br(e($product->description)) !!}
+                    {!! $product->description !!}
                 </div>
 
                 <div class="product-stats">
@@ -145,43 +145,14 @@
 
         <!-- Actions -->
         <div class="product-actions">
-            <a href="{{ route('dashboard') }}#commandes" class="btn btn-secondary">
+            <a href="{{ route('dashboard') }}?section=orders" class="btn btn-secondary">
                 ← Retour aux commandes
             </a>
-            <button class="btn btn-primary" onclick="addToCart('{{ $product->uuid }}')">
-                Ajouter au panier
-            </button>
         </div>
     </div>
 </div>
 
-<script>
-function addToCart(productUuid) {
-    // Logique pour ajouter au panier
-    fetch('/cart/add', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-        },
-        body: JSON.stringify({
-            product_uuid: productUuid
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert('Produit ajouté au panier avec succès !');
-        } else {
-            alert('Erreur lors de l\'ajout au panier');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Erreur lors de l\'ajout au panier');
-    });
-}
-</script>
+
 
 <style>
 .product-details-container {

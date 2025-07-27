@@ -4,17 +4,21 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Subscription;
-use App\Models\SupportTicket;
 use App\Models\Product;
 use App\Models\Payment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
+use Barryvdh\DomPDF\Facade\Pdf;
+
+/** @var User $user */
 
 class ClientDashboardController extends Controller
 {
     public function index(Request $request)
     {
+        /** @var User $user */
         $user = Auth::user();
         $section = $request->get('section', 'overview');
 
@@ -22,8 +26,8 @@ class ClientDashboardController extends Controller
         $stats = [
             'total_subscriptions' => $user->subscriptions()->count(),
             'active_subscriptions' => $user->subscriptions()->where('status', 'active')->count(),
-            'total_support_tickets' => $user->supportTickets()->count(),
-            'open_support_tickets' => $user->supportTickets()->where('status', 'open')->count(),
+            'total_orders' => $user->subscriptions()->count(),
+            'total_products' => Product::count(),
         ];
 
         // Abonnements récents
@@ -33,12 +37,7 @@ class ClientDashboardController extends Controller
             ->take(5)
             ->get();
 
-        // Tickets de support récents
-        $recentSupportTickets = $user->supportTickets()
-            ->with('ticketReplies')
-            ->orderBy('created_at', 'desc')
-            ->take(5)
-            ->get();
+
 
         // Données pour les graphiques
         $monthlyData = $this->getMonthlyData($user);
@@ -50,12 +49,16 @@ class ClientDashboardController extends Controller
             case 'profile':
                 $sectionData = $this->getProfileData($user);
                 break;
-            case 'orders':
+                        case 'orders':
                 $sectionData = $this->getOrdersData($user);
                 break;
             case 'support':
                 $sectionData = $this->getSupportData($user);
                 break;
+            case 'settings':
+                $sectionData = $this->getSettingsData($user);
+                break;
+ 
             case 'settings':
                 $sectionData = $this->getSettingsData($user);
                 break;
@@ -67,7 +70,6 @@ class ClientDashboardController extends Controller
         return view('dashboard.index', compact(
             'stats',
             'recentSubscriptions',
-            'recentSupportTickets',
             'monthlyData',
             'sectionData',
             'section'
@@ -98,7 +100,7 @@ class ClientDashboardController extends Controller
             $recentActivity->push([
                 'type' => 'subscription',
                 'title' => 'Nouvel abonnement',
-                'description' => $subscription->product->title ?? 'Abonnement #' . $subscription->id,
+                'description' => $subscription->product->title ?? 'Abonnement #' . $subscription->number_order,
                 'date' => $subscription->created_at,
                 'icon' => 'fas fa-tv',
                 'color' => 'primary'
@@ -123,7 +125,7 @@ class ClientDashboardController extends Controller
                 $recentActivity->push([
                     'type' => 'payment',
                     'title' => 'Paiement effectué',
-                    'description' => 'Paiement pour ' . ($subscription->product->title ?? 'Abonnement #' . $subscription->id),
+                    'description' => 'Paiement pour ' . ($subscription->product->title ?? 'Abonnement #' . $subscription->number_order),
                     'date' => $payment->created_at,
                     'icon' => 'fas fa-credit-card',
                     'color' => 'success'
@@ -183,10 +185,12 @@ class ClientDashboardController extends Controller
         ];
     }
 
+
+
     private function getSupportData($user)
     {
         $supportTickets = $user->supportTickets()
-            ->with('ticketReplies')
+            ->with('replies')
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
@@ -195,7 +199,6 @@ class ClientDashboardController extends Controller
             'open' => $user->supportTickets()->where('status', 'open')->count(),
             'in_progress' => $user->supportTickets()->where('status', 'in_progress')->count(),
             'resolved' => $user->supportTickets()->where('status', 'resolved')->count(),
-            'closed' => $user->supportTickets()->where('status', 'closed')->count(),
         ];
 
         return [
@@ -206,16 +209,14 @@ class ClientDashboardController extends Controller
 
     private function getSettingsData($user)
     {
+        $settings = $user->getSettings();
+        
         return [
-            'user' => $user,
-            'notifications' => [
-                'email_notifications' => true,
-                'sms_notifications' => false,
-                'billing_reminders' => true,
-                'support_updates' => true,
-            ],
+            'settings' => $settings,
         ];
     }
+
+
 
     private function getMonthlyData($user)
     {
@@ -258,6 +259,7 @@ class ClientDashboardController extends Controller
 
     public function updateProfile(Request $request)
     {
+        /** @var User $user */
         $user = Auth::user();
         
         $validated = $request->validate([
@@ -287,6 +289,37 @@ class ClientDashboardController extends Controller
     {
         $user = Auth::user();
         
+        // Si c'est un changement de mot de passe
+        if ($request->has('current_password')) {
+            $validated = $request->validate([
+                'current_password' => 'required|string',
+                'new_password' => 'required|string|min:8|different:current_password',
+                'new_password_confirmation' => 'required|same:new_password',
+            ]);
+
+            // Vérifier l'ancien mot de passe
+            if (!Hash::check($validated['current_password'], $user->password)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Le mot de passe actuel est incorrect',
+                    'errors' => [
+                        'current_password' => ['Le mot de passe actuel est incorrect']
+                    ]
+                ], 422);
+            }
+
+            // Mettre à jour le mot de passe
+            $user->update([
+                'password' => Hash::make($validated['new_password'])
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Mot de passe changé avec succès'
+            ]);
+        }
+
+        // Autres paramètres
         $validated = $request->validate([
             'email_notifications' => 'boolean',
             'sms_notifications' => 'boolean',
@@ -294,31 +327,76 @@ class ClientDashboardController extends Controller
             'support_updates' => 'boolean',
         ]);
 
-        // Ici vous pourriez sauvegarder les préférences dans une table séparée
-        // Pour l'instant, on simule la sauvegarde
-
         return response()->json([
             'success' => true,
             'message' => 'Paramètres mis à jour avec succès'
         ]);
     }
 
-    public function downloadInvoice($subscriptionId)
+    public function downloadInvoice($subscriptionUuid)
     {
+        /** @var User $user */
         $user = Auth::user();
         
         $subscription = $user->subscriptions()
-            ->where('id', $subscriptionId)
-            ->with(['product', 'payments'])
+            ->where('uuid', $subscriptionUuid)
+            ->with(['product', 'formiptvs', 'payments'])
             ->firstOrFail();
 
-        // Ici vous généreriez le PDF de la facture
-        // Pour l'instant, on simule le téléchargement
+        // Générer le PDF de la facture
+        $pdf = Pdf::loadView('invoices.template', compact('subscription', 'user'));
+        
+        // Nom du fichier
+        $filename = 'facture-' . $subscription->number_order . '.pdf';
+        
+        // Retourner le PDF pour téléchargement
+        return $pdf->download($filename);
+    }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Facture téléchargée avec succès',
-            'filename' => 'facture-' . $subscription->id . '.pdf'
+    public function deleteAccount(Request $request)
+    {
+        $user = Auth::user();
+        
+        // Validation
+        $validated = $request->validate([
+            'password' => 'required|string',
+            'confirmation' => 'required|string|in:SUPPRIMER',
         ]);
+
+        // Vérifier le mot de passe
+        if (!Hash::check($validated['password'], $user->password)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Mot de passe incorrect',
+                'errors' => [
+                    'password' => ['Le mot de passe est incorrect']
+                ]
+            ], 422);
+        }
+        
+        try {
+            // Supprimer toutes les données associées à l'utilisateur
+            $user->subscriptions()->delete();
+            $user->payments()->delete();
+            $user->supportTickets()->delete();
+            $user->notifications()->delete();
+            $user->settings()->delete();
+            
+            // Supprimer l'utilisateur
+            $user->delete();
+            
+            // Déconnecter l'utilisateur
+            Auth::logout();
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Compte supprimé avec succès'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de la suppression du compte'
+            ], 500);
+        }
     }
 }

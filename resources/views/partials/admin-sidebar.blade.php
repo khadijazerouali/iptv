@@ -66,13 +66,21 @@
             <span class="nav-text">Gestion des commandes</span>
             <div class="nav-indicator"></div>
         </a>
-        <a href="{{ route('admin.support') }}" class="nav-item {{ request()->routeIs('admin.support*') ? 'active' : '' }}">
+        <a href="{{ route('admin.support.index') }}" class="nav-item {{ request()->routeIs('admin.support*') ? 'active' : '' }}">
             <div class="nav-icon">
                 <i class="fas fa-headset"></i>
             </div>
             <span class="nav-text">Support</span>
             <div class="nav-indicator"></div>
         </a>
+        <a href="{{ route('admin.promo-codes.index') }}" class="nav-item {{ request()->routeIs('admin.promo-codes*') ? 'active' : '' }}">
+            <div class="nav-icon">
+                <i class="fas fa-ticket-alt"></i>
+            </div>
+            <span class="nav-text">Codes promo</span>
+            <div class="nav-indicator"></div>
+        </a>
+
     </nav>
     
     <div class="sidebar-footer">

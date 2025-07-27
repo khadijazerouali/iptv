@@ -15,6 +15,7 @@
     
     <!-- Custom CSS -->
     <link href="{{ asset('assets/css/admin-global.css') }}" rel="stylesheet">
+    <link href="{{ asset('assets/css/support-modern.css') }}" rel="stylesheet">
     
     <style>
         :root {
@@ -286,22 +287,22 @@
 
         .stat-card.primary {
             background: linear-gradient(135deg, var(--primary-color) 0%, #0056b3 100%);
-            color: white;
+            color: white !important;
         }
 
         .stat-card.success {
             background: linear-gradient(135deg, var(--success-color) 0%, #146c43 100%);
-            color: white;
+            color: white !important;
         }
 
         .stat-card.warning {
             background: linear-gradient(135deg, var(--warning-color) 0%, #e0a800 100%);
-            color: white;
+            color: white !important;
         }
 
         .stat-card.info {
             background: linear-gradient(135deg, var(--info-color) 0%, #0aa2c0 100%);
-            color: white;
+            color: white !important;
         }
 
         .stat-content {
@@ -312,19 +313,22 @@
 
         .stat-icon {
             font-size: 2.5rem;
-            opacity: 0.8;
+            opacity: 0.9;
+            color: white !important;
         }
 
         .stat-details h3 {
             font-size: 2rem;
             font-weight: 700;
             margin: 0;
+            color: white !important;
         }
 
         .stat-details p {
             margin: 0;
             opacity: 0.9;
             font-size: 0.9rem;
+            color: white !important;
         }
 
         /* Tables */
@@ -485,6 +489,29 @@
         .notification.info {
             background: var(--info-color);
         }
+        
+        /* Animations pour les notifications */
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOutRight {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
     </style>
 </head>
 <body>
@@ -539,7 +566,7 @@
                     </a>
                 </div>
                 <div class="nav-item">
-                    <a href="{{ route('dashboard') }}?section=settings" class="nav-link {{ request()->get('section') == 'settings' ? 'active' : '' }}">
+                    <a href="{{ route('settings.index') }}" class="nav-link {{ request()->routeIs('settings.*') ? 'active' : '' }}">
                         <i class="fas fa-cog"></i>
                         Paramètres
                     </a>
@@ -568,9 +595,9 @@
                     <h1 class="header-title">@yield('title', 'Dashboard')</h1>
                 </div>
                 <div class="header-actions">
-                    <button class="notification-btn" onclick="showNotifications()">
+                    <button class="notification-btn" onclick="showNotifications()" id="notificationBtn">
                         <i class="fas fa-bell"></i>
-                        <span class="notification-badge">3</span>
+                        <span class="notification-badge" id="notificationCount">0</span>
                     </button>
                     <a href="{{ route('home') }}" class="btn btn-outline-primary">
                         <i class="fas fa-home me-2"></i>
@@ -600,18 +627,72 @@
             document.getElementById('loadingOverlay').classList.remove('show');
         }
 
-        // Notification functions
+        // Notification functions dynamiques
         function showNotification(message, type = 'info') {
             const notification = document.createElement('div');
             notification.className = `notification ${type}`;
-            notification.textContent = message;
-            document.body.appendChild(notification);
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : type === 'warning' ? '#f59e0b' : '#3b82f6'};
+                color: white;
+                padding: 1rem 1.5rem;
+                border-radius: 8px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                z-index: 9999;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                min-width: 300px;
+                max-width: 400px;
+                animation: slideInRight 0.3s ease;
+                font-weight: 500;
+                transform: translateX(100%);
+            `;
             
-            setTimeout(() => notification.classList.add('show'), 100);
+            notification.innerHTML = `
+                <span>${message}</span>
+                <button onclick="this.parentElement.remove()" style="background: none; border: none; color: white; font-size: 1.2rem; cursor: pointer; margin-left: 1rem; opacity: 0.7;">&times;</button>
+            `;
+            
+            // Ajouter au DOM
+            let notificationContainer = document.querySelector('.notification-container');
+            if (!notificationContainer) {
+                notificationContainer = document.createElement('div');
+                notificationContainer.className = 'notification-container';
+                notificationContainer.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    z-index: 9999;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 10px;
+                `;
+                document.body.appendChild(notificationContainer);
+            }
+            
+            notificationContainer.appendChild(notification);
+            
+            // Animation d'entrée
             setTimeout(() => {
-                notification.classList.remove('show');
-                setTimeout(() => notification.remove(), 300);
-            }, 3000);
+                notification.style.transform = 'translateX(0)';
+            }, 10);
+            
+            // Auto-suppression après 5 secondes avec animation
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.style.transform = 'translateX(100%)';
+                    setTimeout(() => {
+                        if (notification.parentElement) {
+                            notification.remove();
+                        }
+                    }, 300);
+                }
+            }, 5000);
+            
+            return notification;
         }
 
         // Sidebar toggle for mobile
@@ -631,10 +712,129 @@
             }
         });
 
-        // Auto-hide loading after page load
+        // Fonction pour charger les notifications dynamiquement
+        function loadNotifications() {
+            fetch('/notifications/unread-count')
+                .then(response => response.json())
+                .then(data => {
+                    const badge = document.getElementById('notificationCount');
+                    if (badge) {
+                        badge.textContent = data.count;
+                        badge.style.display = data.count > 0 ? 'block' : 'none';
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur lors du chargement des notifications:', error);
+                });
+        }
+        
+        // Fonction pour afficher les notifications
+        function showNotifications() {
+            fetch('/notifications/recent')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.notifications.length === 0) {
+                        showNotification('Aucune nouvelle notification', 'info');
+                        return;
+                    }
+                    
+                    // Créer un modal pour afficher les notifications
+                    const modal = document.createElement('div');
+                    modal.style.cssText = `
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        background: rgba(0, 0, 0, 0.5);
+                        z-index: 10000;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                    `;
+                    
+                    const modalContent = document.createElement('div');
+                    modalContent.style.cssText = `
+                        background: white;
+                        border-radius: 12px;
+                        padding: 2rem;
+                        max-width: 500px;
+                        width: 90%;
+                        max-height: 80vh;
+                        overflow-y: auto;
+                    `;
+                    
+                    modalContent.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                            <h3 style="margin: 0; color: #2d3748;">Notifications</h3>
+                            <button onclick="this.closest('.notification-modal').remove()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #666;">&times;</button>
+                        </div>
+                        <div class="notifications-list">
+                            ${data.notifications.map(notification => `
+                                <div class="notification-item" style="padding: 1rem; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 1rem; cursor: pointer;" onclick="markNotificationAsRead(${notification.id}, '${notification.action_url}')">
+                                    <div style="display: flex; align-items: center; gap: 1rem;">
+                                        <i class="${notification.icon}" style="color: ${notification.color === 'success' ? '#10b981' : notification.color === 'danger' ? '#ef4444' : notification.color === 'warning' ? '#f59e0b' : '#3b82f6'}; font-size: 1.2rem;"></i>
+                                        <div>
+                                            <p style="margin: 0; color: #2d3748; font-weight: 500;">${notification.title}</p>
+                                            <small style="color: #666;">${notification.message}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                    
+                    modal.className = 'notification-modal';
+                    modal.appendChild(modalContent);
+                    document.body.appendChild(modal);
+                    
+                    // Fermer le modal en cliquant à l'extérieur
+                    modal.addEventListener('click', function(e) {
+                        if (e.target === modal) {
+                            modal.remove();
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error('Erreur lors du chargement des notifications:', error);
+                    showNotification('Erreur lors du chargement des notifications', 'error');
+                });
+        }
+
+        // Fonction pour marquer une notification comme lue
+        function markNotificationAsRead(notificationId, actionUrl) {
+            fetch('/notifications/mark-read', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({ notification_id: notificationId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Rediriger vers l'URL d'action si elle existe
+                    if (actionUrl) {
+                        window.location.href = actionUrl;
+                    }
+                    // Recharger les notifications
+                    loadNotifications();
+                }
+            })
+            .catch(error => {
+                console.error('Erreur lors du marquage de la notification:', error);
+            });
+        }
+        
+        // Charger les notifications au chargement de la page
         window.addEventListener('load', function() {
             hideLoading();
+            loadNotifications();
         });
+        
+        // Recharger les notifications toutes les 30 secondes
+        setInterval(loadNotifications, 30000);
     </script>
 
     @stack('scripts')

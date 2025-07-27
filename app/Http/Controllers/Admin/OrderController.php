@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\Product;
 use App\Models\Payment;
 use App\Models\Formiptv;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
@@ -111,7 +112,13 @@ class OrderController extends Controller
             'status' => 'required|string|in:pending,active,cancelled,completed',
         ]);
 
+        $oldStatus = $order->status;
         $order->update($validated);
+
+        // Envoyer notification de changement de statut
+        if ($oldStatus !== $validated['status']) {
+            NotificationService::sendOrderStatusNotification($order, $oldStatus, $validated['status']);
+        }
 
         return response()->json([
             'success' => true,
@@ -134,7 +141,13 @@ class OrderController extends Controller
     public function activate($uuid)
     {
         $order = Subscription::where('uuid', $uuid)->firstOrFail();
+        $oldStatus = $order->status;
         $order->update(['status' => 'active']);
+
+        // Envoyer notification de confirmation
+        if ($oldStatus !== 'active') {
+            NotificationService::sendOrderConfirmedNotification($order);
+        }
 
         return response()->json([
             'success' => true,

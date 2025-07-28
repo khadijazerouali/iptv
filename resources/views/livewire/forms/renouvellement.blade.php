@@ -49,7 +49,7 @@
                 <button type="button" class="counter-btn" wire:click="decrement">&#x25BC;</button>
             </div>
 
-            <button type="submit" class="btn btn-primary btn-lg d-flex align-items-center ms-4 rounded-pill">
+            <button type="button" wire:click="submit" class="btn btn-primary btn-lg d-flex align-items-center ms-4 rounded-pill">
                 COMMANDER MAINTENANT
                 <span class="ms-2"><i class="bi bi-plus-circle"></i></span>
             </button>

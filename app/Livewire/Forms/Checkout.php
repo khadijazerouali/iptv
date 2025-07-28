@@ -13,6 +13,7 @@ use App\Models\ProductOption;
 use App\Models\Applicationtype;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Auth;
 
 class Checkout extends Component
 {
@@ -52,6 +53,11 @@ class Checkout extends Component
         $this->selectedPrice = $option ? $option->price : $this->product->price;
         $this->total = $this->product->price * $this->quantity;
         $this->productType = $this->product->type;
+
+        // Pré-remplir l'email de l'utilisateur connecté
+        if (Auth::check()) {
+            $this->email = Auth::user()->email;
+        }
 
         $countriesPath = public_path('country/fr.json');
         if (!file_exists($countriesPath)) {
@@ -239,7 +245,7 @@ class Checkout extends Component
         Session::forget('carts');
 
         // Flash success message
-        Session::flash('success', 'Commande renouvelée avec succès !');
+        Session::flash('success', 'Commande effectuée avec succès !');
 
         // ENVOI EMAIL
 

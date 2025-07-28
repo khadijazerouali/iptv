@@ -18,6 +18,11 @@ Route::post('reset-password', [App\Http\Controllers\Auth\ResetPasswordController
 // Route publique pour les détails des produits
 Route::get('/product/{slug}', [App\Http\Controllers\Public\ProductController::class, 'show'])->name('product.details');
 
+// Routes pour le panier
+Route::post('/add-to-cart', [App\Http\Controllers\Public\CartController::class, 'addToCart'])->name('cart.add');
+Route::post('/clear-cart', [App\Http\Controllers\Public\CartController::class, 'clearCart'])->name('cart.clear');
+Route::get('/get-cart', [App\Http\Controllers\Public\CartController::class, 'getCart'])->name('cart.get');
+
 // Route spécifique pour le dashboard (utilise UUID)
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard/product/{productUuid}', [DashboardController::class, 'showProduct'])->name('dashboard.product.details');

@@ -45,26 +45,38 @@ class Renouvellement extends Component
 
     public function submit()
     {
-        Session::forget('carts');
-        // dd(session()->get('carts'));
-        // dd($this->all());
-        // Validate input
-        $this->validate([
-            'number_order' => 'required|string',
-            'quantity' => 'required|integer|min:1|max:99',
-            'selectedOptionUuid' => 'nullable', // Optional if no options are available
-            'product_uuid' => 'required',
-        ]);
+        try {
+            // Validation simplifiée pour test
+            if (empty($this->quantity) || $this->quantity < 1) {
+                $this->quantity = 1;
+            }
+            
+            if (empty($this->number_order)) {
+                session()->flash('error', 'Veuillez saisir le numéro de commande');
+                return redirect()->back();
+            }
 
-        
+            // Vider l'ancien panier et ajouter le nouveau produit
+            Session::forget('carts');
+            session()->put('carts', $this->all());
 
-        session()->put('carts', $this->all());
+            // Flash success message
+            session()->flash('message', 'Produit ajouté au panier avec succès !');
 
-        // Handle form submission (e.g., save to database, redirect, etc.)
-        session()->flash('success', 'Commande renouvelée avec succès !');
+            // Retourner un message de succès pour JavaScript
+            $this->dispatch('showCartModal', [
+                'productTitle' => $this->product->title,
+                'orderNumber' => $this->number_order ?? '',
+                'quantity' => $this->quantity,
+                'price' => $this->selectedPrice,
+                'total' => $this->selectedPrice * $this->quantity
+            ]);
 
-        // Redirect to checkout
-        return redirect()->route('checkout');
+        } catch (\Exception $e) {
+            // En cas d'erreur, afficher un message d'erreur
+            session()->flash('error', 'Erreur: ' . $e->getMessage());
+            return redirect()->back();
+        }
     }
 
     public function render()

@@ -152,7 +152,7 @@
 
         <!-- Submit Button -->
         <div class="col-md-6 d-flex align-items-center mb-3 ms-4">
-            <button type="submit" wire:click="submitForm" class="btn btn-primary btn-lg w-100 d-flex justify-content-center align-items-center">
+            <button type="button" wire:click="submitForm" onclick="console.log('Button clicked')" class="btn btn-primary btn-lg w-100 d-flex justify-content-center align-items-center">
                 COMMANDER MAINTENANT
                 <i class="bi bi-plus-circle ms-2"></i>
             </button>

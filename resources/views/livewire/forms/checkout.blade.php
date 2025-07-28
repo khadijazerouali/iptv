@@ -18,7 +18,12 @@
             </div>
             <div class="mb-3">
                 <label for="email">E-mail *</label>
-                <input type="email" class="form-control" id="email" name="email" wire:model="email" required>
+                @if(auth()->check())
+                    <input type="email" class="form-control" id="email" name="email" wire:model="email" value="{{ auth()->user()->email }}" readonly style="background-color: #f8f9fa; cursor: not-allowed;">
+                    <small class="text-muted">Email de votre compte connecté (non modifiable)</small>
+                @else
+                    <input type="email" class="form-control" id="email" name="email" wire:model="email" required>
+                @endif
             </div>
             <div class="mb-3">
                 <label for="pays">Pays/Région *</label>

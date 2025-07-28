@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Abonnement iptv Premium</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -38,7 +39,7 @@
 </head>
 
 <body>
-    @yield('scripts')
+    @stack('scripts')
     
     <!--whatsapp Button-->
     <a href="https://api.whatsapp.com/message/5LUH3NO6QLG5N1?autoload=1&app_absent=0" target="_blank">
@@ -87,7 +88,150 @@
 
     <livewire:inc.footer />
 
+    <!-- Cart Modal -->
+    <div class="modal fade" id="cartModal" tabindex="-1" aria-labelledby="cartModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="d-flex align-items-center">
+                        <img src="/assets/images/product-box.svg" alt="Product" style="width: 40px; height: 40px; margin-right: 15px;">
+                        <h5 class="modal-title" id="cartModalLabel" id="modalProductTitle">Produit ajouté au panier</h5>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="modalProductDetails">
+                        <!-- Les détails du produit seront insérés ici -->
+                    </div>
+                    <div class="mt-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="fw-bold">Sous-Total :</span>
+                            <span class="fw-bold fs-5" id="modalTotal">0.00 €</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="viewCart()">
+                        <i class="fas fa-shopping-cart me-2"></i>
+                        Voir Le Panier
+                    </button>
+                    <button type="button" class="btn btn-dark" onclick="goToCheckout()">
+                        <i class="fas fa-credit-card me-2"></i>
+                        Commander
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('livewire:init', () => {
+        console.log('Livewire initialized');
+        
+        Livewire.on('showCartModal', (data) => {
+            console.log('showCartModal event received:', data);
+            showCartModal(data);
+        });
+    });
+
+    function showCartModal(data) {
+        // Mettre à jour le titre
+        document.getElementById('modalProductTitle').textContent = data.productTitle;
+        
+        // Construire les détails du produit
+        let details = '';
+        
+        // Pour Abonnement
+        if (data.device) {
+            details += `
+                <div class="mb-2">
+                    <strong>Dispositif d'abonnement IPTV :</strong> ${data.device}
+                </div>
+            `;
+        }
+        
+        if (data.magAddress) {
+            details += `
+                <div class="mb-2">
+                    <strong>Mag Adresse :</strong> ${data.magAddress}
+                </div>
+            `;
+        }
+        
+        if (data.channels && data.channels.length > 0) {
+            details += `
+                <div class="mb-2">
+                    <strong>Sélectionnez vos bouquets de chaines :</strong> ${data.channels.join(', ')}
+                </div>
+            `;
+        }
+        
+        if (data.vods && data.vods.length > 0) {
+            details += `
+                <div class="mb-2">
+                    <strong>Vidéos à la demande :</strong> ${data.vods.join(', ')}
+                </div>
+            `;
+        }
+        
+        // Pour Revendeur
+        if (data.firstName && data.lastName) {
+            details += `
+                <div class="mb-2">
+                    <strong>Nom :</strong> ${data.firstName} ${data.lastName}
+                </div>
+            `;
+        }
+        
+        if (data.email) {
+            details += `
+                <div class="mb-2">
+                    <strong>Email :</strong> ${data.email}
+                </div>
+            `;
+        }
+        
+        // Pour Renouvellement
+        if (data.orderNumber) {
+            details += `
+                <div class="mb-2">
+                    <strong>N° de la commande à renouveler :</strong> ${data.orderNumber}
+                </div>
+            `;
+        }
+        
+        details += `
+            <div class="mb-2">
+                <strong>Quantité :</strong> ${data.quantity} x ${data.price.toFixed(2)} €
+            </div>
+        `;
+        
+        // Mettre à jour les détails et le total
+        document.getElementById('modalProductDetails').innerHTML = details;
+        document.getElementById('modalTotal').textContent = data.total.toFixed(2) + ' €';
+        
+        // Afficher la modal
+        const modal = new bootstrap.Modal(document.getElementById('cartModal'));
+        modal.show();
+    }
+
+    function viewCart() {
+        // Fermer la modal et rediriger vers le panier
+        const modal = bootstrap.Modal.getInstance(document.getElementById('cartModal'));
+        modal.hide();
+        window.location.href = '{{ route("checkout") }}';
+    }
+
+    function goToCheckout() {
+        // Fermer la modal et rediriger vers le checkout
+        const modal = bootstrap.Modal.getInstance(document.getElementById('cartModal'));
+        modal.hide();
+        window.location.href = '{{ route("checkout") }}';
+    }
+    </script>
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  @stack('scripts')
 </body>
 @livewireScripts
 </html>

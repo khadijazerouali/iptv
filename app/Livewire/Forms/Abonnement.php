@@ -8,6 +8,7 @@ use Livewire\Component;
 use App\Models\Devicetype;
 use App\Models\Applicationtype;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Public\SubscriptionController;
 use App\Models\Product;
 
@@ -91,49 +92,49 @@ class Abonnement extends Component
 
     public function submitForm()
     {
-        // dd($this->all());
-        Session::forget('carts');
-        // Validate input
-        $this->validate([
-            'quantity' => 'required|integer|min:1|max:99',
-            'selectedDevice' => 'required|string',
-            'selectedApplication' => 'nullable|string',
-            'selectedOptionUuid' => 'nullable|string',
-            'macaddress' => 'nullable|string',
-            'magaddress' => 'nullable|string',
-            'formulermac' => 'nullable|string',
-            'deviceid' => 'nullable|string',
-            'devicekey' => 'nullable|string',
-            'otpcode' => 'nullable|string',
-            'smartstbmac' => 'nullable|string',
-        ]);
+        // Debug: Log pour voir si la méthode est appelée
+        Log::info('submitForm method called');
+        
+        // Validation simplifiée
+        if (empty($this->quantity) || $this->quantity < 1) {
+            $this->quantity = 1;
+        }
+        
+        if (empty($this->selectedDevice)) {
+            $this->selectedDevice = 'default';
+        }
 
-        // dd($this->all());
         // Prepare cart data
         $cartData = [
             'product_uuid' => $this->product->uuid,
             'quantity' => $this->quantity,
             'selectedDevice' => $this->selectedDevice,
-            'selectedApplication' => $this->selectedApplication,
+            'selectedApplication' => $this->selectedApplication ?? null,
             'price' => $this->selectedPrice ?? $this->price,
-            'selectedOptionUuid' => $this->selectedOptionUuid,
-            'macaddress' => $this->macaddress,
-            'magaddress' => $this->magaddress,
-            'formulermac' => $this->formulermac,
-            'deviceid' => $this->deviceid,
-            'devicekey' => $this->devicekey,
-            'otpcode' => $this->otpcode,
-            'smartstbmac' => $this->smartstbmac,
-            'channels' => $this->channels,
-            'vods' => $this->vods,
+            'selectedOptionUuid' => $this->selectedOptionUuid ?? null,
+            'macaddress' => $this->macaddress ?? null,
+            'magaddress' => $this->magaddress ?? null,
+            'formulermac' => $this->formulermac ?? null,
+            'deviceid' => $this->deviceid ?? null,
+            'devicekey' => $this->devicekey ?? null,
+            'otpcode' => $this->otpcode ?? null,
+            'smartstbmac' => $this->smartstbmac ?? null,
+            'channels' => $this->channels ?? [],
+            'vods' => $this->vods ?? [],
         ];
 
-        $controller = new SubscriptionController();
-        return $controller->store($cartData);
+        // Vider l'ancien panier et ajouter le nouveau produit
+        Session::forget('carts');
+        Session::put('carts', $cartData);
 
-        // dd($cartData);
+        // Flash success message
+        session()->flash('message', 'Produit ajouté au panier avec succès !');
 
+        // Debug: Log avant redirection
+        Log::info('Redirecting to checkout');
         
+        // Rediriger directement vers checkout
+        return redirect()->route('checkout');
     }
 
     public function render()

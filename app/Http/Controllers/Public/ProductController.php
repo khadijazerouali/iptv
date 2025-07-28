@@ -32,10 +32,20 @@ class ProductController extends Controller
     {
         $categories = CategoryProduct::all();
         $categoryId = $request->query('category');
-        $products = Product::when($categoryId, function ($query, $categoryId) {
-            return $query->where('category_uuid', $categoryId);
-        })->get();
+        $search = $request->query('search');
+        
+        $products = Product::query()
+            ->when($categoryId, function ($query, $categoryId) {
+                return $query->where('category_uuid', $categoryId);
+            })
+            ->when($search, function ($query, $search) {
+                return $query->where('title', 'like', '%' . $search . '%')
+                            ->orWhere('description', 'like', '%' . $search . '%');
+            })
+            ->whereIn('status', ['active', 'actif'])
+            ->orderBy('created_at', 'desc')
+            ->get();
 
-        return view('boutique.index', compact('categories', 'products', 'categoryId'));
+        return view('boutique.index', compact('categories', 'products', 'categoryId', 'search'));
     }
 }

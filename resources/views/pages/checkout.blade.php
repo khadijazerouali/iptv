@@ -15,6 +15,11 @@
             ❌ {{ session('error') }}
         </div>
     @endif
+    @if (session('message'))
+        <div class="alert alert-info">
+            🛒 {{ session('message') }}
+        </div>
+    @endif
 
     <div class="alert alert-info">
         🔹 Déjà client ? <a href="#" id="show-login-form">Cliquez ici pour vous connecter</a>

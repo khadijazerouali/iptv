@@ -44,34 +44,50 @@ class Revendeur extends Component
 
     public function submitForm()
     {
-        
-        $this->validate([
-            'quantity' => 'required|integer|min:1|max:99',
-            'first_name' => 'required|string',
-            'last_name' => 'required|string',
-            'email' => 'required|email',
-            'selectedOptionUuid' => 'required|string',
-            'selectedPrice' => 'required|integer',
-        ]);
+        try {
+            // Validation simplifiée pour test
+            if (empty($this->quantity) || $this->quantity < 1) {
+                $this->quantity = 1;
+            }
+            
+            if (empty($this->selectedOptionUuid)) {
+                session()->flash('error', 'Veuillez sélectionner une option');
+                return redirect()->back();
+            }
 
-        $cartData = [
-            'product_uuid' => $this->product->uuid,
-            'quantity' => $this->quantity,
-            'first_name' => $this->first_name,
-            'last_name' => $this->last_name,
-            'email' => $this->email,
-            'selectedOptionUuid' => $this->selectedOptionUuid,
-            'selectedPrice' => $this->selectedPrice,
-        ];
-        // Save data to session
-        Session::forget('carts');
-        Session::put('carts', $cartData);
+            $cartData = [
+                'product_uuid' => $this->product->uuid,
+                'quantity' => $this->quantity,
+                'first_name' => $this->first_name ?? '',
+                'last_name' => $this->last_name ?? '',
+                'email' => $this->email ?? '',
+                'selectedOptionUuid' => $this->selectedOptionUuid,
+                'selectedPrice' => $this->selectedPrice,
+            ];
+            
+            // Vider l'ancien panier et ajouter le nouveau produit
+            Session::forget('carts');
+            Session::put('carts', $cartData);
 
-        // Flash success message
-        session()->flash('message', 'Commande envoyée avec succès.');
+            // Flash success message
+            session()->flash('message', 'Produit ajouté au panier avec succès !');
 
-        // Redirect to checkout
-        return redirect()->route('checkout');
+            // Retourner un message de succès pour JavaScript
+            $this->dispatch('showCartModal', [
+                'productTitle' => $this->product->title,
+                'firstName' => $this->first_name ?? '',
+                'lastName' => $this->last_name ?? '',
+                'email' => $this->email ?? '',
+                'quantity' => $this->quantity,
+                'price' => $this->selectedPrice,
+                'total' => $this->selectedPrice * $this->quantity
+            ]);
+
+        } catch (\Exception $e) {
+            // En cas d'erreur, afficher un message d'erreur
+            session()->flash('error', 'Erreur: ' . $e->getMessage());
+            return redirect()->back();
+        }
     }
 
 

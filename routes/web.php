@@ -148,6 +148,7 @@ Route::middleware(['auth'])->group(function () {
         Route::put('promo-codes/{promoCode}', [App\Http\Controllers\Admin\PromoCodeController::class, 'update'])->name('promo-codes.update');
         Route::delete('promo-codes/{promoCode}', [App\Http\Controllers\Admin\PromoCodeController::class, 'destroy'])->name('promo-codes.destroy');
         Route::post('promo-codes/{promoCode}/send', [App\Http\Controllers\Admin\PromoCodeController::class, 'sendToUsers'])->name('promo-codes.send');
+        Route::post('promo-codes/{promoCode}/send-all', [App\Http\Controllers\Admin\PromoCodeController::class, 'sendToAllUsers'])->name('promo-codes.send-all');
         Route::get('promo-codes/users', [App\Http\Controllers\Admin\PromoCodeController::class, 'getUsersForPromo'])->name('promo-codes.users');
         Route::post('promo-codes/{promoCode}/toggle-status', [App\Http\Controllers\Admin\PromoCodeController::class, 'toggleStatus'])->name('promo-codes.toggle-status');
         Route::get('promo-codes/{promoCode}/duplicate', [App\Http\Controllers\Admin\PromoCodeController::class, 'duplicate'])->name('promo-codes.duplicate');

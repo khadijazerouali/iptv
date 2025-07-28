@@ -19,10 +19,13 @@ class CouponForm extends Component
         'coupon_code' => 'required|string|max:50',
     ];
 
-    public function mount()
+    public function boot()
     {
         $this->promoCodeService = app(PromoCodeService::class);
-        
+    }
+
+    public function mount()
+    {
         // Récupérer le code promo appliqué depuis la session
         $this->applied_coupon = $this->promoCodeService->getAppliedCode();
         if ($this->applied_coupon) {

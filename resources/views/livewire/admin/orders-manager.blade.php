@@ -164,7 +164,29 @@
                                             </div>
                                         </td>
                                         <td class="py-3 px-4">
-                                            <span class="fw-bold text-success fs-6">{{ number_format($order->product->price, 2) }}€</span>
+                                            @if($order->hasPromoCode())
+                                                <div class="price-breakdown">
+                                                    <div class="original-price">
+                                                        <span class="text-muted text-decoration-line-through small">
+                                                            {{ number_format($order->original_price, 2) }}€
+                                                        </span>
+                                                    </div>
+                                                    <div class="final-price">
+                                                        <span class="fw-bold text-success fs-6">
+                                                            {{ number_format($order->final_price, 2) }}€
+                                                        </span>
+                                                    </div>
+                                                    <div class="discount-info">
+                                                        <small class="text-success">
+                                                            <i class="fas fa-tag me-1"></i>
+                                                            {{ $order->promo_code }} 
+                                                            (-{{ number_format($order->discount_amount, 2) }}€)
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                            @else
+                                                <span class="fw-bold text-success fs-6">{{ number_format($order->product->price, 2) }}€</span>
+                                            @endif
                                         </td>
                                         <td class="py-3 px-4">
                                             @php

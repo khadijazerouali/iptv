@@ -166,7 +166,24 @@ class PromoCodeService
             ];
         }
 
-        $discount = $appliedCoupon['discount_amount'];
+        // Recalculer la réduction avec le nouveau sous-total
+        $promoCode = PromoCode::find($appliedCoupon['id']);
+        if (!$promoCode) {
+            return [
+                'subtotal' => $subtotal,
+                'discount' => 0,
+                'total' => $subtotal
+            ];
+        }
+
+        // Calculer la nouvelle réduction
+        $discount = $promoCode->calculateDiscount($subtotal);
+        
+        // S'assurer que la réduction ne dépasse pas le sous-total
+        if ($discount > $subtotal) {
+            $discount = $subtotal;
+        }
+
         $total = $subtotal - $discount;
 
         // S'assurer que le total ne soit pas négatif

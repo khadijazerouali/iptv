@@ -130,15 +130,72 @@
                         Standard
                     @endif
                 </td>
-                <td>{{ number_format($subscription->product->price ?? 0, 2) }}€</td>
+                <td>
+                    @if($subscription->hasPromoCode())
+                        <div style="text-align: center;">
+                            <div style="text-decoration: line-through; color: #999; font-size: 11px;">
+                                {{ number_format($subscription->product->price ?? 0, 2) }}€
+                            </div>
+                            <div style="color: #28a745; font-weight: bold;">
+                                {{ number_format($subscription->final_price / $subscription->quantity, 2) }}€
+                            </div>
+                        </div>
+                    @else
+                        {{ number_format($subscription->product->price ?? 0, 2) }}€
+                    @endif
+                </td>
                 <td>{{ $subscription->quantity }}</td>
-                <td>{{ number_format(($subscription->product->price ?? 0) * $subscription->quantity, 2) }}€</td>
+                <td>
+                    @if($subscription->hasPromoCode())
+                        <div style="text-align: center;">
+                            <div style="text-decoration: line-through; color: #999; font-size: 11px;">
+                                {{ number_format(($subscription->product->price ?? 0) * $subscription->quantity, 2) }}€
+                            </div>
+                            <div style="color: #28a745; font-weight: bold;">
+                                {{ number_format($subscription->final_price, 2) }}€
+                            </div>
+                        </div>
+                    @else
+                        {{ number_format(($subscription->product->price ?? 0) * $subscription->quantity, 2) }}€
+                    @endif
+                </td>
             </tr>
         </tbody>
         <tfoot>
+            @if($subscription->hasPromoCode())
+                <tr style="background-color: #f8f9fa;">
+                    <td colspan="4" style="text-align: right; padding: 8px;">
+                        <strong>Sous-total:</strong>
+                    </td>
+                    <td style="padding: 8px;">
+                        {{ number_format($subscription->subtotal, 2) }}€
+                    </td>
+                </tr>
+                <tr style="background-color: #d4edda;">
+                    <td colspan="4" style="text-align: right; padding: 8px;">
+                        <strong>Réduction ({{ $subscription->promo_code }}):</strong>
+                    </td>
+                    <td style="padding: 8px; color: #28a745;">
+                        -{{ number_format($subscription->discount_amount, 2) }}€
+                    </td>
+                </tr>
+            @endif
             <tr class="total-row">
                 <td colspan="4" style="text-align: right;">Total:</td>
-                <td class="total-amount">{{ number_format(($subscription->product->price ?? 0) * $subscription->quantity, 2) }}€</td>
+                <td class="total-amount">
+                    @if($subscription->hasPromoCode())
+                        <div style="text-align: center;">
+                            <div style="text-decoration: line-through; color: #999; font-size: 14px;">
+                                {{ number_format($subscription->subtotal, 2) }}€
+                            </div>
+                            <div style="color: #28a745; font-weight: bold; font-size: 18px;">
+                                {{ number_format($subscription->final_price, 2) }}€
+                            </div>
+                        </div>
+                    @else
+                        {{ number_format(($subscription->product->price ?? 0) * $subscription->quantity, 2) }}€
+                    @endif
+                </td>
             </tr>
         </tfoot>
     </table>

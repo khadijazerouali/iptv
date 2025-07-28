@@ -26,6 +26,11 @@ class Subscription extends Model
         'status',
         'quantity',
         'note',
+        'promo_code_id',
+        'promo_code',
+        'subtotal',
+        'discount_amount',
+        'total',
     ];
 
     protected $searchableFields = ['*'];
@@ -37,6 +42,9 @@ class Subscription extends Model
     protected $casts = [
         'start_date' => 'date',
         'end_date' => 'date',
+        'subtotal' => 'decimal:2',
+        'discount_amount' => 'decimal:2',
+        'total' => 'decimal:2',
     ];
 
     protected static function booted()
@@ -115,5 +123,45 @@ class Subscription extends Model
 
      public function productOption() {
         return $this->belongsTo(ProductOption::class, 'productoption_uuid', 'uuid');
+    }
+
+    public function promoCode()
+    {
+        return $this->belongsTo(PromoCode::class, 'promo_code_id');
+    }
+
+    /**
+     * Obtenir le prix original (avant réduction)
+     */
+    public function getOriginalPriceAttribute()
+    {
+        return $this->subtotal ?? ($this->product->price * $this->quantity);
+    }
+
+    /**
+     * Obtenir le prix final (après réduction)
+     */
+    public function getFinalPriceAttribute()
+    {
+        return $this->total ?? $this->getOriginalPriceAttribute();
+    }
+
+    /**
+     * Vérifier si un code promo a été appliqué
+     */
+    public function hasPromoCode()
+    {
+        return !empty($this->promo_code) && $this->discount_amount > 0;
+    }
+
+    /**
+     * Obtenir le pourcentage de réduction
+     */
+    public function getDiscountPercentageAttribute()
+    {
+        if ($this->subtotal && $this->subtotal > 0) {
+            return round(($this->discount_amount / $this->subtotal) * 100, 2);
+        }
+        return 0;
     }
 }

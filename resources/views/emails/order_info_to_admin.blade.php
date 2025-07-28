@@ -33,7 +33,23 @@
                 </tr>
                 <tr>
                     <td style="padding: 10px; border: 1px solid #ddd;">{{ $product->title ?? $product->name ?? '-' }}</td>
-                    <td style="padding: 10px; border: 1px solid #ddd;">{{ number_format($product->price ?? 0, 2) }} €</td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">
+                        @if($subscription && $subscription->hasPromoCode())
+                            <div style="text-align: center;">
+                                <div style="text-decoration: line-through; color: #999; font-size: 14px;">
+                                    {{ number_format($subscription->original_price, 2) }}€
+                                </div>
+                                <div style="color: #28a745; font-weight: bold; font-size: 16px;">
+                                    {{ number_format($subscription->final_price, 2) }}€
+                                </div>
+                                <div style="color: #28a745; font-size: 12px; margin-top: 2px;">
+                                    🏷️ Code {{ $subscription->promo_code }} (-{{ number_format($subscription->discount_amount, 2) }}€)
+                                </div>
+                            </div>
+                        @else
+                            {{ number_format($product->price ?? 0, 2) }}€
+                        @endif
+                    </td>
                 </tr>
             </table>
 
@@ -59,6 +75,24 @@
                     <td style="padding: 8px; border: 1px solid #eee;">Statut</td>
                     <td style="padding: 8px; border: 1px solid #eee;">{{ $subscription->status ?? '-' }}</td>
                 </tr>
+                @if($subscription && $subscription->hasPromoCode())
+                <tr style="background-color: #d4edda;">
+                    <td style="padding: 8px; border: 1px solid #eee;">Code promo appliqué</td>
+                    <td style="padding: 8px; border: 1px solid #eee; color: #28a745;">
+                        <strong>{{ $subscription->promo_code }}</strong>
+                        @if($subscription->promoCode)
+                            <br><small>{{ $subscription->promoCode->name }}</small>
+                        @endif
+                    </td>
+                </tr>
+                <tr style="background-color: #d4edda;">
+                    <td style="padding: 8px; border: 1px solid #eee;">Réduction accordée</td>
+                    <td style="padding: 8px; border: 1px solid #eee; color: #28a745;">
+                        <strong>-{{ number_format($subscription->discount_amount, 2) }}€</strong>
+                        <br><small>({{ $subscription->discount_percentage }}% de réduction)</small>
+                    </td>
+                </tr>
+                @endif
             </table>
 
             @if($formiptv)

@@ -164,7 +164,7 @@ class PromoCodeController extends Controller
                         'sentCount' => $sentCount,
                         'totalUsers' => count($users),
                         'errors' => $errors,
-                        'admin' => auth()->user()
+                        'admin' => auth()->guard('web')->user()
                     ]
                 );
             }
@@ -181,6 +181,77 @@ class PromoCodeController extends Controller
             'success' => true,
             'message' => $message,
             'sent_count' => $sentCount,
+            'errors' => $errors
+        ]);
+    }
+
+    public function sendToAllUsers(Request $request, PromoCode $promoCode)
+    {
+        // Récupérer tous les utilisateurs actifs (excluant l'admin)
+        $users = User::where('email', '!=', 'admin@admin.com')
+                    ->where('email', '!=', '')
+                    ->whereNotNull('email')
+                    ->get();
+
+        if ($users->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Aucun utilisateur actif trouvé pour l\'envoi d\'emails.'
+            ]);
+        }
+
+        $sentCount = 0;
+        $errors = [];
+
+        foreach ($users as $user) {
+            try {
+                EmailService::sendNotificationEmail(
+                    $user,
+                    '🎫 Code promo spécial IPTV - ' . $promoCode->name,
+                    'emails.promo-code',
+                    ['promoCode' => $promoCode]
+                );
+                $sentCount++;
+            } catch (\Exception $e) {
+                $errors[] = "Erreur pour {$user->email}: " . $e->getMessage();
+                Log::error('Erreur envoi email promo code à ' . $user->email . ': ' . $e->getMessage());
+            }
+        }
+
+        // Mettre à jour les statistiques du code promo
+        $promoCode->incrementEmailSent();
+
+        // Envoyer une notification à l'admin
+        try {
+            $adminUser = User::where('email', 'admin@admin.com')->first();
+            if ($adminUser) {
+                EmailService::sendNotificationEmail(
+                    $adminUser,
+                    '📧 Rapport d\'envoi de code promo - ' . $promoCode->name,
+                    'emails.admin-promo-report',
+                    [
+                        'promoCode' => $promoCode,
+                        'sentCount' => $sentCount,
+                        'totalUsers' => count($users),
+                        'errors' => $errors,
+                        'admin' => auth()->guard('web')->user()
+                    ]
+                );
+            }
+        } catch (\Exception $e) {
+            Log::error('Erreur envoi rapport admin: ' . $e->getMessage());
+        }
+
+        $message = "Code promo envoyé à {$sentCount} utilisateur(s) sur " . count($users) . " avec succès !";
+        if (!empty($errors)) {
+            $message .= " Erreurs: " . count($errors) . " email(s) non envoyé(s).";
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => $message,
+            'sent_count' => $sentCount,
+            'total_users' => count($users),
             'errors' => $errors
         ]);
     }

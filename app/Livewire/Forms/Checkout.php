@@ -11,6 +11,7 @@ use App\Models\Devicetype;
 use App\Models\Subscription;
 use App\Models\ProductOption;
 use App\Models\Applicationtype;
+use App\Services\PromoCodeService;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Auth;
@@ -24,6 +25,8 @@ class Checkout extends Component
     public $selectedOptionUuid;
     public $selectedOptionName;
     public $total;
+    public $subtotal;
+    public $discount = 0;
     public $selectedPrice = 0;
     public $countries = [];
     public $productType;
@@ -42,6 +45,15 @@ class Checkout extends Component
     public $channels = [];
     public $vods = [];
     public $subscription_uuid;
+    public $applied_coupon = null;
+    protected $promoCodeService;
+
+    protected $listeners = ['coupon-applied', 'coupon-removed'];
+
+    public function boot()
+    {
+        $this->promoCodeService = app(PromoCodeService::class);
+    }
 
     public function mount()
     {
@@ -51,7 +63,15 @@ class Checkout extends Component
         $option = ProductOption::whereUuid($this->cart['selectedOptionUuid'])->first();
         $this->selectedOptionName = $option ? $option->name : '-';
         $this->selectedPrice = $option ? $option->price : $this->product->price;
-        $this->total = $this->product->price * $this->quantity;
+        $this->subtotal = $this->selectedPrice * $this->quantity;
+        
+        // Récupérer le code promo appliqué
+        $this->applied_coupon = $this->promoCodeService->getAppliedCode();
+        if ($this->applied_coupon) {
+            $this->discount = $this->applied_coupon['discount_amount'];
+        }
+        
+        $this->updateTotal();
         $this->productType = $this->product->type;
 
         // Pré-remplir l'email de l'utilisateur connecté
@@ -99,7 +119,34 @@ class Checkout extends Component
 
     public function updateTotal()
     {
-        $this->total = $this->selectedPrice * $this->quantity;
+        $this->subtotal = $this->selectedPrice * $this->quantity;
+        
+        // Recalculer la réduction si un code promo est appliqué
+        if ($this->applied_coupon) {
+            $result = $this->promoCodeService->calculateTotalWithDiscount($this->subtotal);
+            $this->discount = $result['discount'];
+        }
+        
+        $this->total = $this->subtotal - $this->discount;
+        
+        // S'assurer que le total ne soit pas négatif
+        if ($this->total < 0) {
+            $this->total = 0;
+        }
+    }
+
+    public function couponApplied($couponData)
+    {
+        $this->applied_coupon = $couponData;
+        $this->discount = $couponData['discount_amount'];
+        $this->updateTotal();
+    }
+
+    public function couponRemoved()
+    {
+        $this->applied_coupon = null;
+        $this->discount = 0;
+        $this->updateTotal();
     }
 
     public function submit()
@@ -173,6 +220,31 @@ class Checkout extends Component
         $formData['quantity'] = $this->cart['quantity'];
         $formData['note'] = $formData['commentaire'];
         $formData['product_uuid'] = $this->product_uuid;
+        
+        // Gestion du code promo
+        if ($this->applied_coupon) {
+            $formData['promo_code_id'] = $this->applied_coupon['id'];
+            $formData['promo_code'] = $this->applied_coupon['code'];
+            $formData['discount_amount'] = $this->discount;
+            $formData['subtotal'] = $this->subtotal;
+            $formData['total'] = $this->total;
+            
+            // Incrémenter le compteur d'utilisation du code promo
+            $this->promoCodeService->incrementUsage($this->applied_coupon['id']);
+            
+            // Nettoyer le code promo de la session après utilisation
+            $this->promoCodeService->removeCode();
+            
+            Session::flash('success', 'Commande créée avec succès ! Code promo ' . $this->applied_coupon['code'] . ' appliqué (-' . number_format($this->discount, 2) . '€).');
+        } else {
+            $formData['promo_code_id'] = null;
+            $formData['promo_code'] = null;
+            $formData['discount_amount'] = 0;
+            $formData['subtotal'] = $this->subtotal;
+            $formData['total'] = $this->total;
+            
+            Session::flash('success', 'Commande créée avec succès !');
+        }
         
         // dd($this->cart);
         $subscription = Subscription::create($formData);

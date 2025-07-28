@@ -3,6 +3,31 @@
 @section('title', 'Gestion des commandes')
 
 @section('content')
+<style>
+.price-breakdown {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.price-breakdown .original-price {
+    font-size: 0.85rem;
+}
+
+.price-breakdown .final-price {
+    font-size: 1rem;
+}
+
+.price-breakdown .discount-info {
+    font-size: 0.75rem;
+    margin-top: 2px;
+}
+
+.price-breakdown .discount-info i {
+    font-size: 0.7rem;
+}
+</style>
+
 <div class="page-header fade-in">
     <div class="d-flex justify-content-between align-items-center">
         <div>
@@ -135,10 +160,33 @@
                     <td>
                         <div class="fw-semibold text-dark">{{ strip_tags($order->product->title ?? 'N/A') }}</div>
                     </td>
-                    <td>
-                        <div class="fw-bold text-success">€{{ number_format($order->total_paid ?? 0, 2) }}</div>
-                        <small class="text-muted">{{ $order->payments->first()->payment_method ?? 'N/A' }}</small>
-                    </td>
+                    <td class="py-3 px-4">
+                                            @if($order->hasPromoCode())
+                                                <div class="price-breakdown">
+                                                    <div class="original-price">
+                                                        <span class="text-muted text-decoration-line-through small">
+                                                            €{{ number_format($order->original_price, 2) }}
+                                                        </span>
+                                                    </div>
+                                                    <div class="final-price">
+                                                        <span class="fw-bold text-success">
+                                                            €{{ number_format($order->final_price, 2) }}
+                                                        </span>
+                                                    </div>
+                                                    <div class="discount-info">
+                                                        <small class="text-success">
+                                                            <i class="fas fa-tag me-1"></i>
+                                                            {{ $order->promo_code }} 
+                                                            (-€{{ number_format($order->discount_amount, 2) }})
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                            @else
+                                                <span class="fw-bold text-success fs-6">
+                                                    €{{ number_format($order->product->price, 2) }}
+                                                </span>
+                                            @endif
+                                        </td>
                     <td>
                         @php
                             $statusConfig = [

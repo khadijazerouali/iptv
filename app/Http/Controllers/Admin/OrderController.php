@@ -26,7 +26,7 @@ class OrderController extends Controller
         ];
 
         // Commandes avec relations
-        $orders = Subscription::with(['user', 'product', 'payments', 'formiptvs'])
+        $orders = Subscription::with(['user', 'product', 'payments', 'formiptvs', 'promoCode'])
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -49,7 +49,7 @@ class OrderController extends Controller
 
     public function show($uuid)
     {
-        $order = Subscription::with(['user', 'product', 'payments', 'formiptvs'])
+        $order = Subscription::with(['user', 'product', 'payments', 'formiptvs', 'promoCode'])
             ->where('uuid', $uuid)
             ->firstOrFail();
 

@@ -18,36 +18,36 @@
                 
                 <!-- Statistiques -->
                 <div class="card-body">
-                    <div class="row mb-4">
+                    <div class="row">
                         <div class="col-md-3">
-                            <div class="info-box bg-primary">
-                                <div class="info-box-content p-3">
-                                    <div class="info-box-text">Total codes</div>
-                                    <div class="info-box-number">{{ $stats['total'] }}</div>
+                            <div class="card bg-primary text-white">
+                                <div class="card-body">
+                                    <h5 class="card-title">Total codes</h5>
+                                    <h2>{{ $stats['total'] }}</h2>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-3">
-                            <div class="info-box bg-success">
-                                <div class="info-box-content p-3">
-                                    <div class="info-box-text">Codes actifs</div>
-                                    <div class="info-box-number">{{ $stats['active'] }}</div>
+                            <div class="card bg-success text-white">
+                                <div class="card-body">
+                                    <h5 class="card-title">Codes actifs</h5>
+                                    <h2>{{ $stats['active'] }}</h2>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-3">
-                            <div class="info-box bg-warning">
-                                <div class="info-box-content p-3">
-                                    <div class="info-box-text">Utilisations</div>
-                                    <div class="info-box-number">{{ $stats['total_usage'] }}</div>
+                            <div class="card bg-warning text-white">
+                                <div class="card-body">
+                                    <h5 class="card-title">Codes expirés</h5>
+                                    <h2>{{ $stats['expired'] }}</h2>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-3">
-                            <div class="info-box bg-info">
-                                <div class="info-box-content p-3">
-                                    <div class="info-box-text">Emails envoyés</div>
-                                    <div class="info-box-number">{{ $stats['total_emails_sent'] }}</div>
+                            <div class="card bg-info text-white">
+                                <div class="card-body">
+                                    <h5 class="card-title">Emails envoyés</h5>
+                                    <h2>{{ $stats['total_emails_sent'] }}</h2>
                                 </div>
                             </div>
                         </div>
@@ -197,9 +197,13 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-warning" onclick="sendToAllUsers()">
+                        <i class="fas fa-broadcast-tower me-2"></i>
+                        Envoyer à tous les utilisateurs
+                    </button>
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-paper-plane me-2"></i>
-                        Envoyer les emails
+                        Envoyer aux sélectionnés
                     </button>
                 </div>
             </form>
@@ -290,6 +294,37 @@ document.getElementById('sendPromoForm').addEventListener('submit', function(e) 
         alert('Erreur lors de l\'envoi des emails.');
     });
 });
+
+function sendToAllUsers() {
+    if (!confirm('Êtes-vous sûr de vouloir envoyer ce code promo à TOUS les utilisateurs actifs ?')) {
+        return;
+    }
+    
+    fetch(`/admin/promo-codes/${currentPromoId}/send-all`, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            let message = data.message;
+            if (data.errors && data.errors.length > 0) {
+                message += '\n\nErreurs détaillées:\n' + data.errors.join('\n');
+            }
+            alert(message);
+            bootstrap.Modal.getInstance(document.getElementById('sendPromoModal')).hide();
+            location.reload();
+        } else {
+            alert(data.message || 'Erreur lors de l\'envoi des emails.');
+        }
+    })
+    .catch(error => {
+        console.error('Erreur:', error);
+        alert('Erreur lors de l\'envoi des emails.');
+    });
+}
 
 function toggleStatus(promoId) {
     if (confirm('Voulez-vous changer le statut de ce code promo ?')) {

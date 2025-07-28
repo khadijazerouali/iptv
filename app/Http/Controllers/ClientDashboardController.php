@@ -80,13 +80,13 @@ class ClientDashboardController extends Controller
     {
         // Abonnements actifs avec détails
         $activeSubscriptions = $user->subscriptions()
-            ->with(['product', 'product.category', 'payments'])
+            ->with(['product', 'product.category', 'payments', 'promoCode'])
             ->where('status', 'active')
             ->get();
 
         // Prochaines échéances (utiliser end_date au lieu de next_billing_date)
         $upcomingExpirations = $user->subscriptions()
-            ->with('product')
+            ->with(['product', 'promoCode'])
             ->where('status', 'active')
             ->where('end_date', '>=', now())
             ->where('end_date', '<=', now()->addDays(30))
@@ -157,7 +157,7 @@ class ClientDashboardController extends Controller
     private function getOrdersData($user)
     {
         $subscriptions = $user->subscriptions()
-            ->with(['product', 'product.category', 'payments'])
+            ->with(['product', 'product.category', 'payments', 'promoCode'])
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 

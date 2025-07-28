@@ -1,8 +1,33 @@
 @extends('layouts.admin')
 
-@section('title', 'Dashboard Admin')
+@section('title', 'Tableau de bord')
 
 @section('content')
+<style>
+.price-breakdown {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.price-breakdown .original-price {
+    font-size: 0.85rem;
+}
+
+.price-breakdown .final-price {
+    font-size: 1rem;
+}
+
+.price-breakdown .discount-info {
+    font-size: 0.75rem;
+    margin-top: 2px;
+}
+
+.price-breakdown .discount-info i {
+    font-size: 0.7rem;
+}
+</style>
+
 <div class="page-header fade-in">
     <div class="d-flex justify-content-between align-items-center">
         <div>
@@ -148,8 +173,27 @@
                             <small class="text-muted">{{ $order->number_order }}</small>
                         </td>
                         <td>
-                            <div class="fw-bold text-success">
-                                €{{ number_format($order->product->price ?? 0, 2) }}
+                            <div class="fw-bold text-success fs-6">
+                                @if($order->hasPromoCode())
+                                    <div class="price-breakdown">
+                                        <div class="original-price">
+                                            <span class="text-muted text-decoration-line-through small">
+                                                €{{ number_format($order->original_price, 2) }}
+                                            </span>
+                                        </div>
+                                        <div class="final-price">
+                                            €{{ number_format($order->final_price, 2) }}
+                                        </div>
+                                        <div class="discount-info">
+                                            <small class="text-success">
+                                                <i class="fas fa-tag me-1"></i>
+                                                {{ $order->promo_code }}
+                                            </small>
+                                        </div>
+                                    </div>
+                                @else
+                                    €{{ number_format($order->product->price ?? 0, 2) }}
+                                @endif
                             </div>
                         </td>
                         <td>

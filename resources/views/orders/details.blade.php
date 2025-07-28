@@ -383,25 +383,64 @@
                 </div>
                 @endif
                 
+                <!-- Sous-total -->
+                @if($subscription->subtotal)
+                <div class="price-item subtotal">
+                    <div class="price-label">Sous-total</div>
+                    <div class="price-value">{{ number_format($subscription->subtotal, 2) }}€</div>
+                </div>
+                @endif
+                
+                <!-- Code promo appliqué -->
+                @if($subscription->hasPromoCode())
+                <div class="price-item discount">
+                    <div class="price-label">
+                        <i class="fas fa-tag text-success me-1"></i>
+                        Code promo: {{ $subscription->promo_code }}
+                        @if($subscription->promoCode)
+                            <br><small class="text-muted">{{ $subscription->promoCode->name }}</small>
+                        @endif
+                    </div>
+                    <div class="price-value text-success">-{{ number_format($subscription->discount_amount, 2) }}€</div>
+                </div>
+                @endif
+                
                 <!-- Total calculé -->
                 @php
-                    $basePrice = $subscription->product->price ?? 0;
-                    $optionPrice = 0;
-                    if($subscription->formiptvs && $subscription->formiptvs->count() > 0) {
-                        foreach($subscription->formiptvs as $formiptv) {
-                            if($formiptv->price && $formiptv->price != $basePrice) {
-                                $optionPrice = $formiptv->price;
-                                break;
+                    // Utiliser les données stockées en base si disponibles
+                    if ($subscription->subtotal) {
+                        $originalPrice = $subscription->subtotal;
+                    } else {
+                        // Calculer le prix original si pas stocké en base
+                        $basePrice = $subscription->product->price ?? 0;
+                        $optionPrice = 0;
+                        if($subscription->formiptvs && $subscription->formiptvs->count() > 0) {
+                            foreach($subscription->formiptvs as $formiptv) {
+                                if($formiptv->price && $formiptv->price != $basePrice) {
+                                    $optionPrice = $formiptv->price;
+                                    break;
+                                }
                             }
                         }
+                        $finalPrice = $optionPrice > 0 ? $optionPrice : $basePrice;
+                        $originalPrice = $finalPrice * $subscription->quantity;
                     }
-                    $finalPrice = $optionPrice > 0 ? $optionPrice : $basePrice;
-                    $totalPrice = $finalPrice * $subscription->quantity;
                 @endphp
                 
                 <div class="price-item total">
-                    <div class="price-label">Total</div>
-                    <div class="price-value">{{ number_format($totalPrice, 2) }}€</div>
+                    <div class="price-label">Total final</div>
+                    <div class="price-value">
+                        @if($subscription->hasPromoCode())
+                            <span class="text-decoration-line-through text-muted me-2">
+                                {{ number_format($originalPrice, 2) }}€
+                            </span>
+                            <span class="text-success fw-bold">
+                                {{ number_format($subscription->final_price, 2) }}€
+                            </span>
+                        @else
+                            {{ number_format($originalPrice, 2) }}€
+                        @endif
+                    </div>
                 </div>
             </div>
         </div>
@@ -926,6 +965,22 @@ document.head.appendChild(style);
 
 .price-item.total {
     border-top: 2px solid #667eea;
+    border-bottom: none;
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #2d3748;
+}
+
+.price-item.subtotal {
+    border-top: 2px solid #4a5568;
+    border-bottom: none;
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #2d3748;
+}
+
+.price-item.discount {
+    border-top: 2px solid #059669;
     border-bottom: none;
     font-weight: bold;
     font-size: 1.1rem;

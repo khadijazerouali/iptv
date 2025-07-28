@@ -3,6 +3,31 @@
 @section('title', 'Tableau de bord')
 
 @section('content')
+<style>
+.price-breakdown {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.price-breakdown .original-price {
+    font-size: 0.85rem;
+}
+
+.price-breakdown .final-price {
+    font-size: 1rem;
+}
+
+.price-breakdown .discount-info {
+    font-size: 0.75rem;
+    margin-top: 2px;
+}
+
+.price-breakdown .discount-info i {
+    font-size: 0.7rem;
+}
+</style>
+
 <!-- Overview Section -->
 @if($section == 'overview')
     <!-- Stats Cards -->
@@ -328,7 +353,29 @@
                                 @endswitch
                             </td>
                             <td>
-                                <strong>{{ number_format($subscription->product->price ?? 0, 2) }} €</strong>
+                                @if($subscription->hasPromoCode())
+                                    <div class="price-breakdown">
+                                        <div class="original-price">
+                                            <span class="text-muted text-decoration-line-through">
+                                                {{ number_format($subscription->original_price, 2) }}€
+                                            </span>
+                                        </div>
+                                        <div class="final-price">
+                                            <strong class="text-success">
+                                                {{ number_format($subscription->final_price, 2) }}€
+                                            </strong>
+                                        </div>
+                                        <div class="discount-info">
+                                            <small class="text-success">
+                                                <i class="fas fa-tag me-1"></i>
+                                                Code {{ $subscription->promo_code }} 
+                                                (-{{ number_format($subscription->discount_amount, 2) }}€)
+                                            </small>
+                                        </div>
+                                    </div>
+                                @else
+                                    <strong>{{ number_format($subscription->product->price ?? 0, 2) }}€</strong>
+                                @endif
                             </td>
                             <td>
                                 <div class="text-muted">

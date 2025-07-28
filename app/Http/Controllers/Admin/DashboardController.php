@@ -43,7 +43,7 @@ class DashboardController extends Controller
             ->get();
 
         // Dernières commandes
-        $recentOrders = Subscription::with(['user', 'product'])
+        $recentOrders = Subscription::with(['user', 'product', 'promoCode'])
             ->orderBy('created_at', 'desc')
             ->limit(5)
             ->get();

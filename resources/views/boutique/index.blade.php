@@ -8,65 +8,77 @@
 
 @section('content')
 <div class="boutique-page">
-    <!-- Sidebar moderne -->
-    <aside class="boutique-sidebar">
-                <h2 class="sidebar-title">
-                    <i class="fas fa-shopping-bag"></i>
-                    Boutique
-                </h2>
-                
-                <!-- Section utilisateur -->
-                <div class="user-info">
-                    <div class="user-avatar">
-                        <i class="fas fa-user"></i>
-                    </div>
-                    <div class="user-details">
-                        <h6>Bienvenue</h6>
-                        <small>Découvrez nos produits</small>
-                    </div>
-                </div>
-                
-                <!-- Barre de recherche -->
-                <div class="search-container">
-                    <form method="GET" action="{{ route('boutique.index') }}">
-                        <input type="text" 
-                               name="search" 
-                               class="search-input" 
-                               placeholder="Rechercher un produit..." 
-                               value="{{ request('search') }}"
-                               autocomplete="off">
-                        <button type="submit" class="search-button">
-                            <i class="fas fa-search"></i>
-                        </button>
-                    </form>
-                </div>
+    <!-- Sélecteur de catégories mobile -->
+    <div class="mobile-category-selector">
+        <select class="category-select" onchange="changeCategory(this.value)">
+            <option value="">Tous les produits</option>
+            @foreach($categories as $category)
+                <option value="{{ $category->uuid }}" {{ request('category') == $category->uuid ? 'selected' : '' }}>
+                    {{ $category->name }}
+                </option>
+            @endforeach
+        </select>
+    </div>
 
-                <!-- Navigation des catégories -->
-                <ul class="category-nav">
-                    <li class="category-item">
-                        <a class="category-link{{ !request('category') ? ' active' : '' }}" 
-                           href="{{ route('boutique.index', array_filter(['search' => request('search')])) }}">
-                            <i class="fas fa-th-large me-2"></i>
-                            Tous les produits
-                        </a>
-                    </li>
-                    @foreach($categories as $category)
-                        <li class="category-item">
-                            <a class="category-link{{ request('category') == $category->uuid ? ' active' : '' }}" 
-                               href="{{ route('boutique.index', array_filter(['category' => $category->uuid, 'search' => request('search')])) }}">
-                                <i class="fas fa-tag me-2"></i>
-                                {{ $category->name }}
-                            </a>
-                        </li>
-                    @endforeach
-                </ul>
-            </aside>
+    <!-- Sidebar moderne (desktop seulement) -->
+    <aside class="boutique-sidebar">
+        <h2 class="sidebar-title">
+            <i class="fas fa-shopping-bag"></i>
+            Boutique
+        </h2>
+        
+        <!-- Section utilisateur -->
+        <div class="user-info">
+            <div class="user-avatar">
+                <i class="fas fa-user"></i>
+            </div>
+            <div class="user-details">
+                <h6>Bienvenue</h6>
+                <small>Découvrez nos produits</small>
+            </div>
+        </div>
+        
+        <!-- Barre de recherche -->
+        <div class="search-container">
+            <form method="GET" action="{{ route('boutique.index') }}">
+                <input type="text" 
+                       name="search" 
+                       class="search-input" 
+                       placeholder="Rechercher un produit..." 
+                       value="{{ request('search') }}"
+                       autocomplete="off">
+                <button type="submit" class="search-button">
+                    <i class="fas fa-search"></i>
+                </button>
+            </form>
+        </div>
+
+        <!-- Navigation des catégories -->
+        <ul class="category-nav">
+            <li class="category-item">
+                <a class="category-link{{ !request('category') ? ' active' : '' }}" 
+                   href="{{ route('boutique.index', array_filter(['search' => request('search')])) }}">
+                    <i class="fas fa-th-large me-2"></i>
+                    Tous les produits
+                </a>
+            </li>
+            @foreach($categories as $category)
+                <li class="category-item">
+                    <a class="category-link{{ request('category') == $category->uuid ? ' active' : '' }}" 
+                       href="{{ route('boutique.index', array_filter(['category' => $category->uuid, 'search' => request('search')])) }}">
+                        <i class="fas fa-tag me-2"></i>
+                        {{ $category->name }}
+                    </a>
+                </li>
+            @endforeach
+        </ul>
+    </aside>
     
     <!-- Container principal -->
     <div class="boutique-container">
         <!-- Section des produits -->
         <main class="products-section">
-                <h1 class="section-title">Nos Produits</h1>
+            <h1 class="section-title">Nos Produits</h1>
                 
                 @if($products->count() > 0)
                     <div class="products-grid">
@@ -83,12 +95,7 @@
                                             <i class="fas fa-image fa-3x text-muted"></i>
                                         </div>
                                     @endif
-                                    <div class="product-overlay">
-                                        <button class="view-button-overlay">
-                                            <i class="fas fa-eye me-2"></i>
-                                            Voir détails
-                                        </button>
-                                    </div>
+
                                 </div>
                                 
                                 <div class="product-content">
@@ -108,7 +115,7 @@
                                     <a href="{{ route('product', $product->slug) }}" 
                                        class="product-button">
                                         <i class="fas fa-eye me-2"></i>
-                                        Voir détails
+                                        Voir 
                                     </a>
                                 </div>
                             </div>
@@ -144,6 +151,26 @@
 
 @push('scripts')
 <script>
+// Fonction pour changer de catégorie sur mobile
+function changeCategory(categoryUuid) {
+    const currentUrl = new URL(window.location);
+    const searchParams = currentUrl.searchParams;
+    
+    if (categoryUuid) {
+        searchParams.set('category', categoryUuid);
+    } else {
+        searchParams.delete('category');
+    }
+    
+    // Conserver la recherche actuelle
+    const currentSearch = searchParams.get('search');
+    if (currentSearch) {
+        searchParams.set('search', currentSearch);
+    }
+    
+    window.location.href = currentUrl.toString();
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     // Animation des cartes au scroll
     const observerOptions = {
@@ -185,6 +212,32 @@ document.addEventListener('DOMContentLoaded', function() {
         
         searchInput.addEventListener('blur', function() {
             this.parentElement.style.transform = 'scale(1)';
+        });
+    }
+    
+
+    
+    // Optimisations pour mobile
+    if (window.innerWidth <= 767) {
+        // Précharger les images pour améliorer les performances
+        const images = document.querySelectorAll('.product-image');
+        images.forEach(img => {
+            if (img.dataset.src) {
+                img.src = img.dataset.src;
+            }
+        });
+        
+        // Améliorer la performance du scroll
+        let ticking = false;
+        function updateScroll() {
+            ticking = false;
+        }
+        
+        window.addEventListener('scroll', function() {
+            if (!ticking) {
+                requestAnimationFrame(updateScroll);
+                ticking = true;
+            }
         });
     }
 });

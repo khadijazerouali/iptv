@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boutique Flexible - Test</title>
+    <link rel="stylesheet" href="boutique.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .test-info {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: #007acc;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-size: 14px;
+            z-index: 1000;
+        }
+        
+        .sidebar-info {
+            position: fixed;
+            top: 50px;
+            right: 10px;
+            background: #28a745;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-size: 12px;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-info">
+        Largeur: <span id="width">0</span>px
+    </div>
+    
+    <div class="sidebar-info">
+        Sidebar: <span id="sidebarStatus">Visible</span>
+    </div>
+    
+    <div class="boutique-page">
+        <!-- Sidebar -->
+        <aside class="boutique-sidebar">
+            <h2 class="sidebar-title">
+                <i class="fas fa-shopping-bag"></i>
+                Boutique
+            </h2>
+            
+            <!-- Section utilisateur -->
+            <div class="user-info">
+                <div class="user-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="user-details">
+                    <h6>Bienvenue</h6>
+                    <small>Découvrez nos produits</small>
+                </div>
+            </div>
+            
+            <!-- Barre de recherche -->
+            <div class="search-container">
+                <form>
+                    <input type="text" class="search-input" placeholder="Rechercher un produit...">
+                    <button type="submit" class="search-button">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Navigation des catégories -->
+            <ul class="category-nav">
+                <li class="category-item">
+                    <a class="category-link active" href="#">
+                        <i class="fas fa-th-large"></i>
+                        Tous les produits
+                    </a>
+                </li>
+                <li class="category-item">
+                    <a class="category-link" href="#">
+                        <i class="fas fa-tag"></i>
+                        IPTV Premium
+                    </a>
+                </li>
+                <li class="category-item">
+                    <a class="category-link" href="#">
+                        <i class="fas fa-mobile-alt"></i>
+                        Mobile Plus
+                    </a>
+                </li>
+                <li class="category-item">
+                    <a class="category-link" href="#">
+                        <i class="fas fa-home"></i>
+                        Famille
+                    </a>
+                </li>
+            </ul>
+        </aside>
+        
+        <!-- Container principal -->
+        <div class="boutique-container">
+            <!-- Section des produits -->
+            <main class="products-section">
+                <h1 class="section-title">Nos Produits</h1>
+                
+                <div class="products-grid">
+                    <div class="product-card">
+                        <div class="product-image-container">
+                            <div style="width: 100%; height: 100%; background: linear-gradient(45deg, #007acc, #00d4ff); display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem;">
+                                📺
+                            </div>
+                        </div>
+                        <div class="product-content">
+                            <h3 class="product-title">Premium IPTV</h3>
+                            <p class="product-description">Accès à plus de 10 000 chaînes HD et VOD. Compatible avec Smart TV, Android, iOS.</p>
+                            <div class="product-price">€29.99/mois</div>
+                            <a href="#" class="product-button">
+                                <i class="fas fa-eye"></i>
+                                Voir détails
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="product-card">
+                        <div class="product-image-container">
+                            <div style="width: 100%; height: 100%; background: linear-gradient(45deg, #28a745, #20c997); display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem;">
+                                📱
+                            </div>
+                        </div>
+                        <div class="product-content">
+                            <h3 class="product-title">Mobile Plus</h3>
+                            <p class="product-description">Service optimisé pour mobile avec streaming adaptatif. Parfait pour les déplacements.</p>
+                            <div class="product-price">€19.99/mois</div>
+                            <a href="#" class="product-button">
+                                <i class="fas fa-eye"></i>
+                                Voir détails
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="product-card">
+                        <div class="product-image-container">
+                            <div style="width: 100%; height: 100%; background: linear-gradient(45deg, #ffc107, #fd7e14); display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem;">
+                                🏠
+                            </div>
+                        </div>
+                        <div class="product-content">
+                            <h3 class="product-title">Famille Premium</h3>
+                            <p class="product-description">Jusqu'à 5 connexions simultanées. Idéal pour toute la famille avec contenu pour tous les âges.</p>
+                            <div class="product-price">€39.99/mois</div>
+                            <a href="#" class="product-button">
+                                <i class="fas fa-eye"></i>
+                                Voir détails
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <script>
+        function updateScreenInfo() {
+            const width = window.innerWidth;
+            const widthSpan = document.getElementById('width');
+            const testInfo = document.querySelector('.test-info');
+            const sidebarStatus = document.getElementById('sidebarStatus');
+            const sidebar = document.querySelector('.boutique-sidebar');
+            
+            let breakpoint = '';
+            let sidebarInfo = '';
+            
+            if (width >= 1200) {
+                breakpoint = ' (3 colonnes)';
+                testInfo.style.background = '#28a745';
+                sidebarInfo = '280px (Desktop)';
+            } else if (width >= 1024) {
+                breakpoint = ' (3 colonnes)';
+                testInfo.style.background = '#28a745';
+                sidebarInfo = '280px (Desktop)';
+            } else if (width >= 768) {
+                breakpoint = ' (2 colonnes)';
+                testInfo.style.background = '#ffc107';
+                testInfo.style.color = '#000';
+                sidebarInfo = '250px (Tablette)';
+            } else {
+                breakpoint = ' (1 colonne)';
+                testInfo.style.background = '#dc3545';
+                testInfo.style.color = '#fff';
+                sidebarInfo = '320px (Mobile)';
+            }
+            
+            widthSpan.textContent = width + breakpoint;
+            sidebarStatus.textContent = sidebarInfo;
+        }
+        
+        window.addEventListener('resize', updateScreenInfo);
+        updateScreenInfo();
+    </script>
+</body>
+</html> 

@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test - Sélecteur Supprimé sur Mobile</title>
+    <link rel="stylesheet" href="boutique.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .test-info {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: #007acc;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-size: 14px;
+            z-index: 1000;
+        }
+        
+        .selector-info {
+            position: fixed;
+            top: 50px;
+            right: 10px;
+            background: #28a745;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-size: 12px;
+            z-index: 1000;
+        }
+        
+        .mode-info {
+            position: fixed;
+            top: 90px;
+            right: 10px;
+            background: #ffc107;
+            color: #000;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-size: 12px;
+            z-index: 1000;
+        }
+        
+        /* Simulation de la navigation */
+        .nav-simulation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: #000;
+            color: white;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            z-index: 999;
+        }
+        
+        .nav-simulation h1 {
+            margin: 0;
+            font-size: 18px;
+        }
+        
+        .test-buttons {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 1000;
+        }
+        
+        .test-btn {
+            background: #007acc;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .test-btn:hover {
+            background: #0056b3;
+        }
+        
+        .mobile-indicator {
+            position: fixed;
+            top: 130px;
+            right: 10px;
+            background: #dc3545;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-size: 12px;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <!-- Simulation de la navigation -->
+    <div class="nav-simulation">
+        <h1>Navigation Bar (60px height)</h1>
+    </div>
+    
+    <div class="test-info">
+        Largeur: <span id="width">0</span>px
+    </div>
+    
+    <div class="selector-info">
+        Sélecteur: <span id="selector">Caché</span>
+    </div>
+    
+    <div class="mode-info">
+        Mode: <span id="mode">Desktop</span>
+    </div>
+    
+    <div class="mobile-indicator">
+        Mobile: <span id="mobile">Non</span>
+    </div>
+    
+    <div class="test-buttons">
+        <button class="test-btn" onclick="resizeToMobile()">Mobile (375px)</button>
+        <button class="test-btn" onclick="resizeToTablet()">Tablet (768px)</button>
+        <button class="test-btn" onclick="resizeToDesktop()">Desktop (1200px)</button>
+    </div>
+    
+    <div class="boutique-page">
+        <!-- Sélecteur de catégories mobile -->
+        <div class="mobile-category-selector">
+            <select class="category-select" onchange="changeCategory(this.value)">
+                <option value="">Tous les produits</option>
+                <option value="premium">IPTV Premium</option>
+                <option value="mobile">Mobile Plus</option>
+                <option value="family">Famille</option>
+                <option value="sport">Sport & Gaming</option>
+            </select>
+        </div>
+
+        <!-- Sidebar moderne -->
+        <aside class="boutique-sidebar">
+            <h2 class="sidebar-title">
+                <i class="fas fa-shopping-bag"></i>
+                Boutique
+            </h2>
+            
+            <!-- Section utilisateur -->
+            <div class="user-info">
+                <div class="user-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="user-details">
+                    <h6>Bienvenue</h6>
+                    <small>Découvrez nos produits</small>
+                </div>
+            </div>
+            
+            <!-- Barre de recherche -->
+            <div class="search-container">
+                <form>
+                    <input type="text" class="search-input" placeholder="Rechercher un produit...">
+                    <button type="submit" class="search-button">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Navigation des catégories -->
+            <ul class="category-nav">
+                <li class="category-item">
+                    <a class="category-link active" href="#">
+                        <i class="fas fa-th-large"></i>
+                        Tous les produits
+                    </a>
+                </li>
+                <li class="category-item">
+                    <a class="category-link" href="#">
+                        <i class="fas fa-tag"></i>
+                        IPTV Premium
+                    </a>
+                </li>
+                <li class="category-item">
+                    <a class="category-link" href="#">
+                        <i class="fas fa-mobile-alt"></i>
+                        Mobile Plus
+                    </a>
+                </li>
+                <li class="category-item">
+                    <a class="category-link" href="#">
+                        <i class="fas fa-home"></i>
+                        Famille
+                    </a>
+                </li>
+                <li class="category-item">
+                    <a class="category-link" href="#">
+                        <i class="fas fa-futbol"></i>
+                        Sport & Gaming
+                    </a>
+                </li>
+                <li class="category-item">
+                    <a class="category-link" href="#">
+                        <i class="fas fa-film"></i>
+                        Cinéma Premium
+                    </a>
+                </li>
+            </ul>
+        </aside>
+        
+        <!-- Container principal -->
+        <div class="boutique-container">
+            <!-- Section des produits -->
+            <main class="products-section">
+                <h1 class="section-title">Nos Produits</h1>
+                
+                <div class="products-grid">
+                    <div class="product-card">
+                        <div class="product-image-container">
+                            <div style="width: 100%; height: 100%; background: linear-gradient(45deg, #007acc, #00d4ff); display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem;">
+                                📺
+                            </div>
+                        </div>
+                        <div class="product-content">
+                            <h3 class="product-title">Premium IPTV</h3>
+                            <p class="product-description">Accès à plus de 10 000 chaînes HD et VOD. Compatible avec Smart TV, Android, iOS.</p>
+                            <div class="product-price">€29.99/mois</div>
+                            <a href="#" class="product-button">
+                                <i class="fas fa-eye"></i>
+                                Voir détails
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="product-card">
+                        <div class="product-image-container">
+                            <div style="width: 100%; height: 100%; background: linear-gradient(45deg, #28a745, #20c997); display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem;">
+                                📱
+                            </div>
+                        </div>
+                        <div class="product-content">
+                            <h3 class="product-title">Mobile Plus</h3>
+                            <p class="product-description">Service optimisé pour mobile avec streaming adaptatif. Parfait pour les déplacements.</p>
+                            <div class="product-price">€19.99/mois</div>
+                            <a href="#" class="product-button">
+                                <i class="fas fa-eye"></i>
+                                Voir détails
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="product-card">
+                        <div class="product-image-container">
+                            <div style="width: 100%; height: 100%; background: linear-gradient(45deg, #ffc107, #fd7e14); display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem;">
+                                🏠
+                            </div>
+                        </div>
+                        <div class="product-content">
+                            <h3 class="product-title">Famille Premium</h3>
+                            <p class="product-description">Jusqu'à 5 connexions simultanées. Idéal pour toute la famille avec contenu pour tous les âges.</p>
+                            <div class="product-price">€39.99/mois</div>
+                            <a href="#" class="product-button">
+                                <i class="fas fa-eye"></i>
+                                Voir détails
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <script>
+        function changeCategory(categoryUuid) {
+            console.log('Changement de catégorie:', categoryUuid);
+            alert('Catégorie sélectionnée: ' + (categoryUuid || 'Tous les produits'));
+        }
+        
+        function resizeToMobile() {
+            window.resizeTo(375, 667);
+            setTimeout(updateScreenInfo, 100);
+        }
+        
+        function resizeToTablet() {
+            window.resizeTo(768, 1024);
+            setTimeout(updateScreenInfo, 100);
+        }
+        
+        function resizeToDesktop() {
+            window.resizeTo(1200, 800);
+            setTimeout(updateScreenInfo, 100);
+        }
+        
+        function updateScreenInfo() {
+            const width = window.innerWidth;
+            const widthSpan = document.getElementById('width');
+            const selectorSpan = document.getElementById('selector');
+            const modeSpan = document.getElementById('mode');
+            const mobileSpan = document.getElementById('mobile');
+            
+            const selector = document.querySelector('.mobile-category-selector');
+            const isVisible = window.getComputedStyle(selector).display !== 'none';
+            
+            let selectorStatus = '';
+            let mode = '';
+            let mobileStatus = '';
+            
+            if (width >= 1200) {
+                selectorStatus = 'Caché (Desktop)';
+                mode = 'Desktop - Sidebar gauche';
+                mobileStatus = 'Non';
+            } else if (width >= 1024) {
+                selectorStatus = 'Caché (Desktop)';
+                mode = 'Desktop - Sidebar gauche';
+                mobileStatus = 'Non';
+            } else if (width >= 768) {
+                selectorStatus = 'Caché (Tablet)';
+                mode = 'Tablet - Sidebar gauche';
+                mobileStatus = 'Non';
+            } else {
+                selectorStatus = isVisible ? 'Visible ❌' : 'Caché ✅';
+                mode = 'Mobile - Sidebar en haut';
+                mobileStatus = 'Oui';
+            }
+            
+            widthSpan.textContent = width;
+            selectorSpan.textContent = selectorStatus;
+            modeSpan.textContent = mode;
+            mobileSpan.textContent = mobileStatus;
+            
+            // Mettre à jour les couleurs
+            if (selectorStatus.includes('❌')) {
+                selectorSpan.style.color = '#dc3545';
+            } else {
+                selectorSpan.style.color = '#28a745';
+            }
+        }
+        
+        window.addEventListener('resize', updateScreenInfo);
+        updateScreenInfo();
+    </script>
+</body>
+</html> 

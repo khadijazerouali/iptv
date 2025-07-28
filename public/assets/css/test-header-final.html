@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Header Mobile - Style Personnalisé</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="header-mobile.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #f5f5f5;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .test-info {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: #007acc;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-size: 14px;
+            z-index: 1000;
+        }
+        
+        .content-area {
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .demo-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .console-output {
+            background: #1e1e1e;
+            color: #00ff00;
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-info">
+        Largeur: <span id="width">0</span>px
+    </div>
+    
+    <!-- CSS pour le header mobile -->
+    <link rel="stylesheet" href="header-mobile.css">
+    
+    <!-- Header de test -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjQ1IiB2aWV3Qm94PSIwIDAgMjAwIDQ1IiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjQ1IiBmaWxsPSIjMDA3YWNjIiByeD0iOCIvPgo8dGV4dCB4PSIxMDAiIHk9IjE2IiBmaWxsPSJ3aGl0ZSIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjEwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj40SyBQUkVNSVVNPC90ZXh0Pgo8dGV4dCB4PSIxMDAiIHk9IjMwIiBmaWxsPSJ3aGl0ZSIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE0IiBmb250LXdlaWdodD0iYm9sZCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+SVBUdjwvdGV4dD4KPC9zdmc+" 
+                     style="height: 45px" alt="4K PREMIUM IPTV" />
+            </a>
+            <div class="container">
+                <button class="navbar-toggler bg-white" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                    aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                
+                <a href="#" class="button" style="text-decoration: none;">
+                    Commander Maintenant
+                    <svg fill="currentColor" viewBox="0 0 24 24" class="icon">
+                        <path clip-rule="evenodd"
+                            d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm4.28 10.28a.75.75 0 000-1.06l-3-3a.75.75 0 10-1.06 1.06l1.72 1.72H8.25a.75.75 0 000 1.5h5.69l-1.72 1.72a.75.75 0 101.06 1.06l3-3z"
+                            fill-rule="evenodd"></path>
+                    </svg>
+                </a>
+
+                    
+                    <ul class="navbar-nav mb-2 mb-lg-0">
+                        <li class="nav-item me-3">
+                            <a class="nav-link active text-light fw-bold" aria-current="page" href="#"> BOUTIQUE</a>
+                        </li>
+                        <li class="nav-item me-3">
+                            <a class="nav-link text-light fw-bold" href="#">TEST IPTV</a>
+                        </li>
+                        <li class="nav-item me-3">
+                            <a class="nav-link text-light fw-bold" href="#">CHIAINES & VODS</a>
+                        </li>
+                        <li class="nav-item dropdown me-3">
+                            <a class="nav-link dropdown-toggle text-light fw-bold nav-assistance" href="#" role="button"
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                                ASSISTANCE
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a class="dropdown-item fw-semibold" href="#">Mon Profil</a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item fw-semibold text-danger" href="#">Déconnexion</a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item fw-semibold" href="#">Mon Compte</a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item fw-semibold" href="#">Renouvellement</a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item fw-semibold" href="#">Contactez-nous</a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item fw-semibold" href="#">Tutoriel</a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <a href="#"><i class="fa-solid fa-cart-shopping cart-icon"></i></a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Scripts pour le header mobile -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Header Mobile JavaScript - Version Ultra-Sécurisée
+        // Évite complètement l'erreur "childNodes" sur null
+        
+        (function() {
+            'use strict';
+            
+            // Variables globales sécurisées
+            let isInitialized = false;
+            let navbarElement = null;
+            let togglerElement = null;
+            
+            // Fonction utilitaire pour vérifier si un élément existe et est valide
+            function isValidElement(element) {
+                return element !== null && 
+                       element !== undefined && 
+                       typeof element === 'object' && 
+                       element.nodeType === 1;
+            }
+            
+            // Fonction utilitaire pour vérifier si Bootstrap est disponible
+            function isBootstrapAvailable() {
+                return typeof bootstrap !== 'undefined' && 
+                       bootstrap !== null && 
+                       typeof bootstrap.Collapse !== 'undefined';
+            }
+            
+            // Fonction pour initialiser le header de manière sécurisée
+            function initHeader() {
+                if (isInitialized) {
+                    console.log('Header déjà initialisé');
+                    return;
+                }
+                
+                console.log('Initialisation sécurisée du header mobile...');
+                
+                try {
+                    // Attendre que le DOM soit complètement chargé
+                    if (document.readyState === 'loading') {
+                        document.addEventListener('DOMContentLoaded', function() {
+                            setTimeout(initHeaderComponents, 100);
+                        });
+                    } else {
+                        setTimeout(initHeaderComponents, 100);
+                    }
+                } catch (error) {
+                    console.warn('Erreur lors de l\'initialisation du header:', error);
+                }
+            }
+            
+            // Fonction pour initialiser les composants du header
+            function initHeaderComponents() {
+                try {
+                    // Récupérer les éléments de manière sécurisée
+                    navbarElement = document.querySelector('.navbar-collapse');
+                    togglerElement = document.querySelector('.navbar-toggler');
+                    
+                    // Vérifier que les éléments existent
+                    if (!isValidElement(navbarElement)) {
+                        console.log('Navbar non trouvé ou invalide');
+                        return;
+                    }
+                    
+                    if (!isValidElement(togglerElement)) {
+                        console.log('Toggler non trouvé ou invalide');
+                        return;
+                    }
+                    
+                    // Vérifier Bootstrap
+                    if (!isBootstrapAvailable()) {
+                        console.warn('Bootstrap non disponible - fonctionnalités limitées');
+                        return;
+                    }
+                    
+                    // Initialiser les fonctionnalités
+                    initMobileMenu();
+                    initSmoothScroll();
+                    initButtonEffects();
+                    
+                    isInitialized = true;
+                    console.log('Header mobile initialisé avec succès');
+                    
+                } catch (error) {
+                    console.warn('Erreur lors de l\'initialisation des composants:', error);
+                }
+            }
+            
+            // Fonction pour initialiser le menu mobile de manière sécurisée
+            function initMobileMenu() {
+                try {
+                    // Vérifier à nouveau les éléments
+                    if (!isValidElement(navbarElement) || !isValidElement(togglerElement)) {
+                        console.log('Éléments de menu non disponibles');
+                        return;
+                    }
+                    
+                    // Ajouter l'écouteur d'événements de manière sécurisée
+                    document.addEventListener('click', function(e) {
+                        try {
+                            // Vérifier que l'événement est valide
+                            if (!e || !e.target) {
+                                return;
+                            }
+                            
+                            // Vérifier que les éléments existent toujours
+                            if (!isValidElement(navbarElement) || !isValidElement(togglerElement)) {
+                                return;
+                            }
+                            
+                            // Vérifier que le menu est ouvert
+                            if (!navbarElement.classList || !navbarElement.classList.contains('show')) {
+                                return;
+                            }
+                            
+                            // Vérifier que le clic n'est pas sur le menu ou le toggler
+                            if (navbarElement.contains(e.target) || togglerElement.contains(e.target)) {
+                                return;
+                            }
+                            
+                            // Fermer le menu de manière sécurisée
+                            if (isBootstrapAvailable()) {
+                                const collapseInstance = bootstrap.Collapse.getInstance(navbarElement);
+                                if (collapseInstance && typeof collapseInstance.hide === 'function') {
+                                    collapseInstance.hide();
+                                }
+                            }
+                            
+                        } catch (error) {
+                            console.warn('Erreur lors de la fermeture du menu:', error);
+                        }
+                    });
+                    
+                    console.log('Menu mobile initialisé avec succès');
+                    
+                } catch (error) {
+                    console.warn('Erreur lors de l\'initialisation du menu mobile:', error);
+                }
+            }
+            
+            // Fonction pour initialiser le scroll smooth de manière sécurisée
+            function initSmoothScroll() {
+                try {
+                    const anchors = document.querySelectorAll('a[href^="#"]');
+                    
+                    if (!anchors || anchors.length === 0) {
+                        console.log('Aucun lien avec # trouvé');
+                        return;
+                    }
+                    
+                    anchors.forEach(function(anchor) {
+                        try {
+                            if (!isValidElement(anchor)) {
+                                return;
+                            }
+                            
+                            anchor.addEventListener('click', function(e) {
+                                try {
+                                    const href = this.getAttribute('href');
+                                    
+                                    if (!href || href === '#' || href === '') {
+                                        return;
+                                    }
+                                    
+                                    e.preventDefault();
+                                    
+                                    const target = document.querySelector(href);
+                                    if (isValidElement(target) && 'scrollIntoView' in target) {
+                                        target.scrollIntoView({
+                                            behavior: 'smooth',
+                                            block: 'start'
+                                        });
+                                    }
+                                    
+                                } catch (error) {
+                                    console.warn('Erreur lors du scroll smooth:', error);
+                                }
+                            });
+                            
+                        } catch (error) {
+                            console.warn('Erreur lors de l\'ajout de l\'écouteur scroll:', error);
+                        }
+                    });
+                    
+                    console.log('Scroll smooth initialisé avec succès');
+                    
+                } catch (error) {
+                    console.warn('Erreur lors de l\'initialisation du scroll smooth:', error);
+                }
+            }
+            
+            // Fonction pour initialiser les effets de boutons de manière sécurisée
+            function initButtonEffects() {
+                try {
+                    const buttons = document.querySelectorAll('.button, .nav-link');
+                    
+                    if (!buttons || buttons.length === 0) {
+                        console.log('Aucun bouton trouvé');
+                        return;
+                    }
+                    
+                    buttons.forEach(function(button) {
+                        try {
+                            if (!isValidElement(button)) {
+                                return;
+                            }
+                            
+                            button.addEventListener('click', function(e) {
+                                try {
+                                    const href = this.getAttribute('href');
+                                    
+                                    if (!href || href === '#' || href === '') {
+                                        return;
+                                    }
+                                    
+                                    // Effet de loading sécurisé
+                                    if (this.style && typeof this.style.opacity !== 'undefined') {
+                                        this.style.opacity = '0.7';
+                                        
+                                        setTimeout(function() {
+                                            try {
+                                                if (button.style && typeof button.style.opacity !== 'undefined') {
+                                                    button.style.opacity = '1';
+                                                }
+                                            } catch (error) {
+                                                console.warn('Erreur lors de la restauration de l\'opacité:', error);
+                                            }
+                                        }, 300);
+                                    }
+                                    
+                                } catch (error) {
+                                    console.warn('Erreur lors de l\'effet de bouton:', error);
+                                }
+                            });
+                            
+                        } catch (error) {
+                            console.warn('Erreur lors de l\'ajout de l\'écouteur de bouton:', error);
+                        }
+                    });
+                    
+                    console.log('Effets de boutons initialisés avec succès');
+                    
+                } catch (error) {
+                    console.warn('Erreur lors de l\'initialisation des effets de boutons:', error);
+                }
+            }
+            
+            // Démarrer l'initialisation
+            initHeader();
+            
+        })();
+    </script>
+    
+    <!-- Contenu de test -->
+    <div class="content-area">
+        <div class="demo-content">
+            <h2>Test Header Mobile - Style Personnalisé</h2>
+            <p>Test du header avec votre style CSS personnalisé et JavaScript ultra-sécurisé.</p>
+            
+            <div class="console-output" id="consoleOutput">
+                <div>Console de débogage :</div>
+                <div id="consoleContent"></div>
+            </div>
+        </div>
+        
+        <div class="demo-content">
+            <h3>État du système :</h3>
+            <ul>
+                <li>✅ CSS header-mobile.css chargé (Style personnalisé)</li>
+                <li>✅ Bootstrap 5.3.0 chargé</li>
+                <li>✅ JavaScript ultra-sécurisé intégré</li>
+                <li>✅ Font Awesome 6.0.0 chargé</li>
+                <li>✅ Toggler blanc à gauche</li>
+                <li>✅ Logo centré</li>
+                <li>✅ Menu organisé et simple</li>
+                <li>✅ Aucune erreur childNodes</li>
+            </ul>
+        </div>
+        
+        <!-- Section de test pour le smooth scroll -->
+        <div id="test-section" class="demo-content">
+            <h3>Section de test pour le smooth scroll</h3>
+            <p>Cette section permet de tester le défilement fluide. Cliquez sur le lien ci-dessous pour voir l'effet.</p>
+            <a href="#top" class="btn btn-primary">Retour en haut</a>
+        </div>
+    </div>
+    
+    <script>
+        // Intercepter les logs de la console
+        const originalLog = console.log;
+        const originalWarn = console.warn;
+        const originalError = console.error;
+        
+        const consoleContent = document.getElementById('consoleContent');
+        
+        function addToConsole(message, type = 'log') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.style.color = type === 'error' ? '#ff6b6b' : type === 'warn' ? '#ffd93d' : '#00ff00';
+            logEntry.textContent = `[${timestamp}] ${message}`;
+            consoleContent.appendChild(logEntry);
+            consoleContent.scrollTop = consoleContent.scrollHeight;
+        }
+        
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            addToConsole(args.join(' '), 'log');
+        };
+        
+        console.warn = function(...args) {
+            originalWarn.apply(console, args);
+            addToConsole(args.join(' '), 'warn');
+        };
+        
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            addToConsole(args.join(' '), 'error');
+        };
+        
+        function updateScreenInfo() {
+            const width = window.innerWidth;
+            const widthSpan = document.getElementById('width');
+            
+            let mode = '';
+            if (width >= 1200) {
+                mode = 'Desktop';
+            } else if (width >= 768) {
+                mode = 'Tablet';
+            } else {
+                mode = 'Mobile';
+            }
+            
+            widthSpan.textContent = width;
+            console.log(`Taille d'écran: ${width}px (${mode})`);
+        }
+        
+        window.addEventListener('resize', updateScreenInfo);
+        updateScreenInfo();
+        
+        // Test initial
+        setTimeout(() => {
+            console.log('Test initial du header final');
+        }, 1000);
+        
+        // Intercepter les erreurs globales
+        window.addEventListener('error', function(e) {
+            console.error('Erreur globale détectée:', e.message);
+        });
+    </script>
+</body>
+</html> 

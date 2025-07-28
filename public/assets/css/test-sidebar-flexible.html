@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Sidebar Flexible</title>
+    <link rel="stylesheet" href="boutique.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .test-info {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: #007acc;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-size: 14px;
+            z-index: 1000;
+        }
+        
+        .sidebar-info {
+            position: fixed;
+            top: 50px;
+            right: 10px;
+            background: #28a745;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-size: 12px;
+            z-index: 1000;
+        }
+        
+        .layout-info {
+            position: fixed;
+            top: 90px;
+            right: 10px;
+            background: #ffc107;
+            color: #000;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-size: 12px;
+            z-index: 1000;
+        }
+        
+        /* Simulation de la navigation */
+        .nav-simulation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: #000;
+            color: white;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            z-index: 999;
+        }
+        
+        .nav-simulation h1 {
+            margin: 0;
+            font-size: 18px;
+        }
+        
+        .test-buttons {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 1000;
+        }
+        
+        .test-btn {
+            background: #007acc;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .test-btn:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <!-- Simulation de la navigation -->
+    <div class="nav-simulation">
+        <h1>Navigation Bar (60px height)</h1>
+    </div>
+    
+    <div class="test-info">
+        Largeur: <span id="width">0</span>px
+    </div>
+    
+    <div class="sidebar-info">
+        Sidebar: <span id="sidebar">Sticky</span>
+    </div>
+    
+    <div class="layout-info">
+        Layout: <span id="layout">Flex</span>
+    </div>
+    
+    <div class="test-buttons">
+        <button class="test-btn" onclick="toggleSidebar()">Toggle Sidebar</button>
+        <button class="test-btn" onclick="resizeWindow()">Resize Window</button>
+        <button class="test-btn" onclick="scrollTest()">Scroll Test</button>
+    </div>
+    
+    <div class="boutique-page">
+        <!-- Sélecteur de catégories mobile -->
+        <div class="mobile-category-selector">
+            <select class="category-select" onchange="changeCategory(this.value)">
+                <option value="">Tous les produits</option>
+                <option value="premium">IPTV Premium</option>
+                <option value="mobile">Mobile Plus</option>
+                <option value="family">Famille</option>
+                <option value="sport">Sport & Gaming</option>
+            </select>
+        </div>
+
+        <!-- Sidebar moderne -->
+        <aside class="boutique-sidebar">
+            <h2 class="sidebar-title">
+                <i class="fas fa-shopping-bag"></i>
+                Boutique
+            </h2>
+            
+            <!-- Section utilisateur -->
+            <div class="user-info">
+                <div class="user-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="user-details">
+                    <h6>Bienvenue</h6>
+                    <small>Découvrez nos produits</small>
+                </div>
+            </div>
+            
+            <!-- Barre de recherche -->
+            <div class="search-container">
+                <form>
+                    <input type="text" class="search-input" placeholder="Rechercher un produit...">
+                    <button type="submit" class="search-button">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Navigation des catégories -->
+            <ul class="category-nav">
+                <li class="category-item">
+                    <a class="category-link active" href="#">
+                        <i class="fas fa-th-large"></i>
+                        Tous les produits
+                    </a>
+                </li>
+                <li class="category-item">
+                    <a class="category-link" href="#">
+                        <i class="fas fa-tag"></i>
+                        IPTV Premium
+                    </a>
+                </li>
+                <li class="category-item">
+                    <a class="category-link" href="#">
+                        <i class="fas fa-mobile-alt"></i>
+                        Mobile Plus
+                    </a>
+                </li>
+                <li class="category-item">
+                    <a class="category-link" href="#">
+                        <i class="fas fa-home"></i>
+                        Famille
+                    </a>
+                </li>
+                <li class="category-item">
+                    <a class="category-link" href="#">
+                        <i class="fas fa-futbol"></i>
+                        Sport & Gaming
+                    </a>
+                </li>
+                <li class="category-item">
+                    <a class="category-link" href="#">
+                        <i class="fas fa-film"></i>
+                        Cinéma Premium
+                    </a>
+                </li>
+                <li class="category-item">
+                    <a class="category-link" href="#">
+                        <i class="fas fa-globe"></i>
+                        International
+                    </a>
+                </li>
+                <li class="category-item">
+                    <a class="category-link" href="#">
+                        <i class="fas fa-star"></i>
+                        Premium Plus
+                    </a>
+                </li>
+            </ul>
+        </aside>
+        
+        <!-- Container principal -->
+        <div class="boutique-container">
+            <!-- Section des produits -->
+            <main class="products-section">
+                <h1 class="section-title">Nos Produits</h1>
+                
+                <div class="products-grid">
+                    <div class="product-card">
+                        <div class="product-image-container">
+                            <div style="width: 100%; height: 100%; background: linear-gradient(45deg, #007acc, #00d4ff); display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem;">
+                                📺
+                            </div>
+                        </div>
+                        <div class="product-content">
+                            <h3 class="product-title">Premium IPTV</h3>
+                            <p class="product-description">Accès à plus de 10 000 chaînes HD et VOD. Compatible avec Smart TV, Android, iOS.</p>
+                            <div class="product-price">€29.99/mois</div>
+                            <a href="#" class="product-button">
+                                <i class="fas fa-eye"></i>
+                                Voir détails
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="product-card">
+                        <div class="product-image-container">
+                            <div style="width: 100%; height: 100%; background: linear-gradient(45deg, #28a745, #20c997); display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem;">
+                                📱
+                            </div>
+                        </div>
+                        <div class="product-content">
+                            <h3 class="product-title">Mobile Plus</h3>
+                            <p class="product-description">Service optimisé pour mobile avec streaming adaptatif. Parfait pour les déplacements.</p>
+                            <div class="product-price">€19.99/mois</div>
+                            <a href="#" class="product-button">
+                                <i class="fas fa-eye"></i>
+                                Voir détails
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="product-card">
+                        <div class="product-image-container">
+                            <div style="width: 100%; height: 100%; background: linear-gradient(45deg, #ffc107, #fd7e14); display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem;">
+                                🏠
+                            </div>
+                        </div>
+                        <div class="product-content">
+                            <h3 class="product-title">Famille Premium</h3>
+                            <p class="product-description">Jusqu'à 5 connexions simultanées. Idéal pour toute la famille avec contenu pour tous les âges.</p>
+                            <div class="product-price">€39.99/mois</div>
+                            <a href="#" class="product-button">
+                                <i class="fas fa-eye"></i>
+                                Voir détails
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="product-card">
+                        <div class="product-image-container">
+                            <div style="width: 100%; height: 100%; background: linear-gradient(45deg, #dc3545, #e83e8c); display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem;">
+                                ⚽
+                            </div>
+                        </div>
+                        <div class="product-content">
+                            <h3 class="product-title">Sport & Gaming</h3>
+                            <p class="product-description">Chaînes sportives premium et contenu gaming. Inclut les événements sportifs majeurs.</p>
+                            <div class="product-price">€34.99/mois</div>
+                            <a href="#" class="product-button">
+                                <i class="fas fa-eye"></i>
+                                Voir détails
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="product-card">
+                        <div class="product-image-container">
+                            <div style="width: 100%; height: 100%; background: linear-gradient(45deg, #6f42c1, #9c27b0); display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem;">
+                                🎬
+                            </div>
+                        </div>
+                        <div class="product-content">
+                            <h3 class="product-title">Cinéma Premium</h3>
+                            <p class="product-description">Bibliothèque de films et séries en 4K. Nouvelles sorties et classiques disponibles.</p>
+                            <div class="product-price">€24.99/mois</div>
+                            <a href="#" class="product-button">
+                                <i class="fas fa-eye"></i>
+                                Voir détails
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="product-card">
+                        <div class="product-image-container">
+                            <div style="width: 100%; height: 100%; background: linear-gradient(45deg, #17a2b8, #20c997); display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem;">
+                                🌍
+                            </div>
+                        </div>
+                        <div class="product-content">
+                            <h3 class="product-title">International</h3>
+                            <p class="product-description">Chaînes du monde entier. Plus de 50 pays représentés avec sous-titres disponibles.</p>
+                            <div class="product-price">€27.99/mois</div>
+                            <a href="#" class="product-button">
+                                <i class="fas fa-eye"></i>
+                                Voir détails
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <script>
+        function changeCategory(categoryUuid) {
+            console.log('Changement de catégorie:', categoryUuid);
+            alert('Catégorie sélectionnée: ' + (categoryUuid || 'Tous les produits'));
+        }
+        
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.boutique-sidebar');
+            const container = document.querySelector('.boutique-container');
+            
+            if (sidebar.style.display === 'none') {
+                sidebar.style.display = 'block';
+                container.style.marginLeft = '';
+            } else {
+                sidebar.style.display = 'none';
+                container.style.marginLeft = '0';
+            }
+        }
+        
+        function resizeWindow() {
+            // Simuler un redimensionnement
+            window.dispatchEvent(new Event('resize'));
+        }
+        
+        function scrollTest() {
+            window.scrollTo({
+                top: 500,
+                behavior: 'smooth'
+            });
+        }
+        
+        function updateScreenInfo() {
+            const width = window.innerWidth;
+            const widthSpan = document.getElementById('width');
+            const sidebarSpan = document.getElementById('sidebar');
+            const layoutSpan = document.getElementById('layout');
+            
+            let sidebarInfo = '';
+            let layoutInfo = '';
+            
+            if (width >= 1200) {
+                sidebarInfo = 'Sticky (280px)';
+                layoutInfo = 'Desktop Flex';
+            } else if (width >= 1024) {
+                sidebarInfo = 'Sticky (280px)';
+                layoutInfo = 'Desktop Flex';
+            } else if (width >= 768) {
+                sidebarInfo = 'Sticky (250px)';
+                layoutInfo = 'Tablet Flex';
+            } else {
+                sidebarInfo = 'Relative (100%)';
+                layoutInfo = 'Mobile Column';
+            }
+            
+            widthSpan.textContent = width;
+            sidebarSpan.textContent = sidebarInfo;
+            layoutSpan.textContent = layoutInfo;
+        }
+        
+        window.addEventListener('resize', updateScreenInfo);
+        updateScreenInfo();
+    </script>
+</body>
+</html> 

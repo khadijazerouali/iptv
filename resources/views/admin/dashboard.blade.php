@@ -12,13 +12,13 @@
             </h1>
             <p class="page-subtitle">Vue d'ensemble de votre plateforme IPTV</p>
         </div>
-        <div class="d-flex gap-2">
+        <div class="action-buttons">
             <button class="btn btn-primary" onclick="refreshStats()">
-                <i class="fas fa-sync-alt me-2"></i>
+                <i class="fas fa-sync-alt"></i>
                 Actualiser
             </button>
             <button class="btn btn-outline-primary">
-                <i class="fas fa-download me-2"></i>
+                <i class="fas fa-download"></i>
                 Exporter
             </button>
         </div>
@@ -81,166 +81,158 @@
 </div>
 
 <!-- Charts Section -->
-<div class="row mt-4">
-    <div class="col-md-6">
-        <div class="admin-card slide-in">
-            <div class="table-header">
-                <h5>
-                    <i class="fas fa-chart-line"></i>
-                    Commandes mensuelles
-                </h5>
-            </div>
-            <div class="p-3">
-                <canvas id="ordersChart" width="400" height="200"></canvas>
-            </div>
+<div class="charts-grid">
+    <div class="admin-card slide-in">
+        <div class="table-header">
+            <h5>
+                <i class="fas fa-chart-line"></i>
+                Commandes mensuelles
+            </h5>
+        </div>
+        <div class="p-3">
+            <canvas id="ordersChart" width="400" height="200"></canvas>
         </div>
     </div>
     
-    <div class="col-md-6">
-        <div class="admin-card slide-in">
-            <div class="table-header">
-                <h5>
-                    <i class="fas fa-chart-bar"></i>
-                    Revenus mensuels
-                </h5>
-            </div>
-            <div class="p-3">
-                <canvas id="revenueChart" width="400" height="200"></canvas>
-            </div>
+    <div class="admin-card slide-in">
+        <div class="table-header">
+            <h5>
+                <i class="fas fa-chart-bar"></i>
+                Revenus mensuels
+            </h5>
+        </div>
+        <div class="p-3">
+            <canvas id="revenueChart" width="400" height="200"></canvas>
         </div>
     </div>
 </div>
 
 <!-- Recent Data Section -->
-<div class="row mt-4">
-    <div class="col-md-6">
-        <div class="admin-card slide-in">
-            <div class="table-header">
-                <h5>
-                    <i class="fas fa-clock"></i>
-                    Dernières commandes
-                </h5>
-                <a href="{{ route('admin.orders') }}" class="btn btn-outline-primary btn-sm">
-                    Voir tout
-                </a>
-            </div>
-            <div class="table-responsive">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Client</th>
-                            <th>Produit</th>
-                            <th>Montant</th>
-                            <th>Date</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($recentOrders as $order)
-                        <tr>
-                            <td>
-                                <div class="d-flex align-items-center">
-                                    <div class="bg-primary bg-opacity-10 rounded-circle p-2 me-2">
-                                        <i class="fas fa-user text-primary"></i>
-                                    </div>
-                                    <div>
-                                        <div class="fw-semibold">{{ $order->user->name ?? 'N/A' }}</div>
-                                        <small class="text-muted">{{ $order->user->email ?? 'N/A' }}</small>
-                                    </div>
+<div class="recent-data-grid">
+    <div class="admin-card slide-in">
+        <div class="table-header">
+            <h5>
+                <i class="fas fa-clock"></i>
+                Dernières commandes
+            </h5>
+            <a href="{{ route('admin.orders') }}" class="btn btn-outline-primary btn-sm">
+                Voir tout
+            </a>
+        </div>
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Client</th>
+                        <th>Produit</th>
+                        <th>Montant</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($recentOrders as $order)
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="bg-primary bg-opacity-10 rounded-circle p-2 me-2">
+                                    <i class="fas fa-user text-primary"></i>
                                 </div>
-                            </td>
-                            <td>
-                                <div class="fw-semibold">{{ $order->product->title ?? 'N/A' }}</div>
-                                <small class="text-muted">{{ $order->number_order }}</small>
-                            </td>
-                            <td>
-                                <div class="fw-bold text-success">
-                                    €{{ number_format($order->product->price ?? 0, 2) }}
+                                <div>
+                                    <div class="fw-semibold">{{ $order->user->name ?? 'N/A' }}</div>
+                                    <small class="text-muted">{{ $order->user->email ?? 'N/A' }}</small>
                                 </div>
-                            </td>
-                            <td>
-                                <div class="text-muted">
-                                    <div>{{ $order->created_at->format('d/m/Y') }}</div>
-                                    <small>{{ $order->created_at->format('H:i') }}</small>
-                                </div>
-                            </td>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="4" class="text-center text-muted">
-                                Aucune commande récente
-                            </td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="fw-semibold">{{ $order->product->title ?? 'N/A' }}</div>
+                            <small class="text-muted">{{ $order->number_order }}</small>
+                        </td>
+                        <td>
+                            <div class="fw-bold text-success">
+                                €{{ number_format($order->product->price ?? 0, 2) }}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="text-muted">
+                                <div>{{ $order->created_at->format('d/m/Y') }}</div>
+                                <small>{{ $order->created_at->format('H:i') }}</small>
+                            </div>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="4" class="text-center text-muted">
+                            Aucune commande récente
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
     </div>
     
-    <div class="col-md-6">
-        <div class="admin-card slide-in">
-            <div class="table-header">
-                <h5>
-                    <i class="fas fa-user-plus"></i>
-                    Nouveaux utilisateurs
-                </h5>
-                <a href="{{ route('admin.users') }}" class="btn btn-outline-primary btn-sm">
-                    Voir tout
-                </a>
-            </div>
-            <div class="table-responsive">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Utilisateur</th>
-                            <th>Email</th>
-                            <th>Statut</th>
-                            <th>Date</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($recentUsers as $user)
-                        <tr>
-                            <td>
-                                <div class="d-flex align-items-center">
-                                    <div class="bg-success bg-opacity-10 rounded-circle p-2 me-2">
-                                        <i class="fas fa-user text-success"></i>
-                                    </div>
-                                    <div class="fw-semibold">{{ $user->name }}</div>
+    <div class="admin-card slide-in">
+        <div class="table-header">
+            <h5>
+                <i class="fas fa-user-plus"></i>
+                Nouveaux utilisateurs
+            </h5>
+            <a href="{{ route('admin.users') }}" class="btn btn-outline-primary btn-sm">
+                Voir tout
+            </a>
+        </div>
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Utilisateur</th>
+                        <th>Email</th>
+                        <th>Statut</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($recentUsers as $user)
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="bg-success bg-opacity-10 rounded-circle p-2 me-2">
+                                    <i class="fas fa-user text-success"></i>
                                 </div>
-                            </td>
-                            <td>
-                                <small class="text-muted">{{ $user->email }}</small>
-                            </td>
-                            <td>
-                                <span class="badge badge-success">
-                                    <i class="fas fa-check-circle me-1"></i>
-                                    Actif
-                                </span>
-                            </td>
-                            <td>
-                                <div class="text-muted">
-                                    <div>{{ $user->created_at->format('d/m/Y') }}</div>
-                                    <small>{{ $user->created_at->format('H:i') }}</small>
-                                </div>
-                            </td>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="4" class="text-center text-muted">
-                                Aucun nouvel utilisateur
-                            </td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
+                                <div class="fw-semibold">{{ $user->name }}</div>
+                            </div>
+                        </td>
+                        <td>
+                            <small class="text-muted">{{ $user->email }}</small>
+                        </td>
+                        <td>
+                            <span class="badge badge-success">
+                                <i class="fas fa-check-circle me-1"></i>
+                                Actif
+                            </span>
+                        </td>
+                        <td>
+                            <div class="text-muted">
+                                <div>{{ $user->created_at->format('d/m/Y') }}</div>
+                                <small>{{ $user->created_at->format('H:i') }}</small>
+                            </div>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="4" class="text-center text-muted">
+                            Aucun nouvel utilisateur
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
 
 <!-- Popular Products Section -->
-<div class="admin-card slide-in mt-4">
+<div class="admin-card slide-in">
     <div class="table-header">
         <h5>
             <i class="fas fa-star"></i>
@@ -250,39 +242,35 @@
             Voir tout
         </a>
     </div>
-    <div class="row">
+    <div class="popular-products-grid">
         @forelse($popularProducts as $product)
-        <div class="col-md-4 mb-3">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="bg-primary bg-opacity-10 rounded-circle p-2 me-3">
-                            <i class="fas fa-box text-primary"></i>
-                        </div>
-                        <div>
-                            <h6 class="mb-0">{{ $product->title }}</h6>
-                            <small class="text-muted">{{ $product->category->name ?? 'N/A' }}</small>
-                        </div>
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="bg-primary bg-opacity-10 rounded-circle p-2 me-3">
+                        <i class="fas fa-box text-primary"></i>
                     </div>
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <div class="fw-bold text-success">€{{ number_format($product->price, 2) }}</div>
-                            <small class="text-muted">{{ $product->subscriptions_count }} ventes</small>
-                        </div>
-                        <span class="badge badge-primary">
-                            <i class="fas fa-fire me-1"></i>
-                            Populaire
-                        </span>
-        </div>
+                    <div>
+                        <h6 class="mb-0">{{ $product->title }}</h6>
+                        <small class="text-muted">{{ $product->category->name ?? 'N/A' }}</small>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="fw-bold text-success">€{{ number_format($product->price, 2) }}</div>
+                        <small class="text-muted">{{ $product->subscriptions_count }} ventes</small>
+                    </div>
+                    <span class="badge badge-primary">
+                        <i class="fas fa-fire me-1"></i>
+                        Populaire
+                    </span>
                 </div>
             </div>
         </div>
         @empty
-        <div class="col-12">
-            <div class="text-center text-muted py-4">
-                <i class="fas fa-box fa-3x mb-3"></i>
-                <p>Aucun produit populaire pour le moment</p>
-            </div>
+        <div class="text-center text-muted py-4">
+            <i class="fas fa-box fa-3x mb-3"></i>
+            <p>Aucun produit populaire pour le moment</p>
         </div>
         @endforelse
     </div>

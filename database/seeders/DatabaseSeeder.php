@@ -22,7 +22,7 @@ class DatabaseSeeder extends Seeder
 
     public function run(): void
     {
-        // Création d'un super-admin par défaut
+        // Création d'un admin par défaut
         $admin = \App\Models\User::firstOrCreate(
             [
                 'email' => 'admin@admin.com',
@@ -32,8 +32,8 @@ class DatabaseSeeder extends Seeder
                 'password' => bcrypt('motdepassefort'),
             ]
         );
-        if (\Spatie\Permission\Models\Role::where('name', 'super-admin')->exists()) {
-            $admin->assignRole('super-admin');
+        if (\Spatie\Permission\Models\Role::where('name', 'admin')->exists()) {
+            $admin->assignRole('admin');
         }
         $this->call(PermissionsSeeder::class);
 

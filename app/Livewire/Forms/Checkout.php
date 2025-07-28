@@ -58,11 +58,33 @@ class Checkout extends Component
     public function mount()
     {
         $this->cart = session()->get('carts');
+        
+        // Vérifier si le panier existe et contient les données nécessaires
+        if (!$this->cart || !isset($this->cart['product_uuid'])) {
+            Session::flash('error', 'Panier invalide. Veuillez ajouter un produit au panier.');
+            return redirect()->route('home');
+        }
+        
         $this->product = Product::whereUuid($this->cart['product_uuid'])->first();
+        
+        // Vérifier si le produit existe
+        if (!$this->product) {
+            Session::flash('error', 'Produit introuvable.');
+            return redirect()->route('home');
+        }
+        
         $this->product_uuid = $this->product->uuid;
-        $option = ProductOption::whereUuid($this->cart['selectedOptionUuid'])->first();
-        $this->selectedOptionName = $option ? $option->name : '-';
-        $this->selectedPrice = $option ? $option->price : $this->product->price;
+        
+        // Vérifier si une option est sélectionnée
+        if (isset($this->cart['selectedOptionUuid']) && $this->cart['selectedOptionUuid']) {
+            $option = ProductOption::whereUuid($this->cart['selectedOptionUuid'])->first();
+            $this->selectedOptionName = $option ? $option->name : '-';
+            $this->selectedPrice = $option ? $option->price : $this->product->price;
+        } else {
+            $this->selectedOptionName = '-';
+            $this->selectedPrice = $this->product->price;
+        }
+        
         $this->subtotal = $this->selectedPrice * $this->quantity;
         
         // Récupérer le code promo appliqué
@@ -206,10 +228,15 @@ class Checkout extends Component
                 // 'telephone' => $formData['telephone'],
                 // 'commentaire' => $formData['commentaire'],
             ]);
-            // Attribution du rôle par défaut
-            if ($user->email === 'admin@admin.com') {
-                $user->assignRole('super-admin');
-            } else {
+        }
+        
+        // Attribution du rôle par défaut (seulement si l'utilisateur n'a pas déjà le rôle)
+        if ($user->email === 'admin@admin.com') {
+            if (!$user->hasRole('admin')) {
+                $user->assignRole('admin');
+            }
+        } else {
+            if (!$user->hasRole('user')) {
                 $user->assignRole('user');
             }
         }

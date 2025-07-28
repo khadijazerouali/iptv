@@ -19,17 +19,26 @@ class AuthController extends Controller
             'password' => 'required|min:8|confirmed',
         ]);
 
-        $user = User::create([
-            'name' => $validate['name'],
-            'email' => $validate['email'],
-            'password' => bcrypt($validate['password']),
-        ]);
+        // Vérifier si l'utilisateur existe déjà
+        $user = User::where('email', $validate['email'])->first();
+        
+        if (!$user) {
+            $user = User::create([
+                'name' => $validate['name'],
+                'email' => $validate['email'],
+                'password' => bcrypt($validate['password']),
+            ]);
+        }
 
-        // Attribution du rôle par défaut
+        // Attribution du rôle par défaut (seulement si l'utilisateur n'a pas déjà le rôle)
         if ($user->email === 'admin@admin.com') {
-            $user->assignRole('super-admin');
+            if (!$user->hasRole('admin')) {
+                $user->assignRole('admin');
+            }
         } else {
-            $user->assignRole('user');
+            if (!$user->hasRole('user')) {
+                $user->assignRole('user');
+            }
         }
 
         Auth::login($user);

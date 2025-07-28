@@ -162,7 +162,6 @@
                                         data-original-role="{{ $user->role }}">
                                     <option value="user" {{ $displayRole == 'user' ? 'selected' : '' }}>Utilisateur</option>
                                     <option value="admin" {{ $displayRole == 'admin' ? 'selected' : '' }}>Administrateur</option>
-                                    <option value="super-admin" {{ $displayRole == 'super-admin' ? 'selected' : '' }}>Super Admin</option>
                                 </select>
                                 <button class="btn btn-outline-secondary btn-sm" 
                                         onclick="cancelRoleChange({{ $user->id }})" 

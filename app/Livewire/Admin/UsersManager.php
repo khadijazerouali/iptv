@@ -8,7 +8,7 @@ use App\Models\User;
 class UsersManager extends Component
 {
     public $users;
-    public $roles = ['super-admin', 'user'];
+    public $roles = ['admin', 'user'];
 
     public function mount()
     {

@@ -31,7 +31,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
 
         // Attribution du rôle par défaut
         if ($user->email === 'admin@admin.com') {
-            $user->assignRole('super-admin');
+            $user->assignRole('admin');
         } else {
             $user->assignRole('user');
         }

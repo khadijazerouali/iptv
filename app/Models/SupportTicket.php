@@ -19,6 +19,7 @@ class SupportTicket extends Model
         'status',
         'priority',
         'category',
+        'category_id',
         'assigned_to',
     ];
 
@@ -39,6 +40,11 @@ class SupportTicket extends Model
     public function assignedTo(): BelongsTo
     {
         return $this->belongsTo(User::class, 'assigned_to');
+    }
+
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(SupportCategory::class, 'category_id');
     }
 
     public function replies(): HasMany

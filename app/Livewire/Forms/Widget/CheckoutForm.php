@@ -25,51 +25,34 @@ class CheckoutForm extends Component
             return redirect()->route('home')->with('error', 'La liste des pays est indisponible.');
         }
         $this->countries = json_decode(file_get_contents($countriesPath))->countries ?? [];
-       $this->cart = session()->get('carts');
-       
-       $this->product = Product::where('uuid',$this->cart['product_uuid'])->first();
-       if(!$this->product)   
-       {
+        
+        $this->cart = session()->get('carts');
+        
+        // Vérifier si le panier existe et contient les données nécessaires
+        if (!$this->cart || !isset($this->cart['product_uuid'])) {
+            return redirect()->route('home')->with('error', 'Panier invalide. Veuillez ajouter un produit au panier.');
+        }
+        
+        $this->product = Product::where('uuid', $this->cart['product_uuid'])->first();
+        if (!$this->product) {
             return redirect()->route('home')->with('error', 'Produit non trouvé.');
-       }
-       
-        $this->quantity = $this->cart['quantity'];
+        }
+        
+        $this->quantity = $this->cart['quantity'] ?? 1;
         $this->selectedDevice = $this->cart['selectedDevice'] ?? null;
-    //     if($this->selectedDevice)
-    //     {
-    //         $this->device = Devicetype::where('uuid',$this->selectedDevice)->first();
-    //    }
-       
-       $this->selectedApplication = $this->cart['selectedApplication'] ?? null;
-    //    if($this->selectedApplication)
-    //    {
-    //     $this->application = Applicationtype::where('uuid',$this->selectedApplication)->first();
-    //    }
-       $this->selectedOptionUuid = $this->cart['selectedOptionUuid'] ?? null;
-       if($this->selectedOptionUuid)
-       {
-        $this->selectedOption = ProductOption::where('uuid',$this->selectedOptionUuid)->first();
-       }
+        $this->selectedApplication = $this->cart['selectedApplication'] ?? null;
+        $this->selectedOptionUuid = $this->cart['selectedOptionUuid'] ?? null;
+        
+        if ($this->selectedOptionUuid) {
+            $this->selectedOption = ProductOption::where('uuid', $this->selectedOptionUuid)->first();
+        }
 
-    //    $this->channels = $this->cart['channels'] ?? [];
-    //    foreach($this->channels as $channel) {
-    //        $this->channel_lists[] = Channel::where('uuid',$channel)->first();
-    //    }
-       
-    //    $this->vods = $this->cart['vods'] ?? [];
-    //    foreach($this->vods as $vod) {
-    //        $this->vod_lists[] = Vod::where('uuid',$vod)->first();
-    //    }
-    // dd($this->cart);
-    if($this->selectedOption)
-    {
-        $this->total = $this->cart['quantity'] * $this->selectedOption->price;
-    }
-    else
-    {
-        $this->total = $this->product->price * $this->cart['quantity'];
-    }
-    //    dd($this->cart);
+        // Calculer le total
+        if ($this->selectedOption) {
+            $this->total = $this->quantity * $this->selectedOption->price;
+        } else {
+            $this->total = $this->product->price * $this->quantity;
+        }
     }
 
     public function submitForm()

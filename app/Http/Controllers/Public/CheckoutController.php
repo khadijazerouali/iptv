@@ -13,11 +13,11 @@ class CheckoutController extends Controller
 {
     public function checkout()
     {
-        
-
         $cart = session()->get('carts');
-        if (!$cart) {
-            return redirect()->route('home')->with('error', 'Votre panier est vide.');
+        
+        // Vérifier si le panier existe et contient les données nécessaires
+        if (!$cart || !isset($cart['product_uuid'])) {
+            return redirect()->route('home')->with('error', 'Votre panier est vide ou invalide.');
         }
 
         $product = Product::where('uuid', $cart['product_uuid'])->first();
@@ -34,21 +34,9 @@ class CheckoutController extends Controller
         $selectedOptionName = $selectedOption?->name ?? '';
         $selectedOptionPrice = $selectedOption?->price ?? 0;
 
-        $device_id = $cart['device_id'] ?? '';
-        $device_key = $cart['device_key'] ?? '';
-        $macaddress = $cart['macaddress'] ?? '';
-        $magaddress = $cart['magaddress'] ?? '';
-        $formulermac = $cart['formulermac'] ?? '';
-        $smartstbmac = $cart['smartstbmac'] ?? '';
-        $first_name = $cart['first_name'] ?? '';
-        $last_name = $cart['last_name'] ?? '';
-        $phone = $cart['phone'] ?? '';
-        $email = $cart['email'] ?? '';
-        $number_order = $cart['number_order'] ?? '';
-
-        // Product-specific variables
-        $first_name = $last_name = $phone = $email = $number_order = null;
-        $device_id = $device_key = $macaddress = $magaddress = $formulermac = $smartstbmac = null;
+        // Product-specific variables - initialiser à null par défaut
+        $device_id = $device_key = $macaddress = $magaddress = $formulermac = $smartstbmac = '';
+        $first_name = $last_name = $phone = $email = $number_order = '';
 
         if ($productType === 'abonnement' || $productType === 'testiptv' || $productType === 'application') {
             $device_id = $cart['device_id'] ?? '';
@@ -84,7 +72,6 @@ class CheckoutController extends Controller
             Mail::to($user->email)->send(new \App\Mail\OrderInfoToClient($user, $product, null, null, $cart));
         }
 
-        // dd($product->title);
         return view('pages.checkout', compact(
             'countries',
             'product',

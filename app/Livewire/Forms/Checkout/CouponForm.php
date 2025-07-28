@@ -42,6 +42,13 @@ class CouponForm extends Component
         $this->validate();
         $this->resetValidationMessages();
 
+        // Vérifier que le sous-total est valide
+        if ($this->subtotal <= 0) {
+            $this->validation_message = 'Impossible d\'appliquer un code promo : montant invalide.';
+            $this->validation_type = 'error';
+            return;
+        }
+
         // Utiliser le service pour valider et appliquer le code
         $result = $this->promoCodeService->applyCode($this->coupon_code, $this->subtotal);
         
@@ -80,12 +87,19 @@ class CouponForm extends Component
     private function calculateSubtotal()
     {
         $cart = session('carts');
-        if ($cart && isset($cart['product_uuid'])) {
-            $product = \App\Models\Product::whereUuid($cart['product_uuid'])->first();
-            if ($product) {
-                $quantity = $cart['quantity'] ?? 1;
-                $this->subtotal = $product->price * $quantity;
-            }
+        
+        // Vérifier si le panier existe et contient les données nécessaires
+        if (!$cart || !isset($cart['product_uuid'])) {
+            $this->subtotal = 0;
+            return;
+        }
+        
+        $product = \App\Models\Product::whereUuid($cart['product_uuid'])->first();
+        if ($product) {
+            $quantity = $cart['quantity'] ?? 1;
+            $this->subtotal = $product->price * $quantity;
+        } else {
+            $this->subtotal = 0;
         }
     }
     

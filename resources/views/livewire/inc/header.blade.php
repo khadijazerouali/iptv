@@ -1,4 +1,5 @@
-<nav class="navbar navbar-expand-lg">
+<div>
+    <nav class="navbar navbar-expand-lg">
         <div class="container-fluid">
 
             <a class="navbar-brand ps-5" href="{{ url('/') }}"><img src="{{ asset('/assets/images/Logo.png') }}"
@@ -70,8 +71,47 @@
                             </ul>
                         </li>
                     </ul>
-                    <a href="#"><i class="fa-solid fa-cart-shopping" style="color: #ffffff"></i></a>
+                    
+                    <!-- Icône du panier avec indicateur -->
+                    <div class="cart-icon-container position-relative">
+                        <a href="#" wire:click.prevent="toggleCartModal" class="cart-icon-link">
+                            <i class="fa-solid fa-cart-shopping" style="color: #ffffff; font-size: 1.2rem;"></i>
+                            @if($cart)
+                                <span class="cart-badge">{{ $cartDetails['quantity'] ?? 1 }}</span>
+                            @endif
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
     </nav>
+
+    <style>
+        .cart-icon-container {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .cart-icon-link {
+            text-decoration: none;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .cart-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: #dc3545;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+    </style>
+</div>

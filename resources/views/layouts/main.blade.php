@@ -56,8 +56,7 @@
     </a>
     <!-- End whatsapp Button-->
     <livewire:inc.header />
-
-
+    <livewire:inc.cart-modal />
 
     <!-- Contenu de la page -->
     <div class="container mt-4">
@@ -231,6 +230,7 @@
     </script>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="{{ asset('/assets/js/cart.js') }}"></script>
   @stack('scripts')
 </body>
 @livewireScripts

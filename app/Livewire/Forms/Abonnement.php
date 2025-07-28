@@ -130,6 +130,9 @@ class Abonnement extends Component
         // Flash success message
         session()->flash('message', 'Produit ajouté au panier avec succès !');
 
+        // Émettre un événement pour mettre à jour le panier dans le header
+        $this->dispatch('cartUpdated');
+
         // Debug: Log avant redirection
         Log::info('Redirecting to checkout');
         

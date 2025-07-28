@@ -82,9 +82,58 @@ class CartController extends Controller
     {
         $cart = Session::get('carts');
         
+        if (!$cart) {
+            return response()->json([
+                'success' => true,
+                'cart' => null,
+                'message' => 'Panier vide'
+            ]);
+        }
+
+        // Récupérer les détails du produit
+        $product = Product::where('uuid', $cart['product_uuid'])->first();
+        $cartDetails = null;
+
+        if ($product) {
+            $cartDetails = [
+                'title' => $product->title,
+                'description' => $product->description,
+                'image' => $product->image,
+                'quantity' => $cart['quantity'] ?? 1,
+                'price' => $cart['price'] ?? $product->price,
+                'total' => ($cart['price'] ?? $product->price) * ($cart['quantity'] ?? 1),
+                'type' => $product->type
+            ];
+
+            // Ajouter les détails de l'option si elle existe
+            if (isset($cart['selectedOptionUuid'])) {
+                $option = ProductOption::where('uuid', $cart['selectedOptionUuid'])->first();
+                if ($option) {
+                    $cartDetails['option'] = $option->name;
+                    $cartDetails['price'] = $option->price;
+                    $cartDetails['total'] = $option->price * ($cart['quantity'] ?? 1);
+                }
+            }
+        }
+        
         return response()->json([
             'success' => true,
-            'cart' => $cart
+            'cart' => $cart,
+            'cartDetails' => $cartDetails
+        ]);
+    }
+
+    /**
+     * Obtenir le nombre d'articles dans le panier
+     */
+    public function getCartCount()
+    {
+        $cart = Session::get('carts');
+        $count = $cart ? ($cart['quantity'] ?? 1) : 0;
+        
+        return response()->json([
+            'success' => true,
+            'count' => $count
         ]);
     }
 } 

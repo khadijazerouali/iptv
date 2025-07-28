@@ -9,6 +9,11 @@ Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
+// Route de test pour le panier
+Route::get('/test-cart', function () {
+    return view('test-cart');
+})->name('test.cart');
+
 // Routes de récupération de mot de passe (publiques)
 Route::get('forgot-password', [App\Http\Controllers\Auth\ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
 Route::post('forgot-password', [App\Http\Controllers\Auth\ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
@@ -22,6 +27,7 @@ Route::get('/product/{slug}', [App\Http\Controllers\Public\ProductController::cl
 Route::post('/add-to-cart', [App\Http\Controllers\Public\CartController::class, 'addToCart'])->name('cart.add');
 Route::post('/clear-cart', [App\Http\Controllers\Public\CartController::class, 'clearCart'])->name('cart.clear');
 Route::get('/get-cart', [App\Http\Controllers\Public\CartController::class, 'getCart'])->name('cart.get');
+Route::get('/cart-count', [App\Http\Controllers\Public\CartController::class, 'getCartCount'])->name('cart.count');
 
 // Route spécifique pour le dashboard (utilise UUID)
 Route::middleware(['auth'])->group(function () {

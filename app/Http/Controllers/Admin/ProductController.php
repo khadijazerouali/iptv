@@ -23,8 +23,8 @@ class ProductController extends Controller
             'active_products' => Product::where('status', 'active')->count(),
             'paused_products' => Product::where('status', 'paused')->count(),
             'monthly_sales' => Product::withCount(['subscriptions' => function($query) {
-                $query->whereRaw('strftime("%m", created_at) = ?', [sprintf('%02d', Carbon::now()->month)])
-                      ->whereRaw('strftime("%Y", created_at) = ?', [Carbon::now()->year]);
+                $query->whereRaw('DATE_FORMAT(created_at, "%m") = ?', [sprintf('%02d', Carbon::now()->month)])
+                      ->whereRaw('DATE_FORMAT(created_at, "%Y") = ?', [Carbon::now()->year]);
             }])->get()->sum('subscriptions_count'),
         ];
 

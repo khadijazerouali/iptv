@@ -65,7 +65,7 @@ Route::middleware(['auth'])->group(function () {
 
 
     // Routes Admin
-    Route::prefix('admin')->name('admin.')->group(function () {
+    Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
         // Dashboard principal avec données dynamiques
         Route::get('dashboard', [App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
         
@@ -137,6 +137,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('users', [App\Http\Controllers\Admin\UserController::class, 'index'])->name('users');
         Route::post('users/update-roles', [App\Http\Controllers\Admin\UserController::class, 'updateRoles'])->name('users.updateRoles');
         Route::get('users/list', [App\Http\Controllers\Admin\UserController::class, 'list'])->name('users.list');
+        Route::get('users/{id}', [App\Http\Controllers\Admin\UserController::class, 'show'])->name('users.show');
         Route::delete('users/{id}', [App\Http\Controllers\Admin\UserController::class, 'destroy'])->name('users.destroy');
         
         // Gestion des codes promo

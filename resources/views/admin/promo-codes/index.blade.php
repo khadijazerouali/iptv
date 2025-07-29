@@ -90,8 +90,20 @@
                                         @endif
                                     </td>
                                     <td>
-                                        <span class="badge bg-{{ $promoCode->status_color }}">
-                                            {{ $promoCode->status_text }}
+                                        @php
+                                            $statusConfig = [
+                                                'inactive' => ['class' => 'secondary', 'icon' => 'times-circle', 'label' => 'Inactif'],
+                                                'pending' => ['class' => 'warning', 'icon' => 'clock', 'label' => 'En attente'],
+                                                'active' => ['class' => 'success', 'icon' => 'check-circle', 'label' => 'Actif'],
+                                                'expired' => ['class' => 'danger', 'icon' => 'calendar-times', 'label' => 'Expiré'],
+                                                'exhausted' => ['class' => 'danger', 'icon' => 'exclamation-triangle', 'label' => 'Épuisé']
+                                            ];
+                                            $status = $promoCode->status;
+                                            $config = $statusConfig[$status] ?? $statusConfig['inactive'];
+                                        @endphp
+                                        <span class="badge bg-{{ $config['class'] }} bg-opacity-10 text-{{ $config['class'] }} border border-{{ $config['class'] }} border-opacity-25 px-3 py-2">
+                                            <i class="fas fa-{{ $config['icon'] }} me-1"></i>
+                                            {{ $config['label'] }}
                                         </span>
                                     </td>
                                     <td>

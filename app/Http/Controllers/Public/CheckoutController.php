@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Models\ProductOption;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 
 class CheckoutController extends Controller
 {
@@ -67,9 +68,15 @@ class CheckoutController extends Controller
             'email' => $email ?? '-',
         ];
         
-        // Envoi de l'email au client
-        if (!empty($user->email) && filter_var($user->email, FILTER_VALIDATE_EMAIL)) {
-            Mail::to($user->email)->send(new \App\Mail\OrderInfoToClient($user, $product, null, null, $cart));
+        // Envoi de l'email au client - Gestion sécurisée des erreurs SMTP
+        try {
+            if (!empty($user->email) && filter_var($user->email, FILTER_VALIDATE_EMAIL)) {
+                Mail::to($user->email)->send(new \App\Mail\OrderInfoToClient($user, $product, null, null, $cart));
+            }
+        } catch (\Exception $e) {
+            // Log l'erreur mais ne pas faire échouer la page
+            Log::error('Erreur lors de l\'envoi de l\'email client: ' . $e->getMessage());
+            Log::error('Stack trace: ' . $e->getTraceAsString());
         }
 
         return view('pages.checkout', compact(

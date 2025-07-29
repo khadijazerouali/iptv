@@ -23,7 +23,7 @@
                 <tr>
                     <td style="padding: 10px; border: 1px solid #ddd;">{{ $product->title ?? $product->name ?? '-' }}</td>
                     <td style="padding: 10px; border: 1px solid #ddd;">
-                        @if($subscription && $subscription->hasPromoCode())
+                        @if($subscription && isset($subscription->promo_code) && $subscription->promo_code)
                             <div style="text-align: center;">
                                 <div style="text-decoration: line-through; color: #999; font-size: 14px;">
                                     {{ number_format($subscription->original_price, 2) }}€
@@ -64,7 +64,7 @@
                     <td style="padding: 8px; border: 1px solid #eee;">Statut</td>
                     <td style="padding: 8px; border: 1px solid #eee;">{{ $subscription->status ?? '-' }}</td>
                 </tr>
-                @if($subscription && $subscription->hasPromoCode())
+                @if($subscription && isset($subscription->promo_code) && $subscription->promo_code)
                 <tr style="background-color: #d4edda;">
                     <td style="padding: 8px; border: 1px solid #eee;">Code promo appliqué</td>
                     <td style="padding: 8px; border: 1px solid #eee; color: #28a745;">
@@ -126,7 +126,7 @@
             </table>
             @endif
 
-            @if($subscription && $subscription->formiptvs && $subscription->formiptvs->count() > 0)
+            @if($subscription && isset($subscription->formiptvs) && $subscription->formiptvs && $subscription->formiptvs->count() > 0)
             @foreach($subscription->formiptvs as $formiptv)
                 @php
                     $applicationType = \App\Models\Applicationtype::where('name', $formiptv->application)->first();
@@ -171,7 +171,7 @@
             @endforeach
             @endif
 
-            @if($subscription->note)
+            @if($subscription && isset($subscription->note) && $subscription->note)
             <h3 style="margin-top: 30px;">Informations Complémentaires</h3>
             <p style="padding: 10px; background: #f9f9f9; border-radius: 4px;">{{ $subscription->note }}</p>
             @endif

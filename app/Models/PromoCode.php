@@ -180,13 +180,13 @@ class PromoCode extends Model
     public function getStatusColorAttribute()
     {
         $colors = [
-            'inactive' => 'gray',
-            'pending' => 'yellow',
-            'active' => 'green',
-            'expired' => 'red',
-            'exhausted' => 'red'
+            'inactive' => 'secondary',
+            'pending' => 'warning',
+            'active' => 'success',
+            'expired' => 'danger',
+            'exhausted' => 'danger'
         ];
 
-        return $colors[$this->status] ?? 'gray';
+        return $colors[$this->status] ?? 'secondary';
     }
 } 

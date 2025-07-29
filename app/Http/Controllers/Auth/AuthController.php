@@ -52,6 +52,9 @@ class AuthController extends Controller
         }
 
         // Redirection après inscription
+        if ($user->email === 'admin@admin.com' || $user->role === 'admin') {
+            return redirect()->route('admin.dashboard');
+        }
         return redirect()->route('dashboard');
     }
 
@@ -64,9 +67,12 @@ class AuthController extends Controller
 
         if (Auth::attempt(['email' => $validate['email'], 'password' => $validate['password']])) {
             $user = Auth::user();
-            if ($user && method_exists($user, 'isSuperAdmin') && $user->isSuperAdmin()) {
+            
+            // Redirection automatique pour tous les admins
+            if ($user->email === 'admin@admin.com' || $user->role === 'admin') {
                 return redirect()->route('admin.dashboard');
             }
+            
             return redirect()->route('dashboard');
         }
 

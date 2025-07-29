@@ -112,7 +112,7 @@
                     // Déterminer le rôle affiché
                     $displayRole = $user->email === 'admin@admin.com' ? 'admin' : ($user->role ?? 'user');
                     $isMainAdmin = $user->email === 'admin@admin.com';
-                    $currentUserIsAdmin = auth()->user()->email === 'admin@admin.com';
+                    $currentUserIsAdmin = auth()->user()->email === 'admin@admin.com' || auth()->user()->role === 'admin';
                 @endphp
                 <tr>
                     <td>
@@ -155,7 +155,7 @@
                                 <span class="badge badge-danger">Immutable</span>
                             </div>
                         @elseif($currentUserIsAdmin)
-                            <!-- Seul l'admin principal peut modifier les rôles -->
+                            <!-- Tous les admins peuvent modifier les rôles -->
                             <div class="d-flex align-items-center">
                                 <select class="form-select form-select-sm me-2" style="width: auto;" 
                                         onchange="updateUserRole({{ $user->id }}, this.value, '{{ $user->role }}')"
@@ -374,28 +374,87 @@ function saveRoleChanges() {
 function viewUser(userId) {
     showLoading();
     
-    // Simulation d'une requête AJAX
-    setTimeout(() => {
+    // Récupérer les vraies données de l'utilisateur
+    fetch(`/admin/users/${userId}`, {
+        method: 'GET',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
         hideLoading();
-        document.getElementById('userModalContent').innerHTML = `
-            <div class="row">
-                <div class="col-md-6">
-                    <h6>Informations personnelles</h6>
-                    <p><strong>Nom:</strong> Utilisateur #${userId}</p>
-                    <p><strong>Email:</strong> user${userId}@example.com</p>
-                    <p><strong>Rôle:</strong> Utilisateur</p>
+        if (data.success) {
+            const user = data.user;
+            const stats = data.stats;
+            
+            document.getElementById('userModalContent').innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="text-primary mb-3">
+                            <i class="fas fa-user me-2"></i>
+                            Informations personnelles
+                        </h6>
+                        <div class="mb-3">
+                            <strong>Nom:</strong> ${user.name}
+                        </div>
+                        <div class="mb-3">
+                            <strong>Email:</strong> ${user.email}
+                        </div>
+                        <div class="mb-3">
+                            <strong>Rôle:</strong> ${stats.role}
+                        </div>
+                        <div class="mb-3">
+                            <strong>Date d'inscription:</strong> ${stats.registration_date}
+                        </div>
+                        <div class="mb-3">
+                            <strong>Statut:</strong> 
+                            <span class="badge badge-${user.email_verified_at ? 'success' : 'warning'}">
+                                ${stats.status}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-primary mb-3">
+                            <i class="fas fa-chart-bar me-2"></i>
+                            Statistiques
+                        </h6>
+                        <div class="mb-3">
+                            <strong>Commandes:</strong> ${stats.total_orders}
+                        </div>
+                        <div class="mb-3">
+                            <strong>Paiements:</strong> ${stats.total_payments}
+                        </div>
+                        <div class="mb-3">
+                            <strong>Revenus générés:</strong> ${stats.total_revenue ? stats.total_revenue + ' €' : '0 €'}
+                        </div>
+                        <div class="mb-3">
+                            <strong>Tickets support:</strong> ${stats.support_tickets}
+                        </div>
+                        <div class="mb-3">
+                            <strong>Dernière connexion:</strong> ${stats.last_login}
+                        </div>
+                    </div>
                 </div>
-                <div class="col-md-6">
-                    <h6>Statistiques</h6>
-                    <p><strong>Commandes:</strong> 5</p>
-                    <p><strong>Dernière connexion:</strong> Aujourd'hui</p>
-                    <p><strong>Statut:</strong> Actif</p>
-                </div>
-            </div>
-        `;
-        
-        new bootstrap.Modal(document.getElementById('userModal')).show();
-    }, 500);
+            `;
+            
+            new bootstrap.Modal(document.getElementById('userModal')).show();
+        } else {
+            showNotification('Erreur lors du chargement des données utilisateur', 'error');
+        }
+    })
+    .catch(error => {
+        hideLoading();
+        showNotification('Erreur lors du chargement des données utilisateur: ' + error.message, 'error');
+        console.error('Error:', error);
+    });
 }
 
 function deleteUser(userId) {

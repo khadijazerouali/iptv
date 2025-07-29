@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
@@ -18,8 +19,9 @@ class UserController extends Controller
 
     public function updateRoles(Request $request): JsonResponse
     {
-        // Vérifier que l'utilisateur actuel est l'admin principal
-        if (auth()->user()->email !== 'admin@admin.com') {
+        // Vérifier que l'utilisateur actuel est admin
+        $currentUser = Auth::user();
+        if (!$currentUser || ($currentUser->email !== 'admin@admin.com' && $currentUser->role !== 'admin')) {
             return response()->json([
                 'success' => false,
                 'message' => 'Accès non autorisé'
@@ -47,8 +49,9 @@ class UserController extends Controller
 
     public function destroy($id)
     {
-        // Vérifier que l'utilisateur connecté est admin@admin.com
-        if (auth()->user()->email !== 'admin@admin.com') {
+        // Vérifier que l'utilisateur connecté est admin
+        $currentUser = Auth::user();
+        if (!$currentUser || ($currentUser->email !== 'admin@admin.com' && $currentUser->role !== 'admin')) {
             return response()->json([
                 'success' => false,
                 'message' => 'Accès non autorisé'
@@ -81,6 +84,30 @@ class UserController extends Controller
         return response()->json([
             'success' => true,
             'users' => $users
+        ]);
+    }
+
+    public function show($id)
+    {
+        $user = User::with(['subscriptions', 'payments', 'supportTickets'])
+            ->findOrFail($id);
+
+        // Calculer les statistiques
+        $stats = [
+            'total_orders' => $user->subscriptions->count(),
+            'total_payments' => $user->payments->where('status', 'completed')->count(),
+            'total_revenue' => $user->payments->where('status', 'completed')->sum('amount'),
+            'support_tickets' => $user->supportTickets->count(),
+            'last_login' => $user->last_login_at ? $user->last_login_at->diffForHumans() : 'Jamais connecté',
+            'status' => $user->email_verified_at ? 'Vérifié' : 'En attente',
+            'registration_date' => $user->created_at->format('d/m/Y à H:i'),
+            'role' => $user->email === 'admin@admin.com' ? 'Administrateur' : ($user->role === 'admin' ? 'Administrateur' : 'Utilisateur')
+        ];
+
+        return response()->json([
+            'success' => true,
+            'user' => $user,
+            'stats' => $stats
         ]);
     }
 } 

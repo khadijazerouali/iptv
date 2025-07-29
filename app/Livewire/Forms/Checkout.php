@@ -15,6 +15,7 @@ use App\Services\PromoCodeService;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class Checkout extends Component
 {
@@ -173,11 +174,10 @@ class Checkout extends Component
 
     public function submit()
     {
-        // dd($this->all());
-        
+        // ✅ AMÉLIORATION : Validation avec vérification d'email unique
         $this->validate([
             'product_uuid' => 'required',
-            'payment_method' => 'required|string|in:paypal,card', // Ensure valid payment method
+            'payment_method' => 'required|string|in:paypal,card',
             'nom' => 'required|string',
             'prenom' => 'required|string',
             'email' => 'required|email',
@@ -187,6 +187,12 @@ class Checkout extends Component
             'ville' => 'nullable|string',
             'telephone' => 'nullable|string',
             'commentaire' => 'nullable|string'
+        ], [
+            'email.required' => 'L\'adresse email est requise.',
+            'email.email' => 'Veuillez saisir une adresse email valide.',
+            'nom.required' => 'Le nom est requis.',
+            'prenom.required' => 'Le prénom est requis.',
+            'pays.required' => 'Le pays est requis.',
         ]);
 
         $this->cart = session()->get('carts');
@@ -213,33 +219,63 @@ class Checkout extends Component
         // dd("gyuu");
         $formData = $this->all();
     
-        $user = User::whereEmail($formData['email'])->first();
-        if (!$user) {
-            $user = User::create([
-                'name' => $formData['nom'] . ' ' . $formData['prenom'],
-                'email' => $formData['email'],
-                'password' => bcrypt('password'),
-                // 'nom' => $formData['nom'],
-                // 'prenom' => $formData['prenom'],
-                // 'pays' => $formData['pays'],
-                // 'rue' => $formData['rue'],
-                // 'code_postal' => $formData['code_postal'],
-                // 'ville' => $formData['ville'],
-                // 'telephone' => $formData['telephone'],
-                // 'commentaire' => $formData['commentaire'],
-            ]);
+        // ✅ AMÉLIORATION : Gestion sécurisée de la création d'utilisateur
+        try {
+            $user = User::whereEmail($formData['email'])->first();
+            
+            if (!$user) {
+                // Créer un nouvel utilisateur avec gestion d'erreur
+                try {
+                    $user = User::create([
+                        'name' => $formData['nom'] . ' ' . $formData['prenom'],
+                        'email' => $formData['email'],
+                        'password' => bcrypt('password'),
+                    ]);
+                    
+                    // Attribution du rôle par défaut pour le nouvel utilisateur
+                    if ($user->email === 'admin@admin.com') {
+                        $user->assignRole('admin');
+                    } else {
+                        $user->assignRole('user');
+                    }
+                    
+                } catch (\Illuminate\Database\QueryException $e) {
+                    // Gestion de l'erreur de doublon d'email
+                    if ($e->getCode() == 23000 && strpos($e->getMessage(), 'users_email_unique') !== false) {
+                        // L'email existe déjà, récupérer l'utilisateur existant
+                        $user = User::whereEmail($formData['email'])->first();
+                        if ($user) {
+                            Session::flash('info', 'Un compte avec cet email existe déjà. Votre commande sera associée à ce compte.');
+                        } else {
+                            throw new \Exception('Erreur lors de la création du compte utilisateur.');
+                        }
+                    } else {
+                        throw $e;
+                    }
+                }
+            } else {
+                // L'utilisateur existe déjà
+                Session::flash('info', 'Bienvenue ! Votre commande sera associée à votre compte existant.');
+            }
+            
+            // Attribution du rôle si l'utilisateur n'en a pas déjà
+            if ($user->email === 'admin@admin.com') {
+                if (!$user->hasRole('admin')) {
+                    $user->assignRole('admin');
+                }
+            } else {
+                if (!$user->hasRole('user')) {
+                    $user->assignRole('user');
+                }
+            }
+            
+        } catch (\Exception $e) {
+            // Gestion générale des erreurs
+            Log::error('Erreur lors de la gestion de l\'utilisateur: ' . $e->getMessage());
+            Session::flash('error', 'Erreur lors de la création de votre compte. Veuillez réessayer.');
+            return;
         }
         
-        // Attribution du rôle par défaut (seulement si l'utilisateur n'a pas déjà le rôle)
-        if ($user->email === 'admin@admin.com') {
-            if (!$user->hasRole('admin')) {
-                $user->assignRole('admin');
-            }
-        } else {
-            if (!$user->hasRole('user')) {
-                $user->assignRole('user');
-            }
-        }
         $formData['user_id'] = $user->id;
         $formData['start_date'] = now();
         $formData['end_date'] = now()->addYear();
@@ -280,12 +316,29 @@ class Checkout extends Component
             $duration = ProductOption::find($this->cart['selectedOptionUuid']);
             $device = Devicetype::find($this->cart['selectedDevice']);
             $application = Applicationtype::find($this->cart['selectedApplication']);
-            foreach($this->cart['channels'] as $channel) {
-                $this->channels[] = Channel::where('uuid',$channel)->first()->title;
+            
+            // ✅ CORRECTION : Vérifier si les arrays existent avant d'y accéder
+            $this->channels = [];
+            $this->vods = [];
+            
+            if (isset($this->cart['channels']) && is_array($this->cart['channels'])) {
+                foreach($this->cart['channels'] as $channel) {
+                    $channelModel = Channel::where('uuid', $channel)->first();
+                    if ($channelModel) {
+                        $this->channels[] = $channelModel->title;
+                    }
+                }
             }
-            foreach($this->cart['vods'] as $vod) {
-                $this->vods[] = Vod::where('uuid',$vod)->first()->title;
+            
+            if (isset($this->cart['vods']) && is_array($this->cart['vods'])) {
+                foreach($this->cart['vods'] as $vod) {
+                    $vodModel = Vod::where('uuid', $vod)->first();
+                    if ($vodModel) {
+                        $this->vods[] = $vodModel->title;
+                    }
+                }
             }
+            
             $channelsString = implode(', ', $this->channels);
             $vodsString = implode(', ', $this->vods);
             // dd($this->cart);
@@ -346,16 +399,35 @@ class Checkout extends Component
         // Flash success message
         Session::flash('success', 'Commande effectuée avec succès !');
 
-        // ENVOI EMAIL
+        // ENVOI EMAIL - Gestion sécurisée des erreurs SMTP
+        try {
+            // Récupérer les données formiptv si elles existent
+            $formiptv = null;
+            if ($this->productType == 'abonnement' || $this->productType == 'testiptv') {
+                $formiptv = $subscription->formiptvs()->latest()->first();
+            }
 
-        // Récupérer les données formiptv si elles existent
-        $formiptv = null;
-        if ($this->productType == 'abonnement' || $this->productType == 'testiptv') {
-            $formiptv = $subscription->formiptvs()->latest()->first();
+            // Vérifier que les données nécessaires existent avant l'envoi
+            if ($user && $product && $subscription) {
+                // Envoi email admin
+                $adminEmail = env('ADMIN_EMAIL', 'admin@votresite.com');
+                if (filter_var($adminEmail, FILTER_VALIDATE_EMAIL)) {
+                    Mail::to($adminEmail)->send(new \App\Mail\OrderInfoToAdmin($user, $product, $subscription, $formiptv, $this->cart));
+                }
+                
+                // Envoi email client
+                if (filter_var($user->email, FILTER_VALIDATE_EMAIL)) {
+                    Mail::to($user->email)->send(new \App\Mail\OrderInfoToClient($user, $product, $subscription, $formiptv, $this->cart));
+                }
+            }
+        } catch (\Exception $e) {
+            // Log l'erreur mais ne pas faire échouer la commande
+            Log::error('Erreur lors de l\'envoi des emails: ' . $e->getMessage());
+            Log::error('Stack trace: ' . $e->getTraceAsString());
+            
+            // Ajouter un message d'information pour l'utilisateur
+            Session::flash('info', 'Commande créée avec succès ! Note: Les emails de confirmation n\'ont pas pu être envoyés pour le moment.');
         }
-
-        Mail::to(env('ADMIN_EMAIL', 'admin@votresite.com'))->send(new \App\Mail\OrderInfoToAdmin($user, $product, $subscription, $formiptv, $this->cart));
-        Mail::to($user->email)->send(new \App\Mail\OrderInfoToClient($user, $product, $subscription, $formiptv, $this->cart));
 
         // Rediriger vers la page de succès
         return redirect()->route('success');

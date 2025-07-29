@@ -41,7 +41,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
         Session::regenerate();
 
         $user = Auth::user();
-        if ($user && $user->isSuperAdmin()) {
+        if ($user->email === 'admin@admin.com' || $user->role === 'admin') {
             $this->redirectIntended(default: route('admin.dashboard', absolute: false), navigate: true);
         } else {
             $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
